@@ -39,5 +39,5 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## 📋 TODO / Plany Rozwoju
 
-- [ ] **Rate Limiting dla API AI (`/api/ai`)**: Zastąpić tymczasową blokadę ciastkową (`test=alen`) pełnym rate limiterem zapytań na minutę per IP (np. `@upstash/ratelimit` z Redisem lub sliding window w pamięci).
+- [ ] **Rate Limiting dla API AI (`/api/ai`)**: pełnym rate limiterem zapytań na minutę per IP (np. `@upstash/ratelimit` z Redisem lub sliding window w pamięci).
 
