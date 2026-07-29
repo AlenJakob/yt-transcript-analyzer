@@ -13,7 +13,7 @@ const openai = new OpenAI({
 
 export async function POST(req: NextRequest) {
 	try {
-		// TODO: temporary authentication - refactor before deployment
+		// TODO:  temporary authentication - refactor before deployment
 		const testCookie = req.cookies.get('test')?.value;
 		if (testCookie !== 'alen') {
 			return NextResponse.json({ error: 'Brak autoryzacji.' }, { status: 401 });
