@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Paper, TextField, Box, Typography, Chip, Stack, Select, MenuItem } from '@mui/material';
+import { Paper, Box, Select, MenuItem } from '@mui/material';
 import { ModelOpenRouter } from '@/types/openRouter';
 
 const mapModels = (models: ModelOpenRouter[]) => {
@@ -18,6 +18,7 @@ const mapModels = (models: ModelOpenRouter[]) => {
 
 export default function ModelSelect() {
 	const [models, setModels] = React.useState<Partial<ModelOpenRouter>[] | undefined>(undefined);
+	const [selectedModel, setSelectedModel] = React.useState<string>('');
 
 	React.useEffect(() => {
 		const getModels = async () => {
@@ -26,6 +27,10 @@ export default function ModelSelect() {
 
 			const mappedModels = mapModels(data.models.freeModels);
 			setModels(mappedModels);
+
+			if (mappedModels.length > 0 && mappedModels[0].id) {
+				setSelectedModel(mappedModels[0].id);
+			}
 		};
 
 		getModels();
@@ -44,7 +49,13 @@ export default function ModelSelect() {
 			}}
 		>
 			<Box sx={{ mb: 2 }}>
-				<Select size="medium" label="Model" fullWidth value={models?.at(0)?.id}>
+				<Select
+					size="medium"
+					label="Model"
+					fullWidth
+					value={selectedModel}
+					onChange={(e) => setSelectedModel(e.target.value)}
+				>
 					{models?.map((model) => (
 						<MenuItem key={model.id} value={model.id}>
 							{model.name}
