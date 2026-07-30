@@ -6,10 +6,10 @@ import CssBaseline from '@mui/material/CssBaseline';
 import darkTheme from '@/theme/theme';
 
 export default function ThemeRegistry({ children }: { children: React.ReactNode }) {
-  return (
-    <ThemeProvider theme={darkTheme}>
-      <CssBaseline />
-      {children}
-    </ThemeProvider>
-  );
+	return (
+		<ThemeProvider theme={darkTheme}>
+			<CssBaseline />
+			{children}
+		</ThemeProvider>
+	);
 }
