@@ -1,8 +1,18 @@
 'use client';
 
-import * as React from 'react';
 import { Paper, Box, Select, MenuItem } from '@mui/material';
 import { ModelOpenRouter } from '@/types/openRouter';
+import { useEffect, useState } from 'react';
+
+function getCookie(name: string) {
+	if (typeof window === 'undefined') {
+		return null;
+	}
+	const value = `; ${document.cookie}`;
+	const parts = value.split(`; ${name}=`);
+	if (parts.length === 2) return parts.pop()?.split(';').shift();
+	return null;
+}
 
 const mapModels = (models: ModelOpenRouter[]) => {
 	const mappedModels = models.map((model) => {
@@ -17,10 +27,18 @@ const mapModels = (models: ModelOpenRouter[]) => {
 };
 
 export default function ModelSelect() {
-	const [models, setModels] = React.useState<Partial<ModelOpenRouter>[] | undefined>(undefined);
-	const [selectedModel, setSelectedModel] = React.useState<string>('');
+	const [models, setModels] = useState<Partial<ModelOpenRouter>[] | undefined>(undefined);
+	const [selectedModel, setSelectedModel] = useState<string>('');
+	const [isAllowed, setIsAllowed] = useState(false);
 
-	React.useEffect(() => {
+	useEffect(() => {
+		const testCookie = getCookie('test');
+		if (testCookie === 'alen') {
+			setIsAllowed(true);
+		}
+	}, []);
+
+	useEffect(() => {
 		const getModels = async () => {
 			const res = await fetch('/api/ai/models');
 			const data = await res.json();
@@ -35,6 +53,10 @@ export default function ModelSelect() {
 
 		getModels();
 	}, []);
+
+	if (!isAllowed) {
+		return null;
+	}
 
 	return (
 		<Paper
