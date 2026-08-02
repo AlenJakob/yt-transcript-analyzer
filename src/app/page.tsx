@@ -18,7 +18,7 @@ import {
 } from '@/lib/storage';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import InfoIcon from '@mui/icons-material/Info';
-import ModelSelect from '@/components/ModelsSelect';
+import ModelSelect from '@/components/ModelSelect';
 
 export default function Home() {
 	const [activeTab, setActiveTab] = React.useState<'analyzer' | 'archive'>('analyzer');

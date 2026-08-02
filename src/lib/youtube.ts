@@ -1,3 +1,5 @@
+import { YoutubeTranscript, TranscriptResponse } from 'youtube-transcript';
+
 export interface TranscriptSegment {
 	text: string;
 	duration: number;
@@ -16,6 +18,46 @@ export interface TranscriptStats {
 	wordCount: number;
 	charCount: number;
 	readingTimeMinutes: number;
+}
+
+export interface FetchTranscriptResult {
+	rawTranscript: TranscriptResponse[];
+	language: string;
+}
+
+/**
+ * Fetches transcript with language fallback cascade (e.g. 'pl' -> 'en' -> default)
+ */
+export async function fetchTranscriptWithFallback(
+	videoId: string,
+	preferredLangs: string[] = ['pl', 'en']
+): Promise<FetchTranscriptResult> {
+	let lastError: unknown = null;
+
+	// Try each preferred language in priority order
+	for (const lang of preferredLangs) {
+		try {
+			const res = await YoutubeTranscript.fetchTranscript(videoId, { lang });
+			if (res && res.length > 0) {
+				return { rawTranscript: res, language: lang };
+			}
+		} catch (err) {
+			lastError = err;
+		}
+	}
+
+	// Fallback to default/original language transcript
+	try {
+		const res = await YoutubeTranscript.fetchTranscript(videoId);
+		if (res && res.length > 0) {
+			return { rawTranscript: res, language: 'default' };
+		}
+	} catch (err) {
+		lastError = err;
+	}
+
+	const errorMessage = lastError instanceof Error ? lastError.message : 'Brak dostępnych napisów';
+	throw new Error(errorMessage);
 }
 
 /**
@@ -213,3 +255,4 @@ export function formatContinuousParagraphs(segments: TranscriptSegment[]): strin
 
 	return paragraphs;
 }
+

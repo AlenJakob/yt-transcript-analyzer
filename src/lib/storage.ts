@@ -86,3 +86,45 @@ export function clearHistory(): HistoryItem[] {
 		return [];
 	}
 }
+
+export interface UserPreferences {
+	preferredLanguage: 'pl' | 'en' | 'auto';
+}
+
+const PREFERENCES_STORAGE_KEY = 'yt_transcript_user_preferences_v1';
+
+const DEFAULT_PREFERENCES: UserPreferences = {
+	preferredLanguage: 'pl',
+};
+
+/**
+ * Loads user preferences from localStorage
+ */
+export function getUserPreferences(): UserPreferences {
+	if (typeof window === 'undefined') return DEFAULT_PREFERENCES;
+	try {
+		const raw = localStorage.getItem(PREFERENCES_STORAGE_KEY);
+		if (!raw) return DEFAULT_PREFERENCES;
+		return { ...DEFAULT_PREFERENCES, ...JSON.parse(raw) };
+	} catch (err) {
+		console.error('Błąd podczas odczytu preferencji użytkownika:', err);
+		return DEFAULT_PREFERENCES;
+	}
+}
+
+/**
+ * Saves user preferences to localStorage
+ */
+export function saveUserPreferences(prefs: Partial<UserPreferences>): UserPreferences {
+	if (typeof window === 'undefined') return DEFAULT_PREFERENCES;
+	try {
+		const current = getUserPreferences();
+		const updated = { ...current, ...prefs };
+		localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(updated));
+		return updated;
+	} catch (err) {
+		console.error('Błąd podczas zapisu preferencji użytkownika:', err);
+		return DEFAULT_PREFERENCES;
+	}
+}
+

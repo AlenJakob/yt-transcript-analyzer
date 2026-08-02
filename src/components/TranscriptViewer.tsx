@@ -64,11 +64,8 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 	}, [processedSegments, searchQuery]);
 
 	const formattedParagraphs = React.useMemo((): string[] => {
-		if (!searchQuery.trim()) {
-			return formatContinuousParagraphs(segments);
-		}
-		return filteredSegments.map((segment) => segment.text);
-	}, [segments, filteredSegments, searchQuery]);
+		return formatContinuousParagraphs(segments);
+	}, [segments]);
 
 	const handleCopySingleBlock = (item: TranscriptSegment) => {
 		navigator.clipboard.writeText(`[${item.timestamp}] ${item.text}`);
@@ -77,7 +74,7 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 
 	const handleCopyText = (includeTimestamps: boolean) => {
 		const content = includeTimestamps
-			? filteredSegments.map((s) => `[${s.timestamp}] ${s.text}`).join('\n\n')
+			? processedSegments.map((s) => `[${s.timestamp}] ${s.text}`).join('\n\n')
 			: formattedParagraphs.join('\n\n');
 		navigator.clipboard.writeText(content);
 		setSnackbarMessage(
@@ -484,15 +481,6 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 						</Typography>
 
 						<Stack sx={{ display: 'flex', flexDirection: 'row', gap: 2 }}>
-							{/* <Button
-                variant="contained"
-                size="small"
-                startIcon={<ContentCopyIcon sx={{ fontSize: 16 }} />}
-                onClick={() => handleGenAi()}
-                sx={{ bgcolor: '#10b981', '&:hover': { bgcolor: '#059669' } }}
-              >
-                GenAI
-              </Button> */}
 							<Button
 								variant="contained"
 								size="small"
