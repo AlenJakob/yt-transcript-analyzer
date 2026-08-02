@@ -12,15 +12,20 @@ import {
 	Alert,
 	Chip,
 	Stack,
+	Select,
+	MenuItem,
+	FormControl,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CancelIcon from '@mui/icons-material/Cancel';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import YouTubeIcon from '@mui/icons-material/YouTube';
+import LanguageIcon from '@mui/icons-material/Language';
 import { extractYouTubeVideoId } from '@/lib/youtube';
+import { getUserPreferences, saveUserPreferences } from '@/lib/storage';
 
 interface UrlInputFormProps {
-	onFetchTranscript: (url: string) => void;
+	onFetchTranscript: (url: string, preferredLanguage: 'pl' | 'en' | 'auto') => void;
 	isLoading: boolean;
 	error: string | null;
 }
@@ -33,6 +38,20 @@ const SAMPLE_VIDEOS = [
 export default function UrlInputForm({ onFetchTranscript, isLoading, error }: UrlInputFormProps) {
 	const [inputUrl, setInputUrl] = React.useState('');
 	const [validationError, setValidationError] = React.useState<string | null>(null);
+	const [preferredLanguage, setPreferredLanguage] = React.useState<'pl' | 'en' | 'auto'>('pl');
+
+	// Odczytaj zapisane w localStorage preferencje użytkownika
+	React.useEffect(() => {
+		const prefs = getUserPreferences();
+		if (prefs.preferredLanguage) {
+			setPreferredLanguage(prefs.preferredLanguage);
+		}
+	}, []);
+
+	const handleLanguageChange = (lang: 'pl' | 'en' | 'auto') => {
+		setPreferredLanguage(lang);
+		saveUserPreferences({ preferredLanguage: lang });
+	};
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -52,13 +71,13 @@ export default function UrlInputForm({ onFetchTranscript, isLoading, error }: Ur
 			return;
 		}
 
-		onFetchTranscript(trimmed);
+		onFetchTranscript(trimmed, preferredLanguage);
 	};
 
 	const handleSelectSample = (sampleUrl: string) => {
 		setInputUrl(sampleUrl);
 		setValidationError(null);
-		onFetchTranscript(sampleUrl);
+		onFetchTranscript(sampleUrl, preferredLanguage);
 	};
 
 	return (
@@ -88,6 +107,7 @@ export default function UrlInputForm({ onFetchTranscript, isLoading, error }: Ur
 
 			<form onSubmit={handleSubmit}>
 				<Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ alignItems: 'stretch' }}>
+					{/* Pole wprowadzania URL */}
 					<TextField
 						fullWidth
 						placeholder="Wklej adres URL filmu (np. https://www.youtube.com/watch?v=...)"
@@ -116,6 +136,33 @@ export default function UrlInputForm({ onFetchTranscript, isLoading, error }: Ur
 							},
 						}}
 					/>
+
+					{/* Wybór preferowanego języka (zapisywany w localStorage) */}
+					<FormControl size="small" sx={{ minWidth: { sm: 160 } }}>
+						<Select
+							value={preferredLanguage}
+							onChange={(e) => handleLanguageChange(e.target.value as 'pl' | 'en' | 'auto')}
+							disabled={isLoading}
+							sx={{
+								height: '56px',
+								borderRadius: 2,
+								bgcolor: 'rgba(255, 255, 255, 0.03)',
+								fontWeight: 600,
+								fontSize: '0.9rem',
+							}}
+							startAdornment={
+								<InputAdornment position="start" sx={{ ml: 1, mr: 0 }}>
+									<LanguageIcon sx={{ fontSize: 18, color: '#9ca3af' }} />
+								</InputAdornment>
+							}
+						>
+							<MenuItem value="pl">🇵🇱 Polski (pl)</MenuItem>
+							<MenuItem value="en">🇬🇧 Angielski (en)</MenuItem>
+							<MenuItem value="auto">🌐 Domyślny (auto)</MenuItem>
+						</Select>
+					</FormControl>
+
+					{/* Przycisk Pobierz tekst */}
 					<Button
 						type="submit"
 						variant="contained"
@@ -125,7 +172,7 @@ export default function UrlInputForm({ onFetchTranscript, isLoading, error }: Ur
 							isLoading ? <CircularProgress size={20} color="inherit" /> : <AutoAwesomeIcon />
 						}
 						sx={{
-							minWidth: { sm: '200px' },
+							minWidth: { sm: '180px' },
 							height: '56px',
 							fontSize: '1rem',
 							bgcolor: '#3b82f6',

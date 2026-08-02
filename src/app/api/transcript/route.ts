@@ -12,7 +12,7 @@ import { decodeHtmlEntities, normalizeTime } from '@/utils/helper';
 export async function POST(req: NextRequest) {
 	try {
 		const body = await req.json();
-		const { url } = body;
+		const { url, preferredLanguage } = body;
 
 		if (!url) {
 			return NextResponse.json(
@@ -31,8 +31,15 @@ export async function POST(req: NextRequest) {
 
 		const metadata = await fetchVideoMetadata(videoId);
 
+		let preferredLangs = ['pl', 'en'];
+		if (preferredLanguage === 'en') {
+			preferredLangs = ['en', 'pl'];
+		} else if (preferredLanguage === 'auto') {
+			preferredLangs = [];
+		}
+
 		try {
-			const { rawTranscript, language } = await fetchTranscriptWithFallback(videoId, ['pl', 'en']);
+			const { rawTranscript, language } = await fetchTranscriptWithFallback(videoId, preferredLangs);
 
 			const segments: TranscriptSegment[] = rawTranscript.map((item) => {
 				const offset = normalizeTime(item.offset);

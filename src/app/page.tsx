@@ -34,7 +34,7 @@ export default function Home() {
 		setHistory(getHistory());
 	}, []);
 
-	const handleFetchTranscript = async (url: string) => {
+	const handleFetchTranscript = async (url: string, preferredLanguage?: 'pl' | 'en' | 'auto') => {
 		setIsLoading(true);
 		setError(null);
 
@@ -42,7 +42,7 @@ export default function Home() {
 			const res = await fetch('/api/transcript', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ url }),
+				body: JSON.stringify({ url, preferredLanguage }),
 			});
 
 			const data = await res.json();
