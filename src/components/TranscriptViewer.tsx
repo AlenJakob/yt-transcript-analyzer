@@ -10,6 +10,7 @@ import {
 	TextField,
 	InputAdornment,
 	Button,
+	ButtonGroup,
 	Grid,
 	Card,
 	CardContent,
@@ -156,9 +157,9 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 					p: 2,
 					mb: 2.5,
 					display: 'flex',
-					flexDirection: { xs: 'column', lg: 'row' },
+					flexDirection: { xs: 'column', xl: 'row' },
 					gap: 2,
-					alignItems: { xs: 'stretch', lg: 'center' },
+					alignItems: { xs: 'stretch', xl: 'center' },
 					justifyContent: 'space-between',
 					bgcolor: '#121824',
 					border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -233,7 +234,7 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 					placeholder="Szukaj frazy w tekście..."
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
-					sx={{ minWidth: { lg: 220 } }}
+					sx={{ minWidth: { sm: 200, lg: 220 } }}
 					slotProps={{
 						input: {
 							startAdornment: (
@@ -245,61 +246,80 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 					}}
 				/>
 
-				{/* Przyciski kopiowania i eksportu */}
-				<Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-					<Tooltip title="Kopiuj sam tekst w sformatowanych akapitach">
-						<Button
-							variant="contained"
-							size="small"
-							startIcon={<ContentCopyIcon sx={{ fontSize: 16 }} />}
-							onClick={() => handleCopyText(false)}
-							sx={{ bgcolor: '#3b82f6', '&:hover': { bgcolor: '#2563eb' } }}
-						>
-							Kopiuj tekst
-						</Button>
-					</Tooltip>
+				{/* Sekcja Akcji: Kopiowanie & Eksport */}
+				<Stack
+					direction="row"
+					spacing={1.5}
+					sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 1 }}
+				>
+					{/* Grupa Kopiowania */}
+					<Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+						<Tooltip title="Kopiuj sam tekst w sformatowanych akapitach">
+							<Button
+								variant="contained"
+								size="small"
+								startIcon={<ContentCopyIcon sx={{ fontSize: 16 }} />}
+								onClick={() => handleCopyText(false)}
+								sx={{ bgcolor: '#3b82f6', '&:hover': { bgcolor: '#2563eb' }, whiteSpace: 'nowrap' }}
+							>
+								Kopiuj tekst
+							</Button>
+						</Tooltip>
 
-					<Tooltip title="Kopiuj akapity wraz ze znacznikami czasu">
-						<Button
+						<Tooltip title="Kopiuj akapity wraz ze znacznikami czasu">
+							<Button
+								variant="outlined"
+								size="small"
+								startIcon={<AccessTimeIcon sx={{ fontSize: 16 }} />}
+								onClick={() => handleCopyText(true)}
+								sx={{
+									borderColor: 'rgba(59, 130, 246, 0.4)',
+									color: '#60a5fa',
+									whiteSpace: 'nowrap',
+								}}
+							>
+								Z czasówkami
+							</Button>
+						</Tooltip>
+					</Stack>
+
+					{/* Grupa Eksportu do pliku */}
+					<Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+						<ButtonGroup
 							variant="outlined"
 							size="small"
-							startIcon={<AccessTimeIcon sx={{ fontSize: 16 }} />}
-							onClick={() => handleCopyText(true)}
-							sx={{ borderColor: 'rgba(59, 130, 246, 0.4)', color: '#60a5fa' }}
+							sx={{
+								borderColor: 'rgba(255, 255, 255, 0.15)',
+								'& .MuiButton-root': {
+									borderColor: 'rgba(255, 255, 255, 0.15)',
+									color: 'text.primary',
+									px: 1.5,
+									py: 0.5,
+									fontWeight: 600,
+									fontSize: '0.8rem',
+									'&:hover': {
+										bgcolor: 'rgba(255, 255, 255, 0.06)',
+										borderColor: 'rgba(255, 255, 255, 0.3)',
+									},
+								},
+							}}
 						>
-							Kopiuj z czasówkami
-						</Button>
-					</Tooltip>
-
-					<Button
-						variant="outlined"
-						size="small"
-						startIcon={<DownloadIcon sx={{ fontSize: 16 }} />}
-						onClick={() => handleExport('txt')}
-						sx={{ borderColor: 'rgba(255, 255, 255, 0.15)', color: 'text.primary' }}
-					>
-						.txt
-					</Button>
-
-					<Button
-						variant="outlined"
-						size="small"
-						startIcon={<DownloadIcon sx={{ fontSize: 16 }} />}
-						onClick={() => handleExport('md')}
-						sx={{ borderColor: 'rgba(255, 255, 255, 0.15)', color: 'text.primary' }}
-					>
-						.md
-					</Button>
-
-					<Button
-						variant="outlined"
-						size="small"
-						startIcon={<DownloadIcon sx={{ fontSize: 16 }} />}
-						onClick={() => handleExport('json')}
-						sx={{ borderColor: 'rgba(255, 255, 255, 0.15)', color: 'text.primary' }}
-					>
-						.json
-					</Button>
+							<Tooltip title="Pobierz plik tekstowy .txt">
+								<Button
+									startIcon={<DownloadIcon sx={{ fontSize: 15 }} />}
+									onClick={() => handleExport('txt')}
+								>
+									.txt
+								</Button>
+							</Tooltip>
+							<Tooltip title="Pobierz plik Markdown .md">
+								<Button onClick={() => handleExport('md')}>.md</Button>
+							</Tooltip>
+							<Tooltip title="Pobierz plik JSON .json">
+								<Button onClick={() => handleExport('json')}>.json</Button>
+							</Tooltip>
+						</ButtonGroup>
+					</Stack>
 				</Stack>
 			</Paper>
 

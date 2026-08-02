@@ -10,21 +10,20 @@ function getCookie(name: string) {
 	}
 	const value = `; ${document.cookie}`;
 	const parts = value.split(`; ${name}=`);
-	if (parts.length === 2) return parts.pop()?.split(';').shift();
+	if (parts.length === 2) {
+		return parts.pop()?.split(';').shift();
+	}
 	return null;
 }
 
-const mapModels = (models: ModelOpenRouter[]) => {
-	const mappedModels = models.map((model) => {
+const mapModels = (models: ModelOpenRouter[]) =>
+	models.map((model) => {
 		return {
 			name: model.name,
 			description: model.description,
 			id: model.id,
 		};
 	});
-
-	return mappedModels;
-};
 
 export default function ModelSelect() {
 	const [models, setModels] = useState<Partial<ModelOpenRouter>[] | undefined>(undefined);

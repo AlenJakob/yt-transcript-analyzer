@@ -68,8 +68,7 @@ export default function Header({ activeTab, historyCount, onTabChange }: HeaderP
 								variant="caption"
 								sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 0.5 }}
 							>
-								<AutoAwesomeIcon sx={{ fontSize: 13, color: '#3b82f6' }} /> Analiza wideo & Szablony
-								AI
+								<AutoAwesomeIcon sx={{ fontSize: 13, color: '#3b82f6' }} />
 							</Typography>
 						</Box>
 					</Stack>
