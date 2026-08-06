@@ -1,15 +1,6 @@
 name: CI Pipeline
 
-on:
-  push:
-    branches:
-      - master
-      - 'feat/**'
-      - 'feature/**'
-      - 'fix/**'
-  pull_request:
-    branches:
-      - master
+on: [push, pull_request]
 
 jobs:
   build-and-test:
