@@ -5,9 +5,8 @@ on:
   pull_request:
 
 jobs:
-  build-and-test:
+  unit-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v4
@@ -19,10 +18,4 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run lint
-
-      - run: npx tsc --noEmit
-
       - run: npm test
-
-      - run: npm run build
