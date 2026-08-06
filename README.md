@@ -37,7 +37,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ---
 
-## 📋 TODO / Plany Rozwoju
+## 📋 TODO / Development Plan ( in PROGRESS )
 
 - [ ] **Rate Limiting dla API AI (`/api/ai`)**: pełnym rate limiterem zapytań na minutę per IP (np. `@upstash/ratelimit` z Redisem lub sliding window w pamięci).
 
