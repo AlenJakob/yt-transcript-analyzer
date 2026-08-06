@@ -33,7 +33,9 @@ export default function ModelSelect() {
 	useEffect(() => {
 		const testCookie = getCookie('test');
 		if (testCookie === 'alen') {
-			setIsAllowed(true);
+			React.startTransition(() => {
+				setIsAllowed(true);
+			});
 		}
 	}, []);
 

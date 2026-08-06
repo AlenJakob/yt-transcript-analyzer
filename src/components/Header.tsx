@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from 'react';
 import { Box, Container, Typography, Chip, Stack, Button, Badge } from '@mui/material';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
@@ -15,7 +14,6 @@ interface HeaderProps {
 }
 
 export default function Header({ activeTab, historyCount, onTabChange }: HeaderProps) {
-	React.useEffect(() => {});
 	return (
 		<Box
 			component="header"

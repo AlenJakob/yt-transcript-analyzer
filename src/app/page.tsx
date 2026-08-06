@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import { useState, useEffect, startTransition } from 'react';
 import { Container, Box, Typography, Paper } from '@mui/material';
 import Header from '@/components/Header';
 import UrlInputForm from '@/components/UrlInputForm';
@@ -21,17 +21,19 @@ import InfoIcon from '@mui/icons-material/Info';
 import ModelSelect from '@/components/ModelSelect';
 
 export default function Home() {
-	const [activeTab, setActiveTab] = React.useState<'analyzer' | 'archive'>('analyzer');
-	const [isLoading, setIsLoading] = React.useState(false);
-	const [error, setError] = React.useState<string | null>(null);
-	const [metadata, setMetadata] = React.useState<VideoMetadata | null>(null);
-	const [segments, setSegments] = React.useState<TranscriptSegment[]>([]);
-	const [stats, setStats] = React.useState<TranscriptStats | null>(null);
-	const [history, setHistory] = React.useState<HistoryItem[]>([]);
+	const [activeTab, setActiveTab] = useState<'analyzer' | 'archive'>('analyzer');
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [metadata, setMetadata] = useState<VideoMetadata | null>(null);
+	const [segments, setSegments] = useState<TranscriptSegment[]>([]);
+	const [stats, setStats] = useState<TranscriptStats | null>(null);
+	const [history, setHistory] = useState<HistoryItem[]>([]);
 
 	// Odczyt zapisanego archiwum po załadowaniu na kliencie
-	React.useEffect(() => {
-		setHistory(getHistory());
+	useEffect(() => {
+		startTransition(() => {
+			setHistory(getHistory());
+		});
 	}, []);
 
 	const handleFetchTranscript = async (url: string, preferredLanguage?: 'pl' | 'en' | 'auto') => {

@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import { useState, useEffect, startTransition } from 'react';
 import {
 	Paper,
 	TextField,
@@ -36,15 +36,17 @@ const SAMPLE_VIDEOS = [
 ];
 
 export default function UrlInputForm({ onFetchTranscript, isLoading, error }: UrlInputFormProps) {
-	const [inputUrl, setInputUrl] = React.useState('');
-	const [validationError, setValidationError] = React.useState<string | null>(null);
-	const [preferredLanguage, setPreferredLanguage] = React.useState<'pl' | 'en' | 'auto'>('pl');
+	const [inputUrl, setInputUrl] = useState('');
+	const [validationError, setValidationError] = useState<string | null>(null);
+	const [preferredLanguage, setPreferredLanguage] = useState<'pl' | 'en' | 'auto'>('pl');
 
 	// Odczytaj zapisane w localStorage preferencje użytkownika
-	React.useEffect(() => {
+	useEffect(() => {
 		const prefs = getUserPreferences();
 		if (prefs.preferredLanguage) {
-			setPreferredLanguage(prefs.preferredLanguage);
+			startTransition(() => {
+				setPreferredLanguage(prefs.preferredLanguage);
+			});
 		}
 	}, []);
 

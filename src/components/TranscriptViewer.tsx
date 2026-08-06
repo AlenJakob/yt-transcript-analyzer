@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import { useState, useMemo } from 'react';
 import {
 	Box,
 	Paper,
@@ -45,25 +45,25 @@ interface TranscriptViewerProps {
 }
 
 export default function TranscriptViewer({ segments, videoId }: TranscriptViewerProps) {
-	const [viewMode, setViewMode] = React.useState<'timestamps' | 'continuous'>('continuous');
-	const [groupInterval, setGroupInterval] = React.useState<number>(30);
-	const [searchQuery, setSearchQuery] = React.useState('');
-	const [snackbarMessage, setSnackbarMessage] = React.useState<string | null>(null);
+	const [viewMode, setViewMode] = useState<'timestamps' | 'continuous'>('continuous');
+	const [groupInterval, setGroupInterval] = useState<number>(30);
+	const [searchQuery, setSearchQuery] = useState('');
+	const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
-	const processedSegments = React.useMemo(() => {
+	const processedSegments = useMemo(() => {
 		if (groupInterval === 0) {
 			return segments;
 		}
 		return groupTranscriptSegments(segments, groupInterval);
 	}, [segments, groupInterval]);
 
-	const filteredSegments = React.useMemo(() => {
+	const filteredSegments = useMemo(() => {
 		if (!searchQuery.trim()) return processedSegments;
 		const query = searchQuery.toLowerCase();
 		return processedSegments.filter((segment) => segment.text.toLowerCase().includes(query));
 	}, [processedSegments, searchQuery]);
 
-	const formattedParagraphs = React.useMemo((): string[] => {
+	const formattedParagraphs = useMemo((): string[] => {
 		return formatContinuousParagraphs(segments);
 	}, [segments]);
 
@@ -112,15 +112,15 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 		setSnackbarMessage(`Pobrano plik ${fileName}!`);
 	};
 
-	const [aiResponse, setAiResponse] = React.useState('');
-	const [isAiLoading, setIsAiLoading] = React.useState(false);
+	const [aiResponse, setAiResponse] = useState('');
+	const [isAiLoading, setIsAiLoading] = useState(false);
 
 	const handleGenAi = async () => {
 		const transcriptText = formattedParagraphs.join('\n\n');
 
 		try {
 			setIsAiLoading(true);
-			aiResponse.length && setAiResponse('');
+			if (aiResponse.length) setAiResponse('');
 			const resp = await fetch('/api/ai', {
 				method: 'POST',
 				headers: {

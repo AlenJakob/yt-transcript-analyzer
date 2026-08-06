@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import { useState } from 'react';
 import { Card, CardContent, Typography, Box, Grid, Chip, Link, Stack, Button } from '@mui/material';
 import { VideoMetadata, TranscriptStats } from '@/lib/youtube';
 import VideoPlayer from '@/components/VideoPlayer';
@@ -18,7 +18,7 @@ interface VideoMetadataCardProps {
 }
 
 export default function VideoMetadataCard({ metadata, stats }: VideoMetadataCardProps) {
-	const [isPlaying, setIsPlaying] = React.useState(false);
+	const [isPlaying, setIsPlaying] = useState(false);
 	const youtubeWatchUrl = `https://www.youtube.com/watch?v=${metadata.videoId}`;
 
 	return (

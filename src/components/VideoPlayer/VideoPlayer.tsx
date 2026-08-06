@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import { useState, useMemo } from 'react';
 import { Box, Button, Stack, Typography, Tooltip } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import CloseIcon from '@mui/icons-material/Close';
@@ -25,13 +25,9 @@ export default function VideoPlayer({
 	autoPlayOnMount = false,
 	onClosePlayer,
 }: VideoPlayerProps) {
-	const [isPlaying, setIsPlaying] = React.useState(autoPlayOnMount);
+	const [isPlaying, setIsPlaying] = useState(autoPlayOnMount);
 
-	const youtubeWatchUrl = `https://www.youtube.com/watch?v=${videoId}${
-		startTimeSeconds > 0 ? `&t=${startTimeSeconds}` : ''
-	}`;
-
-	const embedUrl = React.useMemo(() => {
+	const embedUrl = useMemo(() => {
 		const params = new URLSearchParams();
 		if (autoplay) params.append('autoplay', '1');
 		if (startTimeSeconds > 0) params.append('start', Math.floor(startTimeSeconds).toString());

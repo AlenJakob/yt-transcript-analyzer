@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import { useState, useMemo } from 'react';
 import {
 	Paper,
 	Box,
@@ -27,7 +27,6 @@ import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import SearchIcon from '@mui/icons-material/Search';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import DescriptionIcon from '@mui/icons-material/Description';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PersonIcon from '@mui/icons-material/Person';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { HistoryItem } from '@/lib/storage';
@@ -45,12 +44,12 @@ export default function ArchiveView({
 	onDeleteItem,
 	onClearHistory,
 }: ArchiveViewProps) {
-	const [searchQuery, setSearchQuery] = React.useState('');
-	const [confirmClearOpen, setConfirmClearOpen] = React.useState(false);
-	const [itemToDelete, setItemToDelete] = React.useState<string | null>(null);
+	const [searchQuery, setSearchQuery] = useState('');
+	const [confirmClearOpen, setConfirmClearOpen] = useState(false);
+	const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
 	// Filtrowanie zmontowanej historii po tytule lub autorze
-	const filteredHistory = React.useMemo(() => {
+	const filteredHistory = useMemo(() => {
 		if (!searchQuery.trim()) return history;
 		const query = searchQuery.toLowerCase();
 		return history.filter(

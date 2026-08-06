@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import { useState, useMemo } from 'react';
 import {
 	Paper,
 	Box,
@@ -157,14 +157,14 @@ const PRESETS: PromptPreset[] = [
 ];
 
 export default function AiAnalysisPresets({ segments, videoTitle }: AiAnalysisPresetsProps) {
-	const [selectedPresetId, setSelectedPresetId] = React.useState<string>(PRESETS[0].id);
-	const [isSimulating, setIsSimulating] = React.useState<boolean>(false);
-	const [simulationResult, setSimulationResult] = React.useState<string | null>(null);
-	const [snackbarMessage, setSnackbarMessage] = React.useState<string | null>(null);
+	const [selectedPresetId, setSelectedPresetId] = useState<string>(PRESETS[0].id);
+	const [isSimulating, setIsSimulating] = useState<boolean>(false);
+	const [simulationResult, setSimulationResult] = useState<string | null>(null);
+	const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
-	const fullText = React.useMemo(() => segments.map((s) => s.text).join(' '), [segments]);
+	const fullText = useMemo(() => segments.map((s) => s.text).join(' '), [segments]);
 
-	const activePreset = React.useMemo(
+	const activePreset = useMemo(
 		() => PRESETS.find((p) => p.id === selectedPresetId) || PRESETS[0],
 		[selectedPresetId]
 	);
