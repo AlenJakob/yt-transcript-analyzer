@@ -2,7 +2,7 @@
 
 import { Paper, Box, Select, MenuItem } from '@mui/material';
 import { ModelOpenRouter } from '@/types/openRouter';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, startTransition } from 'react';
 
 function getCookie(name: string) {
 	if (typeof window === 'undefined') {
@@ -33,7 +33,7 @@ export default function ModelSelect() {
 	useEffect(() => {
 		const testCookie = getCookie('test');
 		if (testCookie === 'alen') {
-			React.startTransition(() => {
+			startTransition(() => {
 				setIsAllowed(true);
 			});
 		}
