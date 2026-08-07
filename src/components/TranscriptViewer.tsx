@@ -493,7 +493,17 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 						</Stack>
 					</Stack>
 
-					<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+					<Box
+						sx={{
+							maxHeight: 450,
+							overflowY: 'auto',
+							overflowX: 'hidden',
+							display: 'flex',
+							flexDirection: 'column',
+							gap: 2,
+							pr: 1.5,
+						}}
+					>
 						{formattedParagraphs.map((para, idx) => (
 							<Typography
 								key={idx}

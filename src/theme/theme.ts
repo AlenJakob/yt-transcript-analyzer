@@ -113,6 +113,29 @@ const darkTheme = createTheme({
 				},
 			},
 		},
+		MuiCssBaseline: {
+			styleOverrides: {
+				'*::-webkit-scrollbar': {
+					width: '8px',
+					height: '8px',
+				},
+				'*::-webkit-scrollbar-track': {
+					backgroundColor: 'rgba(255, 255, 255, 0.05)',
+					borderRadius: '4px',
+				},
+				'*::-webkit-scrollbar-thumb': {
+					backgroundColor: 'rgba(59, 130, 246, 0.5)',
+					borderRadius: '4px',
+					'&:hover': {
+						backgroundColor: '#3b82f6',
+					},
+				},
+				'*': {
+					scrollbarWidth: 'thin',
+					scrollbarColor: '#3b82f6 rgba(255, 255, 255, 0.05)',
+				},
+			},
+		},
 		MuiChip: {
 			styleOverrides: {
 				root: {
