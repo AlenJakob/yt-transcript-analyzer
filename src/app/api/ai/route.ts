@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: 'Brak autoryzacji.' }, { status: 401 });
 		}
 
-		const { transcriptText, promptPreset } = await req.json();
+		const { model, transcriptText, promptPreset } = await req.json();
 
 		if (!transcriptText || !promptPreset) {
 			return NextResponse.json(
@@ -27,9 +27,9 @@ export async function POST(req: NextRequest) {
 				{ status: 400 }
 			);
 		}
-
+		const defaultModel = 'openrouter/free';
 		const response = await openai.chat.completions.create({
-			model: 'openrouter/free',
+			model: model || defaultModel,
 			messages: [
 				{
 					role: 'system',
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 			],
 		});
 
-		return NextResponse.json({ result: response.choices[0].message.content });
+		return NextResponse.json({ result: response.choices[0].message.content, modelUsed: model });
 	} catch (err: unknown) {
 		const message = err instanceof Error ? err.message : 'Nieznany błąd serwera';
 		console.error('[/api/ai] Error:', message);

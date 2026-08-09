@@ -18,7 +18,6 @@ import {
 } from '@/lib/storage';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import InfoIcon from '@mui/icons-material/Info';
-import ModelSelect from '@/components/ModelSelect';
 
 export default function Home() {
 	const [activeTab, setActiveTab] = useState<'analyzer' | 'archive'>('analyzer');
@@ -114,7 +113,6 @@ export default function Home() {
 				) : (
 					/* Widok Głównego Analizatora */
 					<>
-						<ModelSelect />
 						{/* Formularz wprowadzania URL */}
 						<UrlInputForm
 							onFetchTranscript={handleFetchTranscript}

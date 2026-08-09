@@ -3,8 +3,12 @@ import { extractYouTubeVideoId, formatTimestamp, calculateTranscriptStats } from
 
 describe('YouTube Utilities', () => {
 	it('should extract video ID from YouTube URLs', () => {
-		expect(extractYouTubeVideoId('https://www.youtube.com/watch?v=dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ');
-		expect(extractYouTubeVideoId('https://www.youtube.com/watch?feature=shared&v=dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ');
+		expect(extractYouTubeVideoId('https://www.youtube.com/watch?v=dQw4w9WgXcQ')).toBe(
+			'dQw4w9WgXcQ'
+		);
+		expect(
+			extractYouTubeVideoId('https://www.youtube.com/watch?feature=shared&v=dQw4w9WgXcQ')
+		).toBe('dQw4w9WgXcQ');
 		expect(extractYouTubeVideoId('https://youtu.be/dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ');
 		expect(extractYouTubeVideoId('https://www.youtube.com/shorts/dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ');
 		expect(extractYouTubeVideoId('not-a-valid-url')).toBeNull();

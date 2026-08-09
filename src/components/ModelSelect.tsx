@@ -1,6 +1,6 @@
 'use client';
 
-import { Paper, Box, Select, MenuItem } from '@mui/material';
+import { Paper, Box, Select, MenuItem, Typography } from '@mui/material';
 import { ModelOpenRouter } from '@/types/openRouter';
 import { useEffect, useState, startTransition } from 'react';
 
@@ -25,9 +25,13 @@ const mapModels = (models: ModelOpenRouter[]) =>
 		};
 	});
 
-export default function ModelSelect() {
+interface ModelSelectProps {
+	setSelectedModel: (model: string) => void;
+	selectedModel: string;
+}
+
+export default function ModelSelect({ selectedModel, setSelectedModel }: ModelSelectProps) {
 	const [models, setModels] = useState<Partial<ModelOpenRouter>[] | undefined>(undefined);
-	const [selectedModel, setSelectedModel] = useState<string>('');
 	const [isAllowed, setIsAllowed] = useState(false);
 
 	useEffect(() => {
@@ -71,6 +75,7 @@ export default function ModelSelect() {
 				boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
 			}}
 		>
+			<Typography>Medal Select</Typography>
 			<Box sx={{ mb: 2 }}>
 				<Select
 					size="medium"

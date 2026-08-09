@@ -38,6 +38,7 @@ import {
 	groupTranscriptSegments,
 	formatContinuousParagraphs,
 } from '@/lib/youtube';
+import ModelSelect from './ModelSelect';
 
 interface TranscriptViewerProps {
 	segments: TranscriptSegment[];
@@ -49,6 +50,7 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 	const [groupInterval, setGroupInterval] = useState<number>(30);
 	const [searchQuery, setSearchQuery] = useState('');
 	const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+	const [selectedModel, setSelectedModel] = useState<string>('');
 
 	const processedSegments = useMemo(() => {
 		if (groupInterval === 0) {
@@ -127,6 +129,7 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
+					model: selectedModel,
 					transcriptText,
 					promptPreset:
 						'Przeanalizuj poniższą transkrypcję i stwórz streszczenie. Zbierz najważniejsze informacje, nie pomijaj istotnych szczegółów',
@@ -352,15 +355,18 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 					borderRadius: 3,
 				}}
 			>
-				<Button
-					variant="contained"
-					size="small"
-					startIcon={<ContentCopyIcon sx={{ fontSize: 16 }} />}
-					onClick={() => handleGenAi()}
-					sx={{ bgcolor: '#10b981', '&:hover': { bgcolor: '#059669' } }}
-				>
-					GenAI
-				</Button>
+				<Stack>
+					<ModelSelect setSelectedModel={setSelectedModel} selectedModel={selectedModel} />
+					<Button
+						variant="contained"
+						size="small"
+						startIcon={<ContentCopyIcon sx={{ fontSize: 16 }} />}
+						onClick={() => handleGenAi()}
+						sx={{ bgcolor: '#10b981', '&:hover': { bgcolor: '#059669' } }}
+					>
+						GenAI
+					</Button>
+				</Stack>
 				<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
 					<Typography
 						variant="body1"
