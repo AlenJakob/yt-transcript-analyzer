@@ -80,8 +80,7 @@ export function extractYouTubeVideoId(urlOrId: string): string | null {
 
 	// Regex patterns for YouTube URLs
 	const patterns = [
-		/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
-		/[?&]v=([a-zA-Z0-9_-]{11})/,
+		/(?:youtube\.com\/watch\?.*v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
 	];
 
 	for (const pattern of patterns) {
