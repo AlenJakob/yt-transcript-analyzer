@@ -1,8 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { SignedIn, SignedOut, UserButton, useClerk } from '@clerk/nextjs';
-
+import { usePathname, useRouter } from 'next/navigation';
 import { Box, Container, Typography, Chip, Stack, Button, Badge } from '@mui/material';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
@@ -10,20 +8,22 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import HistoryIcon from '@mui/icons-material/History';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonIcon from '@mui/icons-material/Person';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import AuthButtonSlot from '@/components/AuthButtonSlot';
+import { useAuthUser } from '@/hooks/useAuthUser';
 
 interface HeaderProps {
-	activeTab: 'analyzer' | 'archive' | 'profile';
-	historyCount: number;
-	onTabChange: (tab: 'analyzer' | 'archive' | 'profile') => void;
+	historyCount?: number;
 }
 
-export default function Header({ activeTab, historyCount, onTabChange }: HeaderProps) {
-	const [mounted, setMounted] = useState(false);
-	const { openSignIn } = useClerk();
+export default function Header({ historyCount = 0 }: HeaderProps) {
+	const pathname = usePathname();
+	const router = useRouter();
+	const { isAdmin } = useAuthUser();
 
-	useEffect(() => {
-		setMounted(true);
-	}, []);
+	const isAnalyzer = pathname === '/';
+	const isArchive = pathname === '/archive';
+	const isProfile = pathname === '/profile';
 
 	return (
 		<Box
@@ -49,7 +49,7 @@ export default function Header({ activeTab, historyCount, onTabChange }: HeaderP
 						direction="row"
 						spacing={1.5}
 						sx={{ alignItems: 'center', cursor: 'pointer' }}
-						onClick={() => onTabChange('analyzer')}
+						onClick={() => router.push('/')}
 					>
 						<Box
 							sx={{
@@ -82,7 +82,7 @@ export default function Header({ activeTab, historyCount, onTabChange }: HeaderP
 						</Box>
 					</Stack>
 
-					{/* Nawigacja zakładek: Analizator vs Archiwum vs Profil */}
+					{/* Nawigacja stron Next.js: Analizator (/) vs Archiwum (/archive) vs Profil/Panel Admina (/profile) */}
 					<Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
 						<Chip
 							icon={<DarkModeIcon sx={{ fontSize: 15 }} />}
@@ -98,14 +98,14 @@ export default function Header({ activeTab, historyCount, onTabChange }: HeaderP
 							}}
 						/>
 						<Button
-							variant={activeTab === 'analyzer' ? 'contained' : 'outlined'}
+							variant={isAnalyzer ? 'contained' : 'outlined'}
 							size="small"
 							startIcon={<SearchIcon sx={{ fontSize: 18 }} />}
-							onClick={() => onTabChange('analyzer')}
+							onClick={() => router.push('/')}
 							sx={{
-								bgcolor: activeTab === 'analyzer' ? '#3b82f6' : 'transparent',
+								bgcolor: isAnalyzer ? '#3b82f6' : 'transparent',
 								borderColor: 'rgba(255, 255, 255, 0.15)',
-								color: activeTab === 'analyzer' ? '#ffffff' : 'text.secondary',
+								color: isAnalyzer ? '#ffffff' : 'text.secondary',
 								px: 2,
 								borderRadius: 1.5,
 							}}
@@ -114,7 +114,7 @@ export default function Header({ activeTab, historyCount, onTabChange }: HeaderP
 						</Button>
 
 						<Button
-							variant={activeTab === 'archive' ? 'contained' : 'outlined'}
+							variant={isArchive ? 'contained' : 'outlined'}
 							size="small"
 							startIcon={
 								<Badge
@@ -126,11 +126,11 @@ export default function Header({ activeTab, historyCount, onTabChange }: HeaderP
 									<HistoryIcon sx={{ fontSize: 18 }} />
 								</Badge>
 							}
-							onClick={() => onTabChange('archive')}
+							onClick={() => router.push('/archive')}
 							sx={{
-								bgcolor: activeTab === 'archive' ? '#3b82f6' : 'transparent',
+								bgcolor: isArchive ? '#3b82f6' : 'transparent',
 								borderColor: 'rgba(255, 255, 255, 0.15)',
-								color: activeTab === 'archive' ? '#ffffff' : 'text.secondary',
+								color: isArchive ? '#ffffff' : 'text.secondary',
 								px: 2,
 								borderRadius: 1.5,
 							}}
@@ -139,54 +139,32 @@ export default function Header({ activeTab, historyCount, onTabChange }: HeaderP
 						</Button>
 
 						<Button
-							variant={activeTab === 'profile' ? 'contained' : 'outlined'}
+							variant={isProfile ? 'contained' : 'outlined'}
 							size="small"
-							startIcon={<PersonIcon sx={{ fontSize: 18 }} />}
-							onClick={() => onTabChange('profile')}
+							startIcon={
+								isAdmin ? (
+									<AdminPanelSettingsIcon sx={{ fontSize: 18 }} />
+								) : (
+									<PersonIcon sx={{ fontSize: 18 }} />
+								)
+							}
+							onClick={() => router.push('/profile')}
 							sx={{
-								bgcolor: activeTab === 'profile' ? '#3b82f6' : 'transparent',
-								borderColor: 'rgba(255, 255, 255, 0.15)',
-								color: activeTab === 'profile' ? '#ffffff' : 'text.secondary',
+								bgcolor: isProfile ? (isAdmin ? '#9333ea' : '#3b82f6') : 'transparent',
+								borderColor: isAdmin ? 'rgba(168, 85, 247, 0.3)' : 'rgba(255, 255, 255, 0.15)',
+								color: isProfile ? '#ffffff' : isAdmin ? '#c084fc' : 'text.secondary',
 								px: 2,
 								borderRadius: 1.5,
+								'&:hover': {
+									borderColor: isAdmin ? '#a855f7' : '#3b82f6',
+								},
 							}}
 						>
-							Profil
+							{isAdmin ? 'Panel Admina' : 'Profil'}
 						</Button>
 
-						{mounted && (
-							<>
-								<SignedOut>
-									<Button
-										variant="outlined"
-										size="small"
-										onClick={() => openSignIn()}
-										sx={{
-											borderColor: 'rgba(255, 255, 255, 0.2)',
-											color: '#ffffff',
-											px: 2,
-											borderRadius: 3,
-											'&:hover': {
-												borderColor: '#3b82f6',
-												bgcolor: 'rgba(59, 130, 246, 0.08)',
-											},
-										}}
-									>
-										Zaloguj się
-									</Button>
-								</SignedOut>
-
-								<SignedIn>
-									<UserButton
-										appearance={{
-											elements: {
-												avatarBox: { width: 34, height: 34 },
-											},
-										}}
-									/>
-								</SignedIn>
-							</>
-						)}
+						{/* Dedykowany slot autoryzacji zapobiegający przesunięciom CLS */}
+						<AuthButtonSlot />
 					</Stack>
 				</Stack>
 			</Container>

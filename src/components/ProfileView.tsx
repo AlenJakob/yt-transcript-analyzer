@@ -108,11 +108,30 @@ export default function ProfileView() {
 		}
 	};
 
-	const filteredUsers = users.filter(
-		(u) =>
-			u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			`${u.firstName} ${u.lastName}`.toLowerCase().includes(searchQuery.toLowerCase())
-	);
+	const filteredUsers = useMemo(() => {
+		const query = searchQuery.toLowerCase().trim();
+		const filtered = users.filter(
+			(u) =>
+				u.email.toLowerCase().includes(query) ||
+				`${u.firstName} ${u.lastName}`.toLowerCase().includes(query)
+		);
+
+		return [...filtered].sort((a, b) => {
+			const aIsAdmin = a.role === 'admin' ? 1 : 0;
+			const bIsAdmin = b.role === 'admin' ? 1 : 0;
+			if (aIsAdmin !== bIsAdmin) {
+				return bIsAdmin - aIsAdmin; // Admini zawsze na samej górze
+			}
+
+			const aIsPro = a.tier === 'pro' ? 1 : 0;
+			const bIsPro = b.tier === 'pro' ? 1 : 0;
+			if (aIsPro !== bIsPro) {
+				return bIsPro - aIsPro; // Użytkownicy PRO drudzy
+			}
+
+			return b.createdAt - a.createdAt; // Najnowsi jako następni
+		});
+	}, [users, searchQuery]);
 
 	if (!userAuth.isSignedIn && userAuth.isLoaded) {
 		return (
@@ -312,6 +331,7 @@ export default function ProfileView() {
 										const isUserPro = u.tier === 'pro';
 										const isUserAdmin = u.role === 'admin';
 										const isUpdating = updatingUserId === u.id;
+										const isSelf = u.id === userAuth.userId;
 
 										return (
 											<TableRow key={u.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
@@ -321,9 +341,20 @@ export default function ProfileView() {
 															{u.firstName?.[0] || u.email[0]}
 														</Avatar>
 														<Box>
-															<Typography variant="body2" sx={{ fontWeight: 600 }}>
-																{u.firstName || u.lastName ? `${u.firstName} ${u.lastName}`.trim() : u.email}
-															</Typography>
+															<Stack direction="row" spacing={0.8} sx={{ alignItems: 'center' }}>
+																<Typography variant="body2" sx={{ fontWeight: 600 }}>
+																	{u.firstName || u.lastName ? `${u.firstName} ${u.lastName}`.trim() : u.email}
+																</Typography>
+																{isSelf && (
+																	<Chip
+																		label="Ty"
+																		size="small"
+																		color="primary"
+																		variant="outlined"
+																		sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700, borderRadius: 1 }}
+																	/>
+																)}
+															</Stack>
 															<Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
 																{u.email}
 															</Typography>
@@ -347,28 +378,36 @@ export default function ProfileView() {
 												<TableCell align="right">
 													<Stack direction="row" spacing={1} sx={{ justifyContent: 'flex-end' }}>
 														{/* Przełącznik PRO */}
-														<Button
-															size="small"
-															variant={isUserPro ? 'outlined' : 'contained'}
-															color={isUserPro ? 'inherit' : 'success'}
-															disabled={isUpdating}
-															onClick={() => handleUpdateUser(u.id, isUserPro ? 'free' : 'pro', undefined)}
-															sx={{ fontSize: '0.75rem', px: 1.5, py: 0.3, borderRadius: 2 }}
-														>
-															{isUpdating ? <CircularProgress size={12} /> : isUserPro ? 'Cofnij PRO' : 'Daj PRO'}
-														</Button>
+														<Tooltip title={isSelf && isUserPro ? 'Nie możesz odebrać sobie pakietu PRO z poziomu panelu' : ''}>
+															<span>
+																<Button
+																	size="small"
+																	variant={isUserPro ? 'outlined' : 'contained'}
+																	color={isUserPro ? 'inherit' : 'success'}
+																	disabled={isUpdating || (isSelf && isUserPro)}
+																	onClick={() => handleUpdateUser(u.id, isUserPro ? 'free' : 'pro', undefined)}
+																	sx={{ fontSize: '0.75rem', px: 1.5, py: 0.3, borderRadius: 2 }}
+																>
+																	{isUpdating ? <CircularProgress size={12} /> : isUserPro ? 'Cofnij PRO' : 'Daj PRO'}
+																</Button>
+															</span>
+														</Tooltip>
 
 														{/* Przełącznik ADMIN */}
-														<Button
-															size="small"
-															variant={isUserAdmin ? 'outlined' : 'contained'}
-															color={isUserAdmin ? 'inherit' : 'secondary'}
-															disabled={isUpdating}
-															onClick={() => handleUpdateUser(u.id, undefined, isUserAdmin ? 'user' : 'admin')}
-															sx={{ fontSize: '0.75rem', px: 1.5, py: 0.3, borderRadius: 2 }}
-														>
-															{isUpdating ? <CircularProgress size={12} /> : isUserAdmin ? 'Cofnij Admina' : 'Daj Admina'}
-														</Button>
+														<Tooltip title={isSelf && isUserAdmin ? 'Nie możesz odebrać sobie uprawnień Admina z poziomu panelu' : ''}>
+															<span>
+																<Button
+																	size="small"
+																	variant={isUserAdmin ? 'outlined' : 'contained'}
+																	color={isUserAdmin ? 'inherit' : 'secondary'}
+																	disabled={isUpdating || (isSelf && isUserAdmin)}
+																	onClick={() => handleUpdateUser(u.id, undefined, isUserAdmin ? 'user' : 'admin')}
+																	sx={{ fontSize: '0.75rem', px: 1.5, py: 0.3, borderRadius: 2 }}
+																>
+																	{isUpdating ? <CircularProgress size={12} /> : isUserAdmin ? 'Cofnij Admina' : 'Daj Admina'}
+																</Button>
+															</span>
+														</Tooltip>
 													</Stack>
 												</TableCell>
 											</TableRow>

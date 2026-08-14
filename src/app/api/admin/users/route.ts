@@ -3,30 +3,32 @@ import { auth, currentUser, createClerkClient } from '@clerk/nextjs/server';
 
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
-async function verifyAdminAccess(req: NextRequest): Promise<boolean> {
+async function verifyAdminAccess(req: NextRequest): Promise<{ isAdmin: boolean; currentUserId: string | null }> {
 	const { userId } = await auth();
 	const testCookie = req.cookies.get('test')?.value;
-	if (testCookie === 'alen') return true;
-	if (!userId) return false;
+	if (testCookie === 'alen') return { isAdmin: true, currentUserId: userId ?? 'test-user' };
+	if (!userId) return { isAdmin: false, currentUserId: null };
 
 	const user = await currentUser();
-	if (!user) return false;
+	if (!user) return { isAdmin: false, currentUserId: userId };
 
 	const userEmail = user.primaryEmailAddress?.emailAddress;
 	const publicMetadata = (user.publicMetadata as Record<string, unknown>) ?? {};
 	const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
-	return Boolean(
+	const isAdmin = Boolean(
 		publicMetadata?.role === 'admin' ||
 			publicMetadata?.isAdmin === true ||
 			(adminEmail && userEmail && userEmail.toLowerCase() === adminEmail.toLowerCase())
 	);
+
+	return { isAdmin, currentUserId: userId };
 }
 
 // GET /api/admin/users - Pobierz listę zarejestrowanych użytkowników
 export async function GET(req: NextRequest) {
 	try {
-		const isAdmin = await verifyAdminAccess(req);
+		const { isAdmin } = await verifyAdminAccess(req);
 		if (!isAdmin) {
 			return NextResponse.json(
 				{ error: 'Brak uprawnień administratora.' },
@@ -62,7 +64,7 @@ export async function GET(req: NextRequest) {
 // POST /api/admin/users - Zmień pakiet (tier) lub rolę użytkownika
 export async function POST(req: NextRequest) {
 	try {
-		const isAdmin = await verifyAdminAccess(req);
+		const { isAdmin, currentUserId } = await verifyAdminAccess(req);
 		if (!isAdmin) {
 			return NextResponse.json(
 				{ error: 'Brak uprawnień administratora.' },
@@ -75,6 +77,14 @@ export async function POST(req: NextRequest) {
 		if (!targetUserId) {
 			return NextResponse.json(
 				{ error: 'Wymagany jest parametr targetUserId.' },
+				{ status: 400 }
+			);
+		}
+
+		// Zabezpieczenie: Admin nie może odebrać sobie roli Admina ani pakietu PRO
+		if (targetUserId === currentUserId && (role === 'user' || tier === 'free')) {
+			return NextResponse.json(
+				{ error: 'Nie możesz odebrać sobie uprawnień administratora ani pakietu PRO z poziomu panelu.' },
 				{ status: 400 }
 			);
 		}
