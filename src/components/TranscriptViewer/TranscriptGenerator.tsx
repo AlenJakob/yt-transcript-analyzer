@@ -7,7 +7,6 @@ import CheckIcon from '@mui/icons-material/Check';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { useCopyClipboard } from '@/hooks/useCopyClipboad';
 import { useAiSummary } from '@/hooks/useAiSummary';
-import { useFakeAuth } from '@/hooks/useFakeAuth';
 import { useAuthUser } from '@/hooks/useAuthUser';
 
 interface TranscriptGeneratorProps {
@@ -22,9 +21,8 @@ export default function TranscriptGenerator({
 	formattedParagraphs,
 }: TranscriptGeneratorProps) {
 	const { aiResponse, isAiLoading, error, generateSummary, abort } = useAiSummary();
-	const { isSignedIn, isAdmin } = useAuthUser();
-	const { isAllowed: isFakeAllowed } = useFakeAuth();
-	const isAllowed = isAdmin || isFakeAllowed;
+	const { isAdmin } = useAuthUser();
+	const isAllowed = isAdmin;
 	const [copied, setCopied] = useState(false);
 	const { copyClipBoard } = useCopyClipboard();
 
