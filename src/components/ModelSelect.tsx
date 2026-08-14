@@ -4,18 +4,6 @@ import { Paper, Box, Select, MenuItem, Typography } from '@mui/material';
 import { ModelOpenRouter } from '@/types/openRouter';
 import { useEffect, useState, startTransition } from 'react';
 
-function getCookie(name: string) {
-	if (typeof window === 'undefined') {
-		return null;
-	}
-	const value = `; ${document.cookie}`;
-	const parts = value.split(`; ${name}=`);
-	if (parts.length === 2) {
-		return parts.pop()?.split(';').shift();
-	}
-	return null;
-}
-
 const mapModels = (models: ModelOpenRouter[]) =>
 	models.map((model) => {
 		return {
@@ -32,16 +20,6 @@ interface ModelSelectProps {
 
 export default function ModelSelect({ selectedModel, setSelectedModel }: ModelSelectProps) {
 	const [models, setModels] = useState<Partial<ModelOpenRouter>[] | undefined>(undefined);
-	const [isAllowed, setIsAllowed] = useState(false);
-
-	useEffect(() => {
-		const testCookie = getCookie('test');
-		if (testCookie === 'alen') {
-			startTransition(() => {
-				setIsAllowed(true);
-			});
-		}
-	}, []);
 
 	useEffect(() => {
 		const getModels = async () => {
@@ -59,10 +37,6 @@ export default function ModelSelect({ selectedModel, setSelectedModel }: ModelSe
 		getModels();
 	}, []);
 
-	if (!isAllowed) {
-		return null;
-	}
-
 	return (
 		<Paper
 			elevation={0}
@@ -71,7 +45,7 @@ export default function ModelSelect({ selectedModel, setSelectedModel }: ModelSe
 				mb: 4,
 				background: 'linear-gradient(145deg, #121824 0%, #0e131d 100%)',
 				border: '1px solid rgba(255, 255, 255, 0.08)',
-				borderRadius: 4,
+				borderRadius: 1,
 				boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
 			}}
 		>
