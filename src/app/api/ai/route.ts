@@ -38,7 +38,10 @@ export async function POST(req: NextRequest) {
 		// Zabezpieczenie: tylko administrator ma dostęp do generowania AI z OpenRouter
 		if (!isAdmin) {
 			return NextResponse.json(
-				{ error: 'Dostęp ograniczony. Generowanie AI z OpenRouter jest obecnie dostępne tylko dla administratora.' },
+				{
+					error:
+						'Dostęp ograniczony. Generowanie AI z OpenRouter jest obecnie dostępne tylko dla administratora.',
+				},
 				{ status: 403 }
 			);
 		}

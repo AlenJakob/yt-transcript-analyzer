@@ -342,14 +342,24 @@ export default function ArchiveView({
 											<Stack spacing={0.6}>
 												<Typography
 													variant="caption"
-													sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 0.8 }}
+													sx={{
+														color: 'text.secondary',
+														display: 'flex',
+														alignItems: 'center',
+														gap: 0.8,
+													}}
 												>
 													<PersonIcon sx={{ fontSize: 14, color: '#9ca3af' }} />
 													{item.metadata.authorName}
 												</Typography>
 												<Typography
 													variant="caption"
-													sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 0.8 }}
+													sx={{
+														color: 'text.secondary',
+														display: 'flex',
+														alignItems: 'center',
+														gap: 0.8,
+													}}
 												>
 													<CalendarTodayIcon sx={{ fontSize: 13, color: '#9ca3af' }} />
 													Zapisano: {formatDate(item.dateAdded)}
@@ -358,11 +368,7 @@ export default function ArchiveView({
 										</Box>
 
 										{/* Statystyki: Słowa & Czytanie */}
-										<Stack
-											direction="row"
-											spacing={1}
-											sx={{ mb: 2, flexWrap: 'wrap', gap: 0.5 }}
-										>
+										<Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', gap: 0.5 }}>
 											<Chip
 												icon={<DescriptionIcon sx={{ fontSize: 13 }} />}
 												label={`${item.stats.wordCount} słów`}

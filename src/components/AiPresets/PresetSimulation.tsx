@@ -94,8 +94,8 @@ export default function PresetSimulation({
 				>
 					<SmartToyIcon sx={{ fontSize: 40, opacity: 0.4, mb: 1 }} />
 					<Typography variant="body2">
-						Kliknij <strong>&quot;Generuj Symulację AI&quot;</strong>, aby zobaczyć jak
-						wyglądałaby analiza ChatGPT / Claude dla tego filmu.
+						Kliknij <strong>&quot;Generuj Symulację AI&quot;</strong>, aby zobaczyć jak wyglądałaby
+						analiza ChatGPT / Claude dla tego filmu.
 					</Typography>
 				</Box>
 			)}

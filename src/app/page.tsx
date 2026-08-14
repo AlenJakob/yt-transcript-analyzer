@@ -9,12 +9,7 @@ import VideoMetadataCard from '@/components/VideoMetadataCard';
 import TranscriptViewer from '@/components/TranscriptViewer/TranscriptViewer';
 import AiAnalysisPresets from '@/components/AiAnalysisPresets';
 import { VideoMetadata, TranscriptSegment, TranscriptStats } from '@/lib/youtube';
-import {
-	getHistory,
-	saveToHistory,
-	loadFullHistoryItem,
-	HistoryItem,
-} from '@/lib/storage';
+import { getHistory, saveToHistory, loadFullHistoryItem, HistoryItem } from '@/lib/storage';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import InfoIcon from '@mui/icons-material/Info';
 
@@ -155,8 +150,8 @@ function AnalyzerContent() {
 								gap: 0.5,
 							}}
 						>
-							<InfoIcon sx={{ fontSize: 16 }} /> Obsługuje filmy wideo, YouTube Shorts oraz
-							linki skrócone `youtu.be`.
+							<InfoIcon sx={{ fontSize: 16 }} /> Obsługuje filmy wideo, YouTube Shorts oraz linki
+							skrócone `youtu.be`.
 						</Typography>
 					</Paper>
 				)}

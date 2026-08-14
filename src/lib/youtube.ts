@@ -254,4 +254,3 @@ export function formatContinuousParagraphs(segments: TranscriptSegment[]): strin
 
 	return paragraphs;
 }
-

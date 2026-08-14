@@ -39,7 +39,10 @@ export async function POST(req: NextRequest) {
 		}
 
 		try {
-			const { rawTranscript, language } = await fetchTranscriptWithFallback(videoId, preferredLangs);
+			const { rawTranscript, language } = await fetchTranscriptWithFallback(
+				videoId,
+				preferredLangs
+			);
 
 			const segments: TranscriptSegment[] = rawTranscript.map((item) => {
 				const offset = normalizeTime(item.offset);

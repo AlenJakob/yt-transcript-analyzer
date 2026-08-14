@@ -30,8 +30,8 @@ export function useAuthUser(): AuthUserInfo {
 	const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 	const isAdmin = Boolean(
 		publicMetadata?.role === 'admin' ||
-			publicMetadata?.isAdmin === true ||
-			(adminEmail && userEmail && userEmail.toLowerCase() === adminEmail.toLowerCase())
+		publicMetadata?.isAdmin === true ||
+		(adminEmail && userEmail && userEmail.toLowerCase() === adminEmail.toLowerCase())
 	);
 
 	return {
