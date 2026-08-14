@@ -14,6 +14,7 @@ import {
 	saveToHistory,
 	removeFromHistory,
 	clearHistory,
+	loadFullHistoryItem,
 	HistoryItem,
 } from '@/lib/storage';
 import YouTubeIcon from '@mui/icons-material/YouTube';
@@ -74,9 +75,10 @@ export default function Home() {
 
 	// Wybór wideo z archiwum
 	const handleSelectHistoryItem = (item: HistoryItem) => {
-		setMetadata(item.metadata);
-		setSegments(item.segments);
-		setStats(item.stats);
+		const fullItem = loadFullHistoryItem(item);
+		setMetadata(fullItem.metadata);
+		setSegments(fullItem.segments);
+		setStats(fullItem.stats);
 		setError(null);
 		setActiveTab('analyzer'); // Przełączenie z powrotem do analizatora
 	};
@@ -98,7 +100,11 @@ export default function Home() {
 			<Header
 				activeTab={activeTab}
 				historyCount={history.length}
-				onTabChange={(tab) => setActiveTab(tab)}
+				onTabChange={(tab) => {
+					startTransition(() => {
+						setActiveTab(tab);
+					});
+				}}
 			/>
 
 			<Container maxWidth="lg" sx={{ pt: { xs: 3, sm: 4 } }}>

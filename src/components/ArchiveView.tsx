@@ -20,6 +20,7 @@ import {
 	DialogContent,
 	DialogContentText,
 	DialogActions,
+	Pagination,
 } from '@mui/material';
 import HistoryIcon from '@mui/icons-material/History';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -38,6 +39,8 @@ interface ArchiveViewProps {
 	onClearHistory: () => void;
 }
 
+const ITEMS_PER_PAGE = 12;
+
 export default function ArchiveView({
 	history,
 	onSelectHistoryItem,
@@ -47,6 +50,7 @@ export default function ArchiveView({
 	const [searchQuery, setSearchQuery] = useState('');
 	const [confirmClearOpen, setConfirmClearOpen] = useState(false);
 	const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+	const [page, setPage] = useState(1);
 
 	useEffect(() => {
 		const start = performance.now();
@@ -61,6 +65,11 @@ export default function ArchiveView({
 		};
 	}, [history.length]);
 
+	// Reset strony przy zmianie zapytania wyszukiwania
+	useEffect(() => {
+		setPage(1);
+	}, [searchQuery]);
+
 	// Filtrowanie zmontowanej historii po tytule lub autorze
 	const filteredHistory = useMemo(() => {
 		if (!searchQuery.trim()) return history;
@@ -71,6 +80,13 @@ export default function ArchiveView({
 				item.metadata.authorName.toLowerCase().includes(query)
 		);
 	}, [history, searchQuery]);
+
+	const totalPages = Math.ceil(filteredHistory.length / ITEMS_PER_PAGE);
+
+	const paginatedHistory = useMemo(() => {
+		const start = (page - 1) * ITEMS_PER_PAGE;
+		return filteredHistory.slice(start, start + ITEMS_PER_PAGE);
+	}, [filteredHistory, page]);
 
 	const formatDate = (isoString: string) => {
 		try {
@@ -140,39 +156,25 @@ export default function ArchiveView({
 						{/* Przycisk czyszczenia widoczny na urządzeniach mobilnych */}
 						{history.length > 0 && (
 							<Tooltip title="Wyczyść całą historię">
-								<Button
-									variant="outlined"
+								<IconButton
 									color="error"
-									size="small"
-									startIcon={<DeleteSweepIcon sx={{ fontSize: 18 }} />}
 									onClick={() => setConfirmClearOpen(true)}
-									sx={{
-										display: { xs: 'inline-flex', md: 'none' },
-										borderColor: 'rgba(239, 68, 68, 0.3)',
-										whiteSpace: 'nowrap',
-										px: 1.5,
-										py: 0.6,
-										fontSize: '0.8rem',
-									}}
+									sx={{ display: { xs: 'inline-flex', md: 'none' } }}
 								>
-									Wyczyść
-								</Button>
+									<DeleteSweepIcon />
+								</IconButton>
 							</Tooltip>
 						)}
 					</Stack>
 
-					{/* Wyszukiwarka oraz Przycisk czyszczenia dla Desktop */}
-					<Stack
-						direction={{ xs: 'column', sm: 'row' }}
-						spacing={1.5}
-						sx={{ alignItems: 'center', width: { xs: '100%', md: 'auto' } }}
-					>
+					{/* Wyszukiwarka & Akcje archiwum */}
+					<Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
 						<TextField
 							size="small"
-							placeholder="Szukaj w historii..."
+							placeholder="Szukaj po tytule lub autorze..."
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
-							sx={{ width: { xs: '100%', sm: 220 } }}
+							sx={{ width: { xs: '100%', sm: 260 } }}
 							slotProps={{
 								input: {
 									startAdornment: (
@@ -210,34 +212,37 @@ export default function ArchiveView({
 
 			{/* Lista Zapisanych Kart (MUI Grid size={{ xs: 12, sm: 6, md: 4 }}) */}
 			{filteredHistory.length > 0 ? (
-				<Grid container spacing={2.5}>
-					{filteredHistory.map((item) => (
-						<Grid size={{ xs: 12, sm: 6, md: 4 }} key={item.id}>
-							<Card
-								sx={{
-									height: '100%',
-									display: 'flex',
-									flexDirection: 'column',
-									justifyContent: 'space-between',
-									transition: 'transform 0.15s ease, border-color 0.15s ease',
-									'&:hover': {
-										transform: 'translateY(-3px)',
-										borderColor: 'rgba(59, 130, 246, 0.4)',
-									},
-								}}
-							>
-								<CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+				<>
+					<Grid container spacing={2.5}>
+						{paginatedHistory.map((item) => (
+							<Grid size={{ xs: 12, sm: 6, md: 4 }} key={item.id}>
+								<Card
+									sx={{
+										height: '100%',
+										display: 'flex',
+										flexDirection: 'column',
+										bgcolor: '#121824',
+										border: '1px solid rgba(255, 255, 255, 0.08)',
+										borderRadius: 2,
+										transition: 'all 0.2s ease-in-out',
+										'&:hover': {
+											borderColor: 'rgba(59, 130, 246, 0.4)',
+											transform: 'translateY(-3px)',
+											boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
+										},
+									}}
+								>
 									{/* Miniaturka wideo */}
 									<Box
 										sx={{
 											position: 'relative',
 											width: '100%',
 											aspectRatio: '16/9',
-											borderRadius: 2,
+											bgcolor: '#000000',
 											overflow: 'hidden',
-											mb: 2,
-											border: '1px solid rgba(255, 255, 255, 0.08)',
+											cursor: 'pointer',
 										}}
+										onClick={() => onSelectHistoryItem(item)}
 									>
 										{/* eslint-disable-next-line @next/next/no-img-element */}
 										<img
@@ -245,91 +250,150 @@ export default function ArchiveView({
 											alt={item.metadata.title}
 											style={{ width: '100%', height: '100%', objectFit: 'cover' }}
 										/>
-									</Box>
-
-									{/* Tytuł i autor */}
-									<Typography
-										variant="subtitle1"
-										sx={{
-											fontWeight: 700,
-											lineHeight: 1.3,
-											mb: 1,
-											display: '-webkit-box',
-											WebkitLineClamp: 2,
-											WebkitBoxOrient: 'vertical',
-											overflow: 'hidden',
-											minHeight: '2.6em',
-										}}
-									>
-										{item.metadata.title}
-									</Typography>
-
-									<Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1.5 }}>
-										<PersonIcon sx={{ fontSize: 16, color: '#9ca3af' }} />
-										<Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-											{item.metadata.authorName}
-										</Typography>
-									</Stack>
-
-									{/* Data zapisu i statystyka słów */}
-									<Stack direction="row" spacing={1} sx={{ mb: 2, gap: 0.5, flexWrap: 'wrap' }}>
 										<Chip
-											icon={
-												<CalendarTodayIcon sx={{ fontSize: 12, color: '#9ca3af !important' }} />
-											}
-											label={formatDate(item.dateAdded)}
-											size="small"
-											sx={{ bgcolor: 'rgba(255, 255, 255, 0.04)', fontSize: '0.72rem' }}
-										/>
-										<Chip
-											icon={<DescriptionIcon sx={{ fontSize: 12, color: '#3b82f6 !important' }} />}
-											label={`${item.stats.wordCount.toLocaleString('pl-PL')} słów`}
+											label={item.metadata.duration}
 											size="small"
 											sx={{
-												bgcolor: 'rgba(59, 130, 246, 0.1)',
-												color: '#60a5fa',
-												fontSize: '0.72rem',
+												position: 'absolute',
+												bottom: 8,
+												right: 8,
+												bgcolor: 'rgba(0, 0, 0, 0.8)',
+												color: '#ffffff',
+												fontWeight: 600,
+												fontSize: '0.7rem',
+												height: 20,
 											}}
 										/>
-									</Stack>
+									</Box>
 
-									{/* Akcje pod spodem */}
-									<Stack
-										direction="row"
-										spacing={1}
+									<CardContent
 										sx={{
-											alignItems: 'center',
+											flexGrow: 1,
+											display: 'flex',
+											flexDirection: 'column',
 											justifyContent: 'space-between',
-											pt: 1,
-											borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+											p: 2.5,
 										}}
 									>
-										<Button
-											variant="contained"
-											size="small"
-											startIcon={<PlayArrowIcon sx={{ fontSize: 16 }} />}
-											onClick={() => onSelectHistoryItem(item)}
-											sx={{ bgcolor: '#3b82f6', '&:hover': { bgcolor: '#2563eb' } }}
-										>
-											Otwórz
-										</Button>
-
-										<Tooltip title="Usuń z historii">
-											<IconButton
-												size="small"
-												color="error"
-												onClick={() => setItemToDelete(item.id)}
-												sx={{ opacity: 0.7, '&:hover': { opacity: 1 } }}
+										<Box sx={{ mb: 2 }}>
+											<Typography
+												variant="subtitle1"
+												title={item.metadata.title}
+												sx={{
+													fontWeight: 700,
+													fontSize: '0.95rem',
+													lineHeight: 1.35,
+													color: 'text.primary',
+													mb: 1,
+													display: '-webkit-box',
+													WebkitLineClamp: 2,
+													WebkitBoxOrient: 'vertical',
+													overflow: 'hidden',
+													height: '2.7em',
+												}}
 											>
-												<DeleteIcon sx={{ fontSize: 18 }} />
-											</IconButton>
-										</Tooltip>
-									</Stack>
-								</CardContent>
-							</Card>
-						</Grid>
-					))}
-				</Grid>
+												{item.metadata.title}
+											</Typography>
+
+											<Stack spacing={0.6}>
+												<Typography
+													variant="caption"
+													sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 0.8 }}
+												>
+													<PersonIcon sx={{ fontSize: 14, color: '#9ca3af' }} />
+													{item.metadata.authorName}
+												</Typography>
+												<Typography
+													variant="caption"
+													sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 0.8 }}
+												>
+													<CalendarTodayIcon sx={{ fontSize: 13, color: '#9ca3af' }} />
+													Zapisano: {formatDate(item.dateAdded)}
+												</Typography>
+											</Stack>
+										</Box>
+
+										{/* Statystyki: Słowa & Czytanie */}
+										<Stack
+											direction="row"
+											spacing={1}
+											sx={{ mb: 2, flexWrap: 'wrap', gap: 0.5 }}
+										>
+											<Chip
+												icon={<DescriptionIcon sx={{ fontSize: 13 }} />}
+												label={`${item.stats.wordCount} słów`}
+												size="small"
+												variant="outlined"
+												sx={{
+													borderColor: 'rgba(255, 255, 255, 0.1)',
+													color: 'text.secondary',
+													fontSize: '0.7rem',
+													height: 22,
+												}}
+											/>
+											<Chip
+												label={`~${item.stats.estimatedReadingTimeMinutes} min czytania`}
+												size="small"
+												variant="outlined"
+												sx={{
+													borderColor: 'rgba(255, 255, 255, 0.1)',
+													color: 'text.secondary',
+													fontSize: '0.7rem',
+													height: 22,
+												}}
+											/>
+										</Stack>
+
+										{/* Przycisk akcji: Otwórz & Usuń */}
+										<Stack
+											direction="row"
+											sx={{
+												alignItems: 'center',
+												justifyContent: 'space-between',
+												pt: 1,
+												borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+											}}
+										>
+											<Button
+												variant="contained"
+												size="small"
+												startIcon={<PlayArrowIcon sx={{ fontSize: 16 }} />}
+												onClick={() => onSelectHistoryItem(item)}
+												sx={{ bgcolor: '#3b82f6', '&:hover': { bgcolor: '#2563eb' } }}
+											>
+												Otwórz
+											</Button>
+
+											<Tooltip title="Usuń z historii">
+												<IconButton
+													size="small"
+													color="error"
+													onClick={() => setItemToDelete(item.id)}
+													sx={{ opacity: 0.7, '&:hover': { opacity: 1 } }}
+												>
+													<DeleteIcon sx={{ fontSize: 18 }} />
+												</IconButton>
+											</Tooltip>
+										</Stack>
+									</CardContent>
+								</Card>
+							</Grid>
+						))}
+					</Grid>
+
+					{/* Paginacja */}
+					{totalPages > 1 && (
+						<Stack direction="row" justifyContent="center" sx={{ mt: 4 }}>
+							<Pagination
+								count={totalPages}
+								page={page}
+								onChange={(_, newPage) => setPage(newPage)}
+								color="primary"
+								size="medium"
+							/>
+						</Stack>
+					)}
+				</>
 			) : (
 				<Paper
 					elevation={0}
@@ -419,10 +483,8 @@ export default function ArchiveView({
 					</Button>
 					<Button
 						onClick={() => {
-							if (itemToDelete) {
-								onDeleteItem(itemToDelete);
-								setItemToDelete(null);
-							}
+							if (itemToDelete) onDeleteItem(itemToDelete);
+							setItemToDelete(null);
 						}}
 						variant="contained"
 						color="error"
