@@ -56,3 +56,8 @@ This repository (**yt-transcript-analyzer**) is a Next.js web application built 
 
 - Keep components max 500~~ lines
 - otherwise if is longer then 500 line split to smaller if is possible
+
+## 6. Props name
+
+- never use shorter users.map((u) => u.name)
+- always use full name for example users.map((user) => user.name)

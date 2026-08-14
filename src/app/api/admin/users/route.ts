@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth, currentUser, createClerkClient } from '@clerk/nextjs/server';
+import { formatClerkUser } from '@/utils/helper';
 
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
@@ -9,10 +10,14 @@ async function verifyAdminAccess(
 	const { userId } = await auth();
 	const testCookie = req.cookies.get('test')?.value;
 	if (testCookie === 'alen') return { isAdmin: true, currentUserId: userId ?? 'test-user' };
-	if (!userId) return { isAdmin: false, currentUserId: null };
+	if (!userId) {
+		return { isAdmin: false, currentUserId: null };
+	}
 
 	const user = await currentUser();
-	if (!user) return { isAdmin: false, currentUserId: userId };
+	if (!user) {
+		return { isAdmin: false, currentUserId: userId };
+	}
 
 	const userEmail = user.primaryEmailAddress?.emailAddress;
 	const publicMetadata = (user.publicMetadata as Record<string, unknown>) ?? {};
@@ -40,17 +45,7 @@ export async function GET(req: NextRequest) {
 			orderBy: '-created_at',
 		});
 
-		const users = response.data.map((u) => ({
-			id: u.id,
-			email: u.primaryEmailAddress?.emailAddress || 'Brak emaila',
-			firstName: u.firstName || '',
-			lastName: u.lastName || '',
-			imageUrl: u.imageUrl || '',
-			createdAt: u.createdAt,
-			publicMetadata: u.publicMetadata || {},
-			tier: (u.publicMetadata as Record<string, unknown>)?.tier || 'free',
-			role: (u.publicMetadata as Record<string, unknown>)?.role || 'user',
-		}));
+		const users = response.data.map((user) => formatClerkUser(user));
 
 		return NextResponse.json({ users });
 	} catch (err: unknown) {

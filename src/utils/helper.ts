@@ -1,3 +1,5 @@
+import type { User } from '@clerk/nextjs/server';
+
 const MILLISECONDS_IN_SECOND = 1_000;
 const MILLISECOND_THRESHOLD = 10 * MILLISECONDS_IN_SECOND;
 
@@ -23,3 +25,30 @@ export const getCookie = (name: string) => {
 	}
 	return null;
 };
+
+export interface FormattedAdminUser {
+	id: string;
+	email: string;
+	firstName: string;
+	lastName: string;
+	imageUrl: string;
+	createdAt: number;
+	publicMetadata: Record<string, unknown>;
+	tier: string;
+	role: string;
+}
+
+export function formatClerkUser(user: User): FormattedAdminUser {
+	const publicMetadata = (user.publicMetadata as Record<string, unknown>) || {};
+	return {
+		id: user.id,
+		email: user.primaryEmailAddress?.emailAddress || 'Brak emaila',
+		firstName: user.firstName || '',
+		lastName: user.lastName || '',
+		imageUrl: user.imageUrl || '',
+		createdAt: user.createdAt,
+		publicMetadata,
+		tier: (publicMetadata.tier as string) || 'free',
+		role: (publicMetadata.role as string) || 'user',
+	};
+}

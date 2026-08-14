@@ -290,29 +290,29 @@ export default function ProfileView() {
 									</TableRow>
 								</TableHead>
 								<TableBody>
-									{filteredUsers.map((u) => {
-										const isUserPro = u.tier === 'pro';
-										const isUserAdmin = u.role === 'admin';
-										const isUpdating = updatingUserId === u.id;
-										const isSelf = u.id === userAuth.userId;
+									{filteredUsers.map((user) => {
+										const isUserPro = user.tier === 'pro';
+										const isUserAdmin = user.role === 'admin';
+										const isUpdating = updatingUserId === user.id;
+										const isSelf = user.id === userAuth.userId;
 
 										return (
 											<TableRow
-												key={u.id}
+												key={user.id}
 												hover
 												sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
 											>
 												<TableCell>
 													<Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-														<Avatar src={u.imageUrl} sx={{ width: 32, height: 32 }}>
-															{u.firstName?.[0] || u.email[0]}
+														<Avatar src={user.imageUrl} sx={{ width: 32, height: 32 }}>
+															{user.firstName?.[0] || user.email[0]}
 														</Avatar>
 														<Box>
 															<Stack direction="row" spacing={0.8} sx={{ alignItems: 'center' }}>
 																<Typography variant="body2" sx={{ fontWeight: 600 }}>
-																	{u.firstName || u.lastName
-																		? `${u.firstName} ${u.lastName}`.trim()
-																		: u.email}
+																	{user.firstName || user.lastName
+																		? `${user.firstName} ${user.lastName}`.trim()
+																		: user.email}
 																</Typography>
 																{isSelf && (
 																	<Chip
@@ -333,7 +333,7 @@ export default function ProfileView() {
 																variant="caption"
 																sx={{ color: 'text.secondary', display: 'block' }}
 															>
-																{u.email}
+																{user.email}
 															</Typography>
 														</Box>
 													</Stack>
@@ -386,7 +386,11 @@ export default function ProfileView() {
 																	color={isUserPro ? 'inherit' : 'success'}
 																	disabled={isUpdating || (isSelf && isUserPro)}
 																	onClick={() =>
-																		handleUpdateUser(u.id, isUserPro ? 'free' : 'pro', undefined)
+																		handleUpdateUser(
+																			user.id,
+																			isUserPro ? 'free' : 'pro',
+																			undefined
+																		)
 																	}
 																	sx={{ fontSize: '0.75rem', px: 1.5, py: 0.3, borderRadius: 2 }}
 																>
@@ -417,7 +421,7 @@ export default function ProfileView() {
 																	disabled={isUpdating || (isSelf && isUserAdmin)}
 																	onClick={() =>
 																		handleUpdateUser(
-																			u.id,
+																			user.id,
 																			undefined,
 																			isUserAdmin ? 'user' : 'admin'
 																		)
