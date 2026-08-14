@@ -41,3 +41,15 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 - [ ] **Rate Limiting dla API AI (`/api/ai`)**: pełnym rate limiterem zapytań na minutę per IP (np. `@upstash/ratelimit` z Redisem lub sliding window w pamięci).
 
+---
+
+## 🧪 Testing & Continuous Integration
+
+Run unit tests locally:
+```bash
+npm test
+```
+
+Automated CI Pipeline runs on GitHub Actions verifying code quality (`npm run lint`), TypeScript types (`npx tsc --noEmit`), unit tests (`npm test`), and production build (`npm run build`).
+
+

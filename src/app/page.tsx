@@ -5,7 +5,7 @@ import { Container, Box, Typography, Paper } from '@mui/material';
 import Header from '@/components/Header';
 import UrlInputForm from '@/components/UrlInputForm';
 import VideoMetadataCard from '@/components/VideoMetadataCard';
-import TranscriptViewer from '@/components/TranscriptViewer';
+import TranscriptViewer from '@/components/TranscriptViewer/TranscriptViewer';
 import AiAnalysisPresets from '@/components/AiAnalysisPresets';
 import ArchiveView from '@/components/ArchiveView';
 import { VideoMetadata, TranscriptSegment, TranscriptStats } from '@/lib/youtube';
@@ -18,7 +18,6 @@ import {
 } from '@/lib/storage';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import InfoIcon from '@mui/icons-material/Info';
-import ModelSelect from '@/components/ModelSelect';
 
 export default function Home() {
 	const [activeTab, setActiveTab] = useState<'analyzer' | 'archive'>('analyzer');
@@ -114,7 +113,6 @@ export default function Home() {
 				) : (
 					/* Widok Głównego Analizatora */
 					<>
-						<ModelSelect />
 						{/* Formularz wprowadzania URL */}
 						<UrlInputForm
 							onFetchTranscript={handleFetchTranscript}

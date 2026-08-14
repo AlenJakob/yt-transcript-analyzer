@@ -1,20 +1,8 @@
 'use client';
 
-import { Paper, Box, Select, MenuItem } from '@mui/material';
+import { Paper, Box, Select, MenuItem, Typography } from '@mui/material';
 import { ModelOpenRouter } from '@/types/openRouter';
-import { useEffect, useState } from 'react';
-
-function getCookie(name: string) {
-	if (typeof window === 'undefined') {
-		return null;
-	}
-	const value = `; ${document.cookie}`;
-	const parts = value.split(`; ${name}=`);
-	if (parts.length === 2) {
-		return parts.pop()?.split(';').shift();
-	}
-	return null;
-}
+import { useEffect, useState, startTransition } from 'react';
 
 const mapModels = (models: ModelOpenRouter[]) =>
 	models.map((model) => {
@@ -25,19 +13,13 @@ const mapModels = (models: ModelOpenRouter[]) =>
 		};
 	});
 
-export default function ModelSelect() {
-	const [models, setModels] = useState<Partial<ModelOpenRouter>[] | undefined>(undefined);
-	const [selectedModel, setSelectedModel] = useState<string>('');
-	const [isAllowed, setIsAllowed] = useState(false);
+interface ModelSelectProps {
+	setSelectedModel: (model: string) => void;
+	selectedModel: string;
+}
 
-	useEffect(() => {
-		const testCookie = getCookie('test');
-		if (testCookie === 'alen') {
-			React.startTransition(() => {
-				setIsAllowed(true);
-			});
-		}
-	}, []);
+export default function ModelSelect({ selectedModel, setSelectedModel }: ModelSelectProps) {
+	const [models, setModels] = useState<Partial<ModelOpenRouter>[] | undefined>(undefined);
 
 	useEffect(() => {
 		const getModels = async () => {
@@ -55,10 +37,6 @@ export default function ModelSelect() {
 		getModels();
 	}, []);
 
-	if (!isAllowed) {
-		return null;
-	}
-
 	return (
 		<Paper
 			elevation={0}
@@ -67,14 +45,17 @@ export default function ModelSelect() {
 				mb: 4,
 				background: 'linear-gradient(145deg, #121824 0%, #0e131d 100%)',
 				border: '1px solid rgba(255, 255, 255, 0.08)',
-				borderRadius: 4,
+				borderRadius: 1,
 				boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
 			}}
 		>
+			<Typography variant="body2" sx={{ mb: 1, color: 'text.secondary', fontWeight: 600 }}>
+				Model Select
+			</Typography>
 			<Box sx={{ mb: 2 }}>
 				<Select
+					id="model-select-dropdown"
 					size="medium"
-					label="Model"
 					fullWidth
 					value={selectedModel}
 					onChange={(e) => setSelectedModel(e.target.value)}
