@@ -39,6 +39,7 @@ import {
 	formatContinuousParagraphs,
 } from '@/lib/youtube';
 import TranscriptGenerator from './TranscriptGenerator';
+import { useFakeAuth } from '@/hooks/useFakeAuth';
 
 interface TranscriptViewerProps {
 	segments: TranscriptSegment[];
@@ -51,6 +52,8 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 	const [searchQuery, setSearchQuery] = useState('');
 	const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 	const [selectedModel, setSelectedModel] = useState<string>('');
+
+	const { isAllowed } = useFakeAuth();
 
 	const processedSegments = useMemo(() => {
 		if (groupInterval === 0) {
@@ -313,11 +316,13 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 				</Typography>
 			)}
 
-			<TranscriptGenerator
-				selectedModel={selectedModel}
-				setSelectedModel={setSelectedModel}
-				formattedParagraphs={formattedParagraphs}
-			/>
+			{isAllowed && (
+				<TranscriptGenerator
+					selectedModel={selectedModel}
+					setSelectedModel={setSelectedModel}
+					formattedParagraphs={formattedParagraphs}
+				/>
+			)}
 
 			{/* WIDOK 1: CZASÓWKI */}
 			{viewMode === 'timestamps' && (
