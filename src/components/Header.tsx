@@ -9,11 +9,12 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import HistoryIcon from '@mui/icons-material/History';
 import SearchIcon from '@mui/icons-material/Search';
+import PersonIcon from '@mui/icons-material/Person';
 
 interface HeaderProps {
-	activeTab: 'analyzer' | 'archive';
+	activeTab: 'analyzer' | 'archive' | 'profile';
 	historyCount: number;
-	onTabChange: (tab: 'analyzer' | 'archive') => void;
+	onTabChange: (tab: 'analyzer' | 'archive' | 'profile') => void;
 }
 
 export default function Header({ activeTab, historyCount, onTabChange }: HeaderProps) {
@@ -81,7 +82,7 @@ export default function Header({ activeTab, historyCount, onTabChange }: HeaderP
 						</Box>
 					</Stack>
 
-					{/* Nawigacja zakładek: Analizator vs Archiwum */}
+					{/* Nawigacja zakładek: Analizator vs Archiwum vs Profil */}
 					<Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
 						<Chip
 							icon={<DarkModeIcon sx={{ fontSize: 15 }} />}
@@ -135,6 +136,22 @@ export default function Header({ activeTab, historyCount, onTabChange }: HeaderP
 							}}
 						>
 							Archiwum
+						</Button>
+
+						<Button
+							variant={activeTab === 'profile' ? 'contained' : 'outlined'}
+							size="small"
+							startIcon={<PersonIcon sx={{ fontSize: 18 }} />}
+							onClick={() => onTabChange('profile')}
+							sx={{
+								bgcolor: activeTab === 'profile' ? '#3b82f6' : 'transparent',
+								borderColor: 'rgba(255, 255, 255, 0.15)',
+								color: activeTab === 'profile' ? '#ffffff' : 'text.secondary',
+								px: 2,
+								borderRadius: 1.5,
+							}}
+						>
+							Profil
 						</Button>
 
 						{mounted && (

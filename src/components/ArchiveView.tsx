@@ -251,7 +251,7 @@ export default function ArchiveView({
 											style={{ width: '100%', height: '100%', objectFit: 'cover' }}
 										/>
 										<Chip
-											label={item.metadata.duration}
+											label={`~${item.stats.readingTimeMinutes} min`}
 											size="small"
 											sx={{
 												position: 'absolute',
@@ -332,7 +332,7 @@ export default function ArchiveView({
 												}}
 											/>
 											<Chip
-												label={`~${item.stats.estimatedReadingTimeMinutes} min czytania`}
+												label={`~${item.stats.readingTimeMinutes} min czytania`}
 												size="small"
 												variant="outlined"
 												sx={{
@@ -383,7 +383,7 @@ export default function ArchiveView({
 
 					{/* Paginacja */}
 					{totalPages > 1 && (
-						<Stack direction="row" justifyContent="center" sx={{ mt: 4 }}>
+						<Stack direction="row" sx={{ justifyContent: 'center', mt: 4 }}>
 							<Pagination
 								count={totalPages}
 								page={page}

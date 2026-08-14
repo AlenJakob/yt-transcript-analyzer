@@ -8,6 +8,7 @@ import VideoMetadataCard from '@/components/VideoMetadataCard';
 import TranscriptViewer from '@/components/TranscriptViewer/TranscriptViewer';
 import AiAnalysisPresets from '@/components/AiAnalysisPresets';
 import ArchiveView from '@/components/ArchiveView';
+import ProfileView from '@/components/ProfileView';
 import { VideoMetadata, TranscriptSegment, TranscriptStats } from '@/lib/youtube';
 import {
 	getHistory,
@@ -21,7 +22,7 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import InfoIcon from '@mui/icons-material/Info';
 
 export default function Home() {
-	const [activeTab, setActiveTab] = useState<'analyzer' | 'archive'>('analyzer');
+	const [activeTab, setActiveTab] = useState<'analyzer' | 'archive' | 'profile'>('analyzer');
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [metadata, setMetadata] = useState<VideoMetadata | null>(null);
@@ -108,7 +109,10 @@ export default function Home() {
 			/>
 
 			<Container maxWidth="lg" sx={{ pt: { xs: 3, sm: 4 } }}>
-				{activeTab === 'archive' ? (
+				{activeTab === 'profile' ? (
+					/* Widok Profilu Użytkownika & Panelu Admina */
+					<ProfileView />
+				) : activeTab === 'archive' ? (
 					/* Widok Osobnego Archiwum */
 					<ArchiveView
 						history={history}
