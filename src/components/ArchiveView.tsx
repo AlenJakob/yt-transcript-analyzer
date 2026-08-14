@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
 	Paper,
 	Box,
@@ -47,6 +47,19 @@ export default function ArchiveView({
 	const [searchQuery, setSearchQuery] = useState('');
 	const [confirmClearOpen, setConfirmClearOpen] = useState(false);
 	const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+
+	useEffect(() => {
+		const start = performance.now();
+		console.log(
+			`[ArchiveView Perf] Zamontowano widok Archiwum (${history.length} rekordów w pamięci).`
+		);
+		return () => {
+			const end = performance.now();
+			console.log(
+				`[ArchiveView Perf] Odmontowano widok Archiwum po ${(end - start).toFixed(2)} ms.`
+			);
+		};
+	}, [history.length]);
 
 	// Filtrowanie zmontowanej historii po tytule lub autorze
 	const filteredHistory = useMemo(() => {
