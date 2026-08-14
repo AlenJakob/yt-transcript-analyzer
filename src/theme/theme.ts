@@ -62,13 +62,13 @@ const darkTheme = createTheme({
 		},
 	},
 	shape: {
-		borderRadius: 12,
+		borderRadius: 8,
 	},
 	components: {
 		MuiButton: {
 			styleOverrides: {
 				root: {
-					borderRadius: '10px',
+					borderRadius: 2,
 					boxShadow: 'none',
 					padding: '8px 18px',
 					'&:hover': {
@@ -83,7 +83,7 @@ const darkTheme = createTheme({
 					backgroundImage: 'none',
 					backgroundColor: '#121824',
 					border: '1px solid rgba(255, 255, 255, 0.07)',
-					borderRadius: 14,
+					borderRadius: 2,
 				},
 			},
 		},
@@ -91,6 +91,7 @@ const darkTheme = createTheme({
 			styleOverrides: {
 				root: {
 					backgroundImage: 'none',
+					borderRadius: 2,
 				},
 			},
 		},
@@ -98,7 +99,7 @@ const darkTheme = createTheme({
 			styleOverrides: {
 				root: {
 					'& .MuiOutlinedInput-root': {
-						borderRadius: 12,
+						borderRadius: 2,
 						backgroundColor: '#0a0d14',
 						'& fieldset': {
 							borderColor: 'rgba(255, 255, 255, 0.12)',
@@ -121,11 +122,11 @@ const darkTheme = createTheme({
 				},
 				'*::-webkit-scrollbar-track': {
 					backgroundColor: 'rgba(255, 255, 255, 0.05)',
-					borderRadius: '4px',
+					borderRadius: 2,
 				},
 				'*::-webkit-scrollbar-thumb': {
 					backgroundColor: 'rgba(59, 130, 246, 0.5)',
-					borderRadius: '4px',
+					borderRadius: 2,
 					'&:hover': {
 						backgroundColor: '#3b82f6',
 					},
@@ -140,7 +141,7 @@ const darkTheme = createTheme({
 			styleOverrides: {
 				root: {
 					fontWeight: 500,
-					borderRadius: 8,
+					borderRadius: 2,
 				},
 			},
 		},

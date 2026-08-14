@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import OpenAI from 'openai';
 
 // OpenRouter wymaga własnego baseURL i opcjonalnych nagłówków
@@ -13,10 +14,33 @@ const openai = new OpenAI({
 
 export async function POST(req: NextRequest) {
 	try {
-		// TODO: temporary authentication - refactor before deployment
+		const { userId } = await auth();
 		const testCookie = req.cookies.get('test')?.value;
-		if (testCookie !== 'alen') {
-			return NextResponse.json({ error: 'Brak autoryzacji.' }, { status: 401 });
+		const isTestAllowed = testCookie === 'alen';
+
+		let isAdmin = isTestAllowed;
+
+		if (userId && !isAdmin) {
+			const user = await currentUser();
+			const userEmail = user?.primaryEmailAddress?.emailAddress;
+			const publicMetadata = (user?.publicMetadata as Record<string, unknown>) ?? {};
+			const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+
+			if (
+				publicMetadata?.role === 'admin' ||
+				publicMetadata?.isAdmin === true ||
+				(adminEmail && userEmail && userEmail.toLowerCase() === adminEmail.toLowerCase())
+			) {
+				isAdmin = true;
+			}
+		}
+
+		// Zabezpieczenie: tylko administrator ma dostęp do generowania AI z OpenRouter
+		if (!isAdmin) {
+			return NextResponse.json(
+				{ error: 'Dostęp ograniczony. Generowanie AI z OpenRouter jest obecnie dostępne tylko dla administratora.' },
+				{ status: 403 }
+			);
 		}
 
 		const { model, transcriptText, promptPreset } = await req.json();
@@ -27,6 +51,7 @@ export async function POST(req: NextRequest) {
 				{ status: 400 }
 			);
 		}
+
 		const defaultModel = 'openrouter/free';
 		const response = await openai.chat.completions.create({
 			model: model || defaultModel,

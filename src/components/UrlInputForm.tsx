@@ -90,7 +90,7 @@ export default function UrlInputForm({ onFetchTranscript, isLoading, error }: Ur
 				mb: 4,
 				background: 'linear-gradient(145deg, #121824 0%, #0e131d 100%)',
 				border: '1px solid rgba(255, 255, 255, 0.08)',
-				borderRadius: 4,
+				borderRadius: 2,
 				boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
 			}}
 		>
@@ -139,7 +139,6 @@ export default function UrlInputForm({ onFetchTranscript, isLoading, error }: Ur
 						}}
 					/>
 
-					{/* Wybór preferowanego języka (zapisywany w localStorage) */}
 					<FormControl size="small" sx={{ minWidth: { sm: 160 } }}>
 						<Select
 							id="preferred-language-select"
@@ -165,7 +164,6 @@ export default function UrlInputForm({ onFetchTranscript, isLoading, error }: Ur
 						</Select>
 					</FormControl>
 
-					{/* Przycisk Pobierz tekst */}
 					<Button
 						type="submit"
 						variant="contained"
@@ -179,6 +177,7 @@ export default function UrlInputForm({ onFetchTranscript, isLoading, error }: Ur
 							height: '56px',
 							fontSize: '1rem',
 							bgcolor: '#3b82f6',
+							borderRadius: 2,
 							'&:hover': { bgcolor: '#2563eb' },
 						}}
 					>
@@ -199,7 +198,6 @@ export default function UrlInputForm({ onFetchTranscript, isLoading, error }: Ur
 				</Alert>
 			)}
 
-			{/* Przykładowe linki */}
 			<Box sx={{ mt: 2.5, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
 				<Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
 					Szybki test:

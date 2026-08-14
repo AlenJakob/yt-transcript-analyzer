@@ -134,7 +134,7 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 					justifyContent: 'space-between',
 					bgcolor: '#121824',
 					border: '1px solid rgba(255, 255, 255, 0.08)',
-					borderRadius: 3,
+					borderRadius: 2,
 				}}
 			>
 				{/* Przełącznik widoków + grupowanie */}
@@ -150,7 +150,7 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 							borderRadius: 2,
 							'& .MuiToggleButton-root': {
 								border: 0,
-								borderRadius: 1.5,
+								borderRadius: 2,
 								px: 2,
 								py: 0.75,
 								color: 'text.secondary',
@@ -407,7 +407,7 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 						p: { xs: 3, sm: 4 },
 						bgcolor: '#121824',
 						border: '1px solid rgba(255, 255, 255, 0.08)',
-						borderRadius: 3,
+						borderRadius: 2,
 					}}
 				>
 					<Stack

@@ -84,7 +84,7 @@ export default function ArchiveView({
 					mb: 3,
 					bgcolor: '#121824',
 					border: '1px solid rgba(255, 255, 255, 0.08)',
-					borderRadius: 3,
+					borderRadius: 2,
 				}}
 			>
 				<Stack
@@ -325,7 +325,7 @@ export default function ArchiveView({
 						textAlign: 'center',
 						bgcolor: '#121824',
 						border: '1px dashed rgba(255, 255, 255, 0.1)',
-						borderRadius: 3,
+						borderRadius: 2,
 					}}
 				>
 					<HistoryIcon sx={{ fontSize: 44, color: 'text.disabled', mb: 1.5, opacity: 0.4 }} />
@@ -350,7 +350,7 @@ export default function ArchiveView({
 							bgcolor: '#121824',
 							backgroundImage: 'none',
 							border: '1px solid rgba(255, 255, 255, 0.1)',
-							borderRadius: 3,
+							borderRadius: 2,
 						},
 					},
 				}}
@@ -389,7 +389,7 @@ export default function ArchiveView({
 							bgcolor: '#121824',
 							backgroundImage: 'none',
 							border: '1px solid rgba(255, 255, 255, 0.1)',
-							borderRadius: 3,
+							borderRadius: 2,
 						},
 					},
 				}}

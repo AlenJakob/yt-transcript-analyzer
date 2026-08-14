@@ -140,7 +140,7 @@ export default function Home() {
 									textAlign: 'center',
 									bgcolor: 'rgba(18, 24, 36, 0.5)',
 									border: '1px dashed rgba(255, 255, 255, 0.1)',
-									borderRadius: 4,
+									borderRadius: 2,
 								}}
 							>
 								<Box

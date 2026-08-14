@@ -1,5 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { SignedIn, SignedOut, UserButton, useClerk } from '@clerk/nextjs';
+
 import { Box, Container, Typography, Chip, Stack, Button, Badge } from '@mui/material';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
@@ -14,6 +17,13 @@ interface HeaderProps {
 }
 
 export default function Header({ activeTab, historyCount, onTabChange }: HeaderProps) {
+	const [mounted, setMounted] = useState(false);
+	const { openSignIn } = useClerk();
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
 	return (
 		<Box
 			component="header"
@@ -44,7 +54,7 @@ export default function Header({ activeTab, historyCount, onTabChange }: HeaderP
 							sx={{
 								width: 42,
 								height: 42,
-								borderRadius: '12px',
+								borderRadius: 3,
 								background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
 								display: 'flex',
 								alignItems: 'center',
@@ -73,6 +83,19 @@ export default function Header({ activeTab, historyCount, onTabChange }: HeaderP
 
 					{/* Nawigacja zakładek: Analizator vs Archiwum */}
 					<Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+						<Chip
+							icon={<DarkModeIcon sx={{ fontSize: 15 }} />}
+							label="Dark Mode"
+							variant="outlined"
+							size="medium"
+							sx={{
+								borderColor: 'rgba(255, 255, 255, 0.1)',
+								bgcolor: 'rgba(255, 255, 255, 0.03)',
+								color: 'text.secondary',
+								borderRadius: 3,
+								display: { xs: 'none', md: 'inline-flex' },
+							}}
+						/>
 						<Button
 							variant={activeTab === 'analyzer' ? 'contained' : 'outlined'}
 							size="small"
@@ -83,6 +106,7 @@ export default function Header({ activeTab, historyCount, onTabChange }: HeaderP
 								borderColor: 'rgba(255, 255, 255, 0.15)',
 								color: activeTab === 'analyzer' ? '#ffffff' : 'text.secondary',
 								px: 2,
+								borderRadius: 1.5,
 							}}
 						>
 							Analizator
@@ -107,23 +131,45 @@ export default function Header({ activeTab, historyCount, onTabChange }: HeaderP
 								borderColor: 'rgba(255, 255, 255, 0.15)',
 								color: activeTab === 'archive' ? '#ffffff' : 'text.secondary',
 								px: 2,
+								borderRadius: 1.5,
 							}}
 						>
 							Archiwum
 						</Button>
 
-						<Chip
-							icon={<DarkModeIcon sx={{ fontSize: 15 }} />}
-							label="Dark Mode"
-							variant="outlined"
-							size="small"
-							sx={{
-								borderColor: 'rgba(255, 255, 255, 0.1)',
-								bgcolor: 'rgba(255, 255, 255, 0.03)',
-								color: 'text.secondary',
-								display: { xs: 'none', md: 'inline-flex' },
-							}}
-						/>
+						{mounted && (
+							<>
+								<SignedOut>
+									<Button
+										variant="outlined"
+										size="small"
+										onClick={() => openSignIn()}
+										sx={{
+											borderColor: 'rgba(255, 255, 255, 0.2)',
+											color: '#ffffff',
+											px: 2,
+											borderRadius: 3,
+											'&:hover': {
+												borderColor: '#3b82f6',
+												bgcolor: 'rgba(59, 130, 246, 0.08)',
+											},
+										}}
+									>
+										Zaloguj się
+									</Button>
+								</SignedOut>
+
+								<SignedIn>
+									<UserButton
+										appearance={{
+											elements: {
+												avatarBox: { width: 34, height: 34 },
+											},
+										}}
+									/>
+								</SignedIn>
+							</>
+						)}
 					</Stack>
 				</Stack>
 			</Container>

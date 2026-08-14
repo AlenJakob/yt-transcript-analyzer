@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 };
 
 import ThemeRegistry from '@/components/ThemeRegistry';
+import { ClerkProvider } from '@clerk/nextjs';
 
 export default function RootLayout({
 	children,
@@ -28,7 +29,9 @@ export default function RootLayout({
 	return (
 		<html lang="pl" className={`${geistSans.variable} ${geistMono.variable}`}>
 			<body>
-				<ThemeRegistry>{children}</ThemeRegistry>
+				<ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
+					<ThemeRegistry>{children}</ThemeRegistry>
+				</ClerkProvider>
 			</body>
 		</html>
 	);

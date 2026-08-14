@@ -192,7 +192,7 @@ export default function AiAnalysisPresets({ segments, videoTitle }: AiAnalysisPr
 				mb: 6,
 				bgcolor: '#121824',
 				border: '1px solid rgba(255, 255, 255, 0.08)',
-				borderRadius: 4,
+				borderRadius: 2,
 			}}
 		>
 			<Box sx={{ mb: 3 }}>
@@ -294,7 +294,7 @@ export default function AiAnalysisPresets({ segments, videoTitle }: AiAnalysisPr
 				sx={{
 					bgcolor: '#0a0d14',
 					p: 3,
-					borderRadius: 3,
+					borderRadius: 2,
 					border: '1px solid rgba(255, 255, 255, 0.06)',
 				}}
 			>
