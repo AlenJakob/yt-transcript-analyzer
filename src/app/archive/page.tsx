@@ -5,12 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Container, Box } from '@mui/material';
 import Header from '@/components/Header';
 import ArchiveView from '@/components/ArchiveView';
-import {
-	getHistory,
-	removeFromHistory,
-	clearHistory,
-	HistoryItem,
-} from '@/lib/storage';
+import { getHistory, removeFromHistory, clearHistory, HistoryItem } from '@/lib/storage';
 
 export default function ArchivePage() {
 	const router = useRouter();

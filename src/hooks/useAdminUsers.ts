@@ -24,7 +24,9 @@ export function useAdminUsers() {
 	const [snackbarMsg, setSnackbarMsg] = useState<string | null>(null);
 
 	const fetchAdminUsers = useCallback(async () => {
-		if (!userAuth.isAdmin) return;
+		if (!userAuth.isAdmin) {
+			return;
+		}
 		try {
 			setIsLoadingUsers(true);
 			const res = await fetch('/api/admin/users');

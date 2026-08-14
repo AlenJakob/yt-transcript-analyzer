@@ -82,7 +82,6 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 						</Box>
 					</Stack>
 
-					{/* Nawigacja stron Next.js: Analizator (/) vs Archiwum (/archive) vs Profil/Panel Admina (/profile) */}
 					<Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
 						<Chip
 							icon={<DarkModeIcon sx={{ fontSize: 15 }} />}

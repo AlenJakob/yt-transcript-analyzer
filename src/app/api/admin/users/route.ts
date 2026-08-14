@@ -3,7 +3,9 @@ import { auth, currentUser, createClerkClient } from '@clerk/nextjs/server';
 
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
-async function verifyAdminAccess(req: NextRequest): Promise<{ isAdmin: boolean; currentUserId: string | null }> {
+async function verifyAdminAccess(
+	req: NextRequest
+): Promise<{ isAdmin: boolean; currentUserId: string | null }> {
 	const { userId } = await auth();
 	const testCookie = req.cookies.get('test')?.value;
 	if (testCookie === 'alen') return { isAdmin: true, currentUserId: userId ?? 'test-user' };
@@ -18,8 +20,8 @@ async function verifyAdminAccess(req: NextRequest): Promise<{ isAdmin: boolean; 
 
 	const isAdmin = Boolean(
 		publicMetadata?.role === 'admin' ||
-			publicMetadata?.isAdmin === true ||
-			(adminEmail && userEmail && userEmail.toLowerCase() === adminEmail.toLowerCase())
+		publicMetadata?.isAdmin === true ||
+		(adminEmail && userEmail && userEmail.toLowerCase() === adminEmail.toLowerCase())
 	);
 
 	return { isAdmin, currentUserId: userId };
@@ -30,10 +32,7 @@ export async function GET(req: NextRequest) {
 	try {
 		const { isAdmin } = await verifyAdminAccess(req);
 		if (!isAdmin) {
-			return NextResponse.json(
-				{ error: 'Brak uprawnień administratora.' },
-				{ status: 403 }
-			);
+			return NextResponse.json({ error: 'Brak uprawnień administratora.' }, { status: 403 });
 		}
 
 		const response = await clerkClient.users.getUserList({
@@ -66,25 +65,22 @@ export async function POST(req: NextRequest) {
 	try {
 		const { isAdmin, currentUserId } = await verifyAdminAccess(req);
 		if (!isAdmin) {
-			return NextResponse.json(
-				{ error: 'Brak uprawnień administratora.' },
-				{ status: 403 }
-			);
+			return NextResponse.json({ error: 'Brak uprawnień administratora.' }, { status: 403 });
 		}
 
 		const { targetUserId, tier, role } = await req.json();
 
 		if (!targetUserId) {
-			return NextResponse.json(
-				{ error: 'Wymagany jest parametr targetUserId.' },
-				{ status: 400 }
-			);
+			return NextResponse.json({ error: 'Wymagany jest parametr targetUserId.' }, { status: 400 });
 		}
 
 		// Zabezpieczenie: Admin nie może odebrać sobie roli Admina ani pakietu PRO
 		if (targetUserId === currentUserId && (role === 'user' || tier === 'free')) {
 			return NextResponse.json(
-				{ error: 'Nie możesz odebrać sobie uprawnień administratora ani pakietu PRO z poziomu panelu.' },
+				{
+					error:
+						'Nie możesz odebrać sobie uprawnień administratora ani pakietu PRO z poziomu panelu.',
+				},
 				{ status: 400 }
 			);
 		}
