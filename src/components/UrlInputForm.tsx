@@ -142,6 +142,7 @@ export default function UrlInputForm({ onFetchTranscript, isLoading, error }: Ur
 					{/* Wybór preferowanego języka (zapisywany w localStorage) */}
 					<FormControl size="small" sx={{ minWidth: { sm: 160 } }}>
 						<Select
+							id="preferred-language-select"
 							value={preferredLanguage}
 							onChange={(e) => handleLanguageChange(e.target.value as 'pl' | 'en' | 'auto')}
 							disabled={isLoading}

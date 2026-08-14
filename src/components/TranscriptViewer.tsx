@@ -122,7 +122,9 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 
 		try {
 			setIsAiLoading(true);
-			if (aiResponse.length) setAiResponse('');
+			if (aiResponse?.length) {
+				setAiResponse('');
+			}
 			const resp = await fetch('/api/ai', {
 				method: 'POST',
 				headers: {
@@ -370,6 +372,7 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 				<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
 					<Typography
 						variant="body1"
+						component="div"
 						sx={{
 							lineHeight: 1.85,
 							letterSpacing: '0.015em',

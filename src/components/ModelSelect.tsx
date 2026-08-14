@@ -75,11 +75,13 @@ export default function ModelSelect({ selectedModel, setSelectedModel }: ModelSe
 				boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
 			}}
 		>
-			<Typography>Medal Select</Typography>
+			<Typography variant="body2" sx={{ mb: 1, color: 'text.secondary', fontWeight: 600 }}>
+				Model Select
+			</Typography>
 			<Box sx={{ mb: 2 }}>
 				<Select
+					id="model-select-dropdown"
 					size="medium"
-					label="Model"
 					fullWidth
 					value={selectedModel}
 					onChange={(e) => setSelectedModel(e.target.value)}
