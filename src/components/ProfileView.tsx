@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
 import {
 	Paper,
 	Box,
@@ -32,106 +31,24 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import StarIcon from '@mui/icons-material/Star';
 import { useAuthUser } from '@/hooks/useAuthUser';
+import { useAdminUsers } from '@/hooks/useAdminUsers';
 import { useClerk } from '@clerk/nextjs';
-
-interface AdminUser {
-	id: string;
-	email: string;
-	firstName: string;
-	lastName: string;
-	imageUrl: string;
-	createdAt: number;
-	tier: string;
-	role: string;
-}
 
 export default function ProfileView() {
 	const userAuth = useAuthUser();
 	const { openSignIn } = useClerk();
 
-	const [users, setUsers] = useState<AdminUser[]>([]);
-	const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-	const [searchQuery, setSearchQuery] = useState('');
-	const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
-	const [snackbarMsg, setSnackbarMsg] = useState<string | null>(null);
-
-	const fetchAdminUsers = useCallback(async () => {
-		if (!userAuth.isAdmin) return;
-		try {
-			setIsLoadingUsers(true);
-			const res = await fetch('/api/admin/users');
-			const data = await res.json();
-			if (res.ok && data.users) {
-				setUsers(data.users);
-			} else {
-				console.error('Błąd pobierania użytkowników:', data.error);
-			}
-		} catch (err) {
-			console.error('Błąd sieci admin users:', err);
-		} finally {
-			setIsLoadingUsers(false);
-		}
-	}, [userAuth.isAdmin]);
-
-	useEffect(() => {
-		if (userAuth.isAdmin) {
-			fetchAdminUsers();
-		}
-	}, [userAuth.isAdmin, fetchAdminUsers]);
-
-	const handleUpdateUser = async (targetUserId: string, newTier?: string, newRole?: string) => {
-		try {
-			setUpdatingUserId(targetUserId);
-			const res = await fetch('/api/admin/users', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					targetUserId,
-					tier: newTier,
-					role: newRole,
-				}),
-			});
-
-			const data = await res.json();
-			if (res.ok) {
-				setSnackbarMsg(
-					`Zaktualizowano uprawnienia użytkownika! ${newTier ? `Pakiet: ${newTier.toUpperCase()}` : ''} ${newRole ? `Rola: ${newRole.toUpperCase()}` : ''}`
-				);
-				await fetchAdminUsers();
-			} else {
-				alert(`Błąd: ${data.error}`);
-			}
-		} catch (err) {
-			console.error('Błąd aktualizacji uprawnień:', err);
-		} finally {
-			setUpdatingUserId(null);
-		}
-	};
-
-	const filteredUsers = useMemo(() => {
-		const query = searchQuery.toLowerCase().trim();
-		const filtered = users.filter(
-			(u) =>
-				u.email.toLowerCase().includes(query) ||
-				`${u.firstName} ${u.lastName}`.toLowerCase().includes(query)
-		);
-
-		return [...filtered].sort((a, b) => {
-			const aIsAdmin = a.role === 'admin' ? 1 : 0;
-			const bIsAdmin = b.role === 'admin' ? 1 : 0;
-			if (aIsAdmin !== bIsAdmin) {
-				return bIsAdmin - aIsAdmin; // Admini zawsze na samej górze
-			}
-
-			const aIsPro = a.tier === 'pro' ? 1 : 0;
-			const bIsPro = b.tier === 'pro' ? 1 : 0;
-			if (aIsPro !== bIsPro) {
-				return bIsPro - aIsPro; // Użytkownicy PRO drudzy
-			}
-
-			return b.createdAt - a.createdAt; // Najnowsi jako następni
-		});
-	}, [users, searchQuery]);
+	const {
+		users: filteredUsers,
+		isLoadingUsers,
+		searchQuery,
+		setSearchQuery,
+		updatingUserId,
+		snackbarMsg,
+		setSnackbarMsg,
+		fetchAdminUsers,
+		handleUpdateUser,
+	} = useAdminUsers();
 
 	if (!userAuth.isSignedIn && userAuth.isLoaded) {
 		return (
@@ -156,7 +73,11 @@ export default function ProfileView() {
 					Zalogowani użytkownicy mają dostęp do historii transkrypcji, statystyk konta i wyższych
 					limitów AI.
 				</Typography>
-				<Button variant="contained" onClick={() => openSignIn()} sx={{ px: 4, py: 1, borderRadius: 2 }}>
+				<Button
+					variant="contained"
+					onClick={() => openSignIn()}
+					sx={{ px: 4, py: 1, borderRadius: 2 }}
+				>
 					Zaloguj się teraz
 				</Button>
 			</Paper>
@@ -185,7 +106,13 @@ export default function ProfileView() {
 						<Avatar
 							src={userAuth.imageUrl || undefined}
 							alt={userAuth.fullName || 'User Avatar'}
-							sx={{ width: 72, height: 72, bgcolor: '#3b82f6', fontSize: '1.8rem', fontWeight: 700 }}
+							sx={{
+								width: 72,
+								height: 72,
+								bgcolor: '#3b82f6',
+								fontSize: '1.8rem',
+								fontWeight: 700,
+							}}
 						>
 							{userAuth.fullName?.[0] || userAuth.userEmail?.[0] || 'U'}
 						</Avatar>
@@ -217,32 +144,54 @@ export default function ProfileView() {
 										label="Basic (Darmowy)"
 										variant="outlined"
 										size="small"
-										sx={{ color: 'text.secondary', borderColor: 'rgba(255, 255, 255, 0.2)', borderRadius: 2 }}
+										sx={{
+											color: 'text.secondary',
+											borderColor: 'rgba(255, 255, 255, 0.2)',
+											borderRadius: 2,
+										}}
 									/>
 								)}
 							</Stack>
 							<Typography variant="body2" sx={{ color: 'text.secondary' }}>
 								{userAuth.userEmail || 'Brak powiązanego adresu email'}
 							</Typography>
-							<Typography variant="caption" sx={{ color: 'text.disabled', display: 'block', mt: 0.5 }}>
+							<Typography
+								variant="caption"
+								sx={{ color: 'text.disabled', display: 'block', mt: 0.5 }}
+							>
 								User ID: {userAuth.userId}
 							</Typography>
 						</Box>
 					</Stack>
 
 					<Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
-						<Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
+						<Typography
+							variant="caption"
+							sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}
+						>
 							Twój aktywny pakiet
 						</Typography>
 						<Chip
-							icon={userAuth.isPro || userAuth.isAdmin ? <WorkspacePremiumIcon /> : <CheckCircleIcon />}
-							label={userAuth.isAdmin ? 'Dostęp Pełny (Admin)' : userAuth.isPro ? 'Plan PRO (Bez limitów)' : 'Plan Basic'}
+							icon={
+								userAuth.isPro || userAuth.isAdmin ? <WorkspacePremiumIcon /> : <CheckCircleIcon />
+							}
+							label={
+								userAuth.isAdmin
+									? 'Dostęp Pełny (Admin)'
+									: userAuth.isPro
+										? 'Plan PRO (Bez limitów)'
+										: 'Plan Basic'
+							}
 							sx={{
 								px: 1.5,
 								py: 2.2,
 								fontSize: '0.9rem',
 								fontWeight: 700,
-								bgcolor: userAuth.isAdmin ? 'rgba(168, 85, 247, 0.15)' : userAuth.isPro ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+								bgcolor: userAuth.isAdmin
+									? 'rgba(168, 85, 247, 0.15)'
+									: userAuth.isPro
+										? 'rgba(16, 185, 129, 0.15)'
+										: 'rgba(59, 130, 246, 0.15)',
 								color: userAuth.isAdmin ? '#c084fc' : userAuth.isPro ? '#34d399' : '#60a5fa',
 								border: '1px solid rgba(255, 255, 255, 0.1)',
 								borderRadius: 2,
@@ -316,14 +265,28 @@ export default function ProfileView() {
 							Brak zarejestrowanych użytkowników spełniających kryteria wyszukiwania.
 						</Alert>
 					) : (
-						<TableContainer component={Paper} elevation={0} sx={{ bgcolor: 'transparent', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 2 }}>
+						<TableContainer
+							component={Paper}
+							elevation={0}
+							sx={{
+								bgcolor: 'transparent',
+								border: '1px solid rgba(255, 255, 255, 0.08)',
+								borderRadius: 2,
+							}}
+						>
 							<Table size="small">
 								<TableHead sx={{ bgcolor: 'rgba(255, 255, 255, 0.03)' }}>
 									<TableRow>
-										<TableCell sx={{ color: 'text.secondary', fontWeight: 700 }}>Użytkownik</TableCell>
-										<TableCell sx={{ color: 'text.secondary', fontWeight: 700 }}>Pakiet (Tier)</TableCell>
+										<TableCell sx={{ color: 'text.secondary', fontWeight: 700 }}>
+											Użytkownik
+										</TableCell>
+										<TableCell sx={{ color: 'text.secondary', fontWeight: 700 }}>
+											Pakiet (Tier)
+										</TableCell>
 										<TableCell sx={{ color: 'text.secondary', fontWeight: 700 }}>Rola</TableCell>
-										<TableCell align="right" sx={{ color: 'text.secondary', fontWeight: 700 }}>Akcje Zarządzania</TableCell>
+										<TableCell align="right" sx={{ color: 'text.secondary', fontWeight: 700 }}>
+											Akcje Zarządzania
+										</TableCell>
 									</TableRow>
 								</TableHead>
 								<TableBody>
@@ -334,7 +297,11 @@ export default function ProfileView() {
 										const isSelf = u.id === userAuth.userId;
 
 										return (
-											<TableRow key={u.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+											<TableRow
+												key={u.id}
+												hover
+												sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+											>
 												<TableCell>
 													<Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
 														<Avatar src={u.imageUrl} sx={{ width: 32, height: 32 }}>
@@ -343,7 +310,9 @@ export default function ProfileView() {
 														<Box>
 															<Stack direction="row" spacing={0.8} sx={{ alignItems: 'center' }}>
 																<Typography variant="body2" sx={{ fontWeight: 600 }}>
-																	{u.firstName || u.lastName ? `${u.firstName} ${u.lastName}`.trim() : u.email}
+																	{u.firstName || u.lastName
+																		? `${u.firstName} ${u.lastName}`.trim()
+																		: u.email}
 																</Typography>
 																{isSelf && (
 																	<Chip
@@ -351,11 +320,19 @@ export default function ProfileView() {
 																		size="small"
 																		color="primary"
 																		variant="outlined"
-																		sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700, borderRadius: 1 }}
+																		sx={{
+																			height: 18,
+																			fontSize: '0.65rem',
+																			fontWeight: 700,
+																			borderRadius: 1,
+																		}}
 																	/>
 																)}
 															</Stack>
-															<Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+															<Typography
+																variant="caption"
+																sx={{ color: 'text.secondary', display: 'block' }}
+															>
 																{u.email}
 															</Typography>
 														</Box>
@@ -363,48 +340,97 @@ export default function ProfileView() {
 												</TableCell>
 												<TableCell>
 													{isUserPro ? (
-														<Chip label="PRO" color="success" size="small" sx={{ fontWeight: 700, borderRadius: 2 }} />
+														<Chip
+															label="PRO"
+															color="success"
+															size="small"
+															sx={{ fontWeight: 700, borderRadius: 2 }}
+														/>
 													) : (
-														<Chip label="Basic" variant="outlined" size="small" sx={{ borderRadius: 2 }} />
+														<Chip
+															label="Basic"
+															variant="outlined"
+															size="small"
+															sx={{ borderRadius: 2 }}
+														/>
 													)}
 												</TableCell>
 												<TableCell>
 													{isUserAdmin ? (
-														<Chip label="ADMIN" color="secondary" size="small" sx={{ fontWeight: 700, borderRadius: 2 }} />
+														<Chip
+															label="ADMIN"
+															color="secondary"
+															size="small"
+															sx={{ fontWeight: 700, borderRadius: 2 }}
+														/>
 													) : (
-														<Typography variant="caption" sx={{ color: 'text.secondary' }}>User</Typography>
+														<Typography variant="caption" sx={{ color: 'text.secondary' }}>
+															User
+														</Typography>
 													)}
 												</TableCell>
 												<TableCell align="right">
 													<Stack direction="row" spacing={1} sx={{ justifyContent: 'flex-end' }}>
 														{/* Przełącznik PRO */}
-														<Tooltip title={isSelf && isUserPro ? 'Nie możesz odebrać sobie pakietu PRO z poziomu panelu' : ''}>
+														<Tooltip
+															title={
+																isSelf && isUserPro
+																	? 'Nie możesz odebrać sobie pakietu PRO z poziomu panelu'
+																	: ''
+															}
+														>
 															<span>
 																<Button
 																	size="small"
 																	variant={isUserPro ? 'outlined' : 'contained'}
 																	color={isUserPro ? 'inherit' : 'success'}
 																	disabled={isUpdating || (isSelf && isUserPro)}
-																	onClick={() => handleUpdateUser(u.id, isUserPro ? 'free' : 'pro', undefined)}
+																	onClick={() =>
+																		handleUpdateUser(u.id, isUserPro ? 'free' : 'pro', undefined)
+																	}
 																	sx={{ fontSize: '0.75rem', px: 1.5, py: 0.3, borderRadius: 2 }}
 																>
-																	{isUpdating ? <CircularProgress size={12} /> : isUserPro ? 'Cofnij PRO' : 'Daj PRO'}
+																	{isUpdating ? (
+																		<CircularProgress size={12} />
+																	) : isUserPro ? (
+																		'Cofnij PRO'
+																	) : (
+																		'Nadaj PRO'
+																	)}
 																</Button>
 															</span>
 														</Tooltip>
 
 														{/* Przełącznik ADMIN */}
-														<Tooltip title={isSelf && isUserAdmin ? 'Nie możesz odebrać sobie uprawnień Admina z poziomu panelu' : ''}>
+														<Tooltip
+															title={
+																isSelf && isUserAdmin
+																	? 'Nie możesz odebrać sobie uprawnień Admina z poziomu panelu'
+																	: ''
+															}
+														>
 															<span>
 																<Button
 																	size="small"
 																	variant={isUserAdmin ? 'outlined' : 'contained'}
 																	color={isUserAdmin ? 'inherit' : 'secondary'}
 																	disabled={isUpdating || (isSelf && isUserAdmin)}
-																	onClick={() => handleUpdateUser(u.id, undefined, isUserAdmin ? 'user' : 'admin')}
+																	onClick={() =>
+																		handleUpdateUser(
+																			u.id,
+																			undefined,
+																			isUserAdmin ? 'user' : 'admin'
+																		)
+																	}
 																	sx={{ fontSize: '0.75rem', px: 1.5, py: 0.3, borderRadius: 2 }}
 																>
-																	{isUpdating ? <CircularProgress size={12} /> : isUserAdmin ? 'Cofnij Admina' : 'Daj Admina'}
+																	{isUpdating ? (
+																		<CircularProgress size={12} />
+																	) : isUserAdmin ? (
+																		'Cofnij Admina'
+																	) : (
+																		'Nadaj Admina'
+																	)}
 																</Button>
 															</span>
 														</Tooltip>

@@ -10,7 +10,12 @@ export default function ProfilePage() {
 	const [historyCount, setHistoryCount] = useState(0);
 
 	useEffect(() => {
-		setHistoryCount(getHistory().length);
+		try {
+			const data = getHistory();
+			setHistoryCount(data.length);
+		} catch (err) {
+			console.error('Błąd podczas odczytu liczby rekordów z localStorage:', err);
+		}
 	}, []);
 
 	return (

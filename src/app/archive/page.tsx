@@ -15,9 +15,17 @@ import {
 export default function ArchivePage() {
 	const router = useRouter();
 	const [history, setHistory] = useState<HistoryItem[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		setHistory(getHistory());
+		try {
+			const data = getHistory();
+			setHistory(data);
+		} catch (err) {
+			console.error('Błąd podczas ładowania historii z localStorage:', err);
+		} finally {
+			setIsLoading(false);
+		}
 	}, []);
 
 	const handleSelectHistoryItem = (item: HistoryItem) => {
@@ -25,13 +33,21 @@ export default function ArchivePage() {
 	};
 
 	const handleDeleteHistoryItem = (videoId: string) => {
-		const updated = removeFromHistory(videoId);
-		setHistory(updated);
+		try {
+			const updated = removeFromHistory(videoId);
+			setHistory(updated);
+		} catch (err) {
+			console.error('Błąd podczas usuwania elementu z localStorage:', err);
+		}
 	};
 
 	const handleClearHistory = () => {
-		const updated = clearHistory();
-		setHistory(updated);
+		try {
+			const updated = clearHistory();
+			setHistory(updated);
+		} catch (err) {
+			console.error('Błąd podczas czyszczenia historii z localStorage:', err);
+		}
 	};
 
 	return (
@@ -40,6 +56,7 @@ export default function ArchivePage() {
 			<Container maxWidth="lg" sx={{ pt: { xs: 3, sm: 4 } }}>
 				<ArchiveView
 					history={history}
+					isLoading={isLoading}
 					onSelectHistoryItem={handleSelectHistoryItem}
 					onDeleteItem={handleDeleteHistoryItem}
 					onClearHistory={handleClearHistory}

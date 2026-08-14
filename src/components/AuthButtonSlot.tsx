@@ -13,7 +13,6 @@ export default function AuthButtonSlot() {
 		setMounted(true);
 	}, []);
 
-	// Szerokość slotu: 34px dla zalogowanego użytkownika (avatar), 104px dla przycisku zaloguj
 	const targetWidth = mounted && isSignedIn ? 34 : 104;
 
 	return (

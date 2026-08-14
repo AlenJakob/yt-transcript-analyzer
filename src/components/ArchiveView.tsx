@@ -21,6 +21,7 @@ import {
 	DialogContentText,
 	DialogActions,
 	Pagination,
+	Skeleton,
 } from '@mui/material';
 import HistoryIcon from '@mui/icons-material/History';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -34,6 +35,7 @@ import { HistoryItem } from '@/lib/storage';
 
 interface ArchiveViewProps {
 	history: HistoryItem[];
+	isLoading?: boolean;
 	onSelectHistoryItem: (item: HistoryItem) => void;
 	onDeleteItem: (videoId: string) => void;
 	onClearHistory: () => void;
@@ -43,6 +45,7 @@ const ITEMS_PER_PAGE = 12;
 
 export default function ArchiveView({
 	history,
+	isLoading = false,
 	onSelectHistoryItem,
 	onDeleteItem,
 	onClearHistory,
@@ -211,7 +214,48 @@ export default function ArchiveView({
 			</Paper>
 
 			{/* Lista Zapisanych Kart (MUI Grid size={{ xs: 12, sm: 6, md: 4 }}) */}
-			{filteredHistory.length > 0 ? (
+			{isLoading ? (
+				<Grid container spacing={2.5}>
+					{[1, 2, 3, 4, 5, 6].map((i) => (
+						<Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
+							<Card
+								sx={{
+									height: '100%',
+									bgcolor: '#121824',
+									border: '1px solid rgba(255, 255, 255, 0.08)',
+									borderRadius: 2,
+									p: 2.5,
+								}}
+							>
+								<Skeleton
+									variant="rectangular"
+									width="100%"
+									height={150}
+									sx={{ borderRadius: 2, mb: 2, bgcolor: 'rgba(255, 255, 255, 0.06)' }}
+								/>
+								<Skeleton
+									variant="text"
+									width="85%"
+									height={24}
+									sx={{ bgcolor: 'rgba(255, 255, 255, 0.06)' }}
+								/>
+								<Skeleton
+									variant="text"
+									width="60%"
+									height={20}
+									sx={{ mb: 2, bgcolor: 'rgba(255, 255, 255, 0.06)' }}
+								/>
+								<Skeleton
+									variant="rectangular"
+									width="45%"
+									height={30}
+									sx={{ borderRadius: 2, bgcolor: 'rgba(255, 255, 255, 0.06)' }}
+								/>
+							</Card>
+						</Grid>
+					))}
+				</Grid>
+			) : filteredHistory.length > 0 ? (
 				<>
 					<Grid container spacing={2.5}>
 						{paginatedHistory.map((item) => (

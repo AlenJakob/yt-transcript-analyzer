@@ -31,17 +31,21 @@ function AnalyzerContent() {
 
 	// Odczyt zapisanego archiwum po załadowaniu na kliencie
 	useEffect(() => {
-		const loadedHistory = getHistory();
-		setHistory(loadedHistory);
+		try {
+			const loadedHistory = getHistory();
+			setHistory(loadedHistory);
 
-		if (videoIdParam) {
-			const targetItem = loadedHistory.find((item) => item.id === videoIdParam);
-			if (targetItem) {
-				const fullItem = loadFullHistoryItem(targetItem);
-				setMetadata(fullItem.metadata);
-				setSegments(fullItem.segments);
-				setStats(fullItem.stats);
+			if (videoIdParam) {
+				const targetItem = loadedHistory.find((item) => item.id === videoIdParam);
+				if (targetItem) {
+					const fullItem = loadFullHistoryItem(targetItem);
+					setMetadata(fullItem.metadata);
+					setSegments(fullItem.segments);
+					setStats(fullItem.stats);
+				}
 			}
+		} catch (err) {
+			console.error('Błąd podczas odczytu archiwum z localStorage:', err);
 		}
 	}, [videoIdParam]);
 
