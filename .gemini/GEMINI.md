@@ -65,3 +65,10 @@ This repository (**yt-transcript-analyzer**) is a Next.js web application built 
 ## 7. nested return
 
 - if (!videoIdParam) return; wrong always use nested return in curly braces {}
+
+## 8. Commit Message Rules
+
+- Always use Conventional Commits format: `feat:`, `fix:`, `refactor:`, `docs:`, `chore:`, `ci:`, `test:`, `style:`.
+- Include scope when applicable, e.g. `feat(archive): ...`, `fix(auth): ...`.
+- Language: English.
+- Keep the title concise (max 72 characters).

@@ -29,8 +29,6 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 		});
 	}, []);
 
-	const displayHistoryCount = mounted ? historyCount : 0;
-
 	const isAnalyzer = pathname === '/';
 	const isArchive = pathname === '/archive';
 	const isProfile = pathname === '/profile';
