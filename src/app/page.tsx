@@ -1,85 +1,26 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { Container, Box, Typography, Paper } from '@mui/material';
 import Header from '@/components/Header';
 import UrlInputForm from '@/components/UrlInputForm';
 import VideoMetadataCard from '@/components/VideoMetadataCard';
 import TranscriptViewer from '@/components/TranscriptViewer/TranscriptViewer';
 import AiAnalysisPresets from '@/components/AiAnalysisPresets';
-import { VideoMetadata, TranscriptSegment, TranscriptStats } from '@/lib/youtube';
-import { getHistory, saveToHistory, loadFullHistoryItem, HistoryItem } from '@/lib/storage';
+import { useTranscriptArchive } from '@/hooks/useTranscriptArchive';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import InfoIcon from '@mui/icons-material/Info';
 
 function AnalyzerContent() {
-	const searchParams = useSearchParams();
-	const videoIdParam = searchParams.get('videoId');
-
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [metadata, setMetadata] = useState<VideoMetadata | null>(null);
-	const [segments, setSegments] = useState<TranscriptSegment[]>([]);
-	const [stats, setStats] = useState<TranscriptStats | null>(null);
-	const [history, setHistory] = useState<HistoryItem[]>([]);
-
-	// Odczyt zapisanego archiwum po załadowaniu na kliencie
-	useEffect(() => {
-		try {
-			const loadedHistory = getHistory();
-			setHistory(loadedHistory);
-
-			if (videoIdParam) {
-				const targetItem = loadedHistory.find((item) => item.id === videoIdParam);
-				if (targetItem) {
-					const fullItem = loadFullHistoryItem(targetItem);
-					setMetadata(fullItem.metadata);
-					setSegments(fullItem.segments);
-					setStats(fullItem.stats);
-				}
-			}
-		} catch (err) {
-			console.error('Błąd podczas odczytu archiwum z localStorage:', err);
-		}
-	}, [videoIdParam]);
-
-	const handleFetchTranscript = async (url: string, preferredLanguage?: 'pl' | 'en' | 'auto') => {
-		setIsLoading(true);
-		setError(null);
-
-		try {
-			const res = await fetch('/api/transcript', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ url, preferredLanguage }),
-			});
-
-			const data = await res.json();
-
-			if (!res.ok) {
-				setError(data.error || 'Wystąpił błąd podczas pobierania transkrypcji.');
-				if (data.metadata) {
-					setMetadata(data.metadata);
-				}
-				setIsLoading(false);
-				return;
-			}
-
-			setMetadata(data.metadata);
-			setSegments(data.segments);
-			setStats(data.stats);
-
-			// Automatyczny zapis w archiwum localStorage
-			const updatedHistory = saveToHistory(data.metadata, data.segments, data.stats);
-			setHistory(updatedHistory);
-		} catch (err: unknown) {
-			const msg = err instanceof Error ? err.message : 'Wystąpił nieoczekiwany błąd sieci.';
-			setError(`Błąd połączenia: ${msg}`);
-		} finally {
-			setIsLoading(false);
-		}
-	};
+	const {
+		isLoading,
+		error,
+		metadata,
+		segments,
+		stats,
+		history,
+		handleFetchTranscript,
+	} = useTranscriptArchive();
 
 	return (
 		<Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 8 }}>
