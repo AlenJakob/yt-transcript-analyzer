@@ -31,10 +31,14 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import StarIcon from '@mui/icons-material/Star';
 import { useAuthUser } from '@/hooks/useAuthUser';
-import { useAdminUsers } from '@/hooks/useAdminUsers';
+import { AdminUser, useAdminUsers } from '@/hooks/useAdminUsers';
 import { useClerk } from '@clerk/nextjs';
 
-export default function ProfileView() {
+interface ProfileViewProps {
+	initialUsers?: AdminUser[];
+}
+
+export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 	const userAuth = useAuthUser();
 	const { openSignIn } = useClerk();
 
@@ -48,7 +52,7 @@ export default function ProfileView() {
 		setSnackbarMsg,
 		fetchAdminUsers,
 		handleUpdateUser,
-	} = useAdminUsers();
+	} = useAdminUsers(initialUsers);
 
 	if (!userAuth.isSignedIn && userAuth.isLoaded) {
 		return (

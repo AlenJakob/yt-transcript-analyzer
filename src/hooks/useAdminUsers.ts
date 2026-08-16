@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuthUser } from '@/hooks/useAuthUser';
+import { useAuth } from '@clerk/nextjs';
 
 export interface AdminUser {
 	id: string;
@@ -14,23 +15,44 @@ export interface AdminUser {
 	role: string;
 }
 
-export function useAdminUsers() {
+export function useAdminUsers(initialUsers: AdminUser[] = []) {
 	const userAuth = useAuthUser();
+	const { getToken, isLoaded, isSignedIn, userId } = useAuth();
 
-	const [users, setUsers] = useState<AdminUser[]>([]);
+	console.log('[useAdminUsers Hook Full Debug]', {
+		isLoaded,
+		isSignedIn,
+		userId,
+		userAuthIsAdmin: userAuth.isAdmin,
+	});
+
+	const [users, setUsers] = useState<AdminUser[]>(initialUsers);
 	const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
 	const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
 	const [snackbarMsg, setSnackbarMsg] = useState<string | null>(null);
 
+	useEffect(() => {
+		if (initialUsers && initialUsers.length > 0) {
+			setUsers(initialUsers);
+		}
+	}, [initialUsers]);
+
 	const fetchAdminUsers = useCallback(async () => {
-		if (!userAuth.isAdmin) {
+		if (!userAuth.isLoaded || !userAuth.isSignedIn || !userAuth.isAdmin) {
 			return;
 		}
 		try {
 			setIsLoadingUsers(true);
-			const res = await fetch('/api/admin/users');
+			const token = await getToken();
+			console.log('[/api/admin/users Client token prefix]:', token ? token.slice(0, 25) : 'NULL');
+			const headers: Record<string, string> = {};
+			if (token) {
+				headers['Authorization'] = `Bearer ${token}`;
+			}
+			const res = await fetch('/api/admin/users', { credentials: 'include', headers });
 			const data = await res.json();
+			console.log('[/api/admin/users Response]:', data);
 			if (res.ok && data.users) {
 				setUsers(data.users);
 			} else {
@@ -41,20 +63,27 @@ export function useAdminUsers() {
 		} finally {
 			setIsLoadingUsers(false);
 		}
-	}, [userAuth.isAdmin]);
+	}, [userAuth.isLoaded, userAuth.isSignedIn, userAuth.isAdmin, getToken]);
 
 	useEffect(() => {
-		if (userAuth.isAdmin) {
+		if (userAuth.isLoaded && userAuth.isSignedIn && userAuth.isAdmin && users.length === 0) {
 			fetchAdminUsers();
 		}
-	}, [userAuth.isAdmin, fetchAdminUsers]);
+	}, [userAuth.isLoaded, userAuth.isSignedIn, userAuth.isAdmin, users.length, fetchAdminUsers]);
 
 	const handleUpdateUser = async (targetUserId: string, newTier?: string, newRole?: string) => {
 		try {
 			setUpdatingUserId(targetUserId);
+			const token = await getToken();
+			const headers: Record<string, string> = {
+				'Content-Type': 'application/json',
+			};
+			if (token) {
+				headers['Authorization'] = `Bearer ${token}`;
+			}
 			const res = await fetch('/api/admin/users', {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers,
 				body: JSON.stringify({
 					targetUserId,
 					tier: newTier,
@@ -81,14 +110,18 @@ export function useAdminUsers() {
 	const filteredUsers = useMemo(() => {
 		const query = searchQuery.toLowerCase().trim();
 		const filtered = users.filter(
-			(u) =>
-				u.email.toLowerCase().includes(query) ||
-				`${u.firstName} ${u.lastName}`.toLowerCase().includes(query)
+			(user) =>
+				user.email.toLowerCase().includes(query) ||
+				`${user.firstName} ${user.lastName}`.toLowerCase().includes(query)
 		);
 
 		return [...filtered].sort((a, b) => {
-			if (a.id === userAuth.userId) return -1;
-			if (b.id === userAuth.userId) return 1;
+			if (a.id === userAuth.userId) {
+				return -1;
+			}
+			if (b.id === userAuth.userId) {
+				return 1;
+			}
 			return 0;
 		});
 	}, [users, searchQuery, userAuth.userId]);

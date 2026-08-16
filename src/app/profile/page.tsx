@@ -1,28 +1,35 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import { Container, Box } from '@mui/material';
 import Header from '@/components/Header';
 import ProfileView from '@/components/ProfileView';
-import { getHistory } from '@/lib/storage';
+import { createClerkClient } from '@clerk/nextjs/server';
+import { formatClerkUser, FormattedAdminUser } from '@/utils/helper';
+import { verifyAdminAccess } from '@/lib/auth';
 
-export default function ProfilePage() {
-	const [historyCount, setHistoryCount] = useState(0);
+export const dynamic = 'force-dynamic';
 
-	useEffect(() => {
+const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+
+export default async function ProfilePage() {
+	let initialUsers: FormattedAdminUser[] = [];
+	const { isAdmin } = await verifyAdminAccess();
+
+	if (isAdmin) {
 		try {
-			const data = getHistory();
-			setHistoryCount(data.length);
+			const response = await clerkClient.users.getUserList({
+				limit: 50,
+				orderBy: '-created_at',
+			});
+			initialUsers = response.data.map((user) => formatClerkUser(user));
 		} catch (err) {
-			console.error('Błąd podczas odczytu liczby rekordów z localStorage:', err);
+			console.error('[ProfilePage SSR] Error fetching admin users:', err);
 		}
-	}, []);
+	}
 
 	return (
 		<Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 8 }}>
-			<Header historyCount={historyCount} />
+			<Header />
 			<Container maxWidth="lg" sx={{ pt: { xs: 3, sm: 4 } }}>
-				<ProfileView />
+				<ProfileView initialUsers={initialUsers} />
 			</Container>
 		</Box>
 	);

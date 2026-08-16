@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth, currentUser } from '@clerk/nextjs/server';
 import OpenAI from 'openai';
+import { verifyAdminAccess } from '@/lib/auth';
+
+export const dynamic = 'force-dynamic';
 
 // OpenRouter wymaga własnego baseURL i opcjonalnych nagłówków
 const openai = new OpenAI({
@@ -14,26 +16,7 @@ const openai = new OpenAI({
 
 export async function POST(req: NextRequest) {
 	try {
-		const { userId } = await auth();
-		const testCookie = req.cookies.get('test')?.value;
-		const isTestAllowed = testCookie === 'alen';
-
-		let isAdmin = isTestAllowed;
-
-		if (userId && !isAdmin) {
-			const user = await currentUser();
-			const userEmail = user?.primaryEmailAddress?.emailAddress;
-			const publicMetadata = (user?.publicMetadata as Record<string, unknown>) ?? {};
-			const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-
-			if (
-				publicMetadata?.role === 'admin' ||
-				publicMetadata?.isAdmin === true ||
-				(adminEmail && userEmail && userEmail.toLowerCase() === adminEmail.toLowerCase())
-			) {
-				isAdmin = true;
-			}
-		}
+		const { isAdmin } = await verifyAdminAccess(req);
 
 		// Zabezpieczenie: tylko administrator ma dostęp do generowania AI z OpenRouter
 		if (!isAdmin) {
