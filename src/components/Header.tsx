@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect, startTransition } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Box, Container, Typography, Chip, Stack, Button, Badge } from '@mui/material';
 import YouTubeIcon from '@mui/icons-material/YouTube';
@@ -20,6 +21,15 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 	const pathname = usePathname();
 	const router = useRouter();
 	const { isAdmin } = useAuthUser();
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		startTransition(() => {
+			setMounted(true);
+		});
+	}, []);
+
+	const displayHistoryCount = mounted ? historyCount : 0;
 
 	const isAnalyzer = pathname === '/';
 	const isArchive = pathname === '/archive';
@@ -116,14 +126,18 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 							variant={isArchive ? 'contained' : 'outlined'}
 							size="small"
 							startIcon={
-								<Badge
-									badgeContent={historyCount}
-									color="primary"
-									max={99}
-									sx={{ '& .MuiBadge-badge': { fontSize: '0.65rem', height: 16, minWidth: 16 } }}
-								>
+								mounted ? (
+									<Badge
+										badgeContent={historyCount}
+										color="primary"
+										max={99}
+										sx={{ '& .MuiBadge-badge': { fontSize: '0.65rem', height: 16, minWidth: 16 } }}
+									>
+										<HistoryIcon sx={{ fontSize: 18 }} />
+									</Badge>
+								) : (
 									<HistoryIcon sx={{ fontSize: 18 }} />
-								</Badge>
+								)
 							}
 							onClick={() => router.push('/archive')}
 							sx={{

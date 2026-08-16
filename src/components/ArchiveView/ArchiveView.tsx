@@ -44,9 +44,10 @@ export default function ArchiveView({
 		};
 	}, [history.length]);
 
-	useEffect(() => {
+	const handleSearchChange = (query: string) => {
+		setSearchQuery(query);
 		setPage(1);
-	}, [searchQuery]);
+	};
 
 	const filteredHistory = useMemo(() => {
 		if (!searchQuery.trim()) return history;
@@ -70,7 +71,7 @@ export default function ArchiveView({
 			<ArchiveHeader
 				historyCount={history.length}
 				searchQuery={searchQuery}
-				onSearchChange={setSearchQuery}
+				onSearchChange={handleSearchChange}
 				onConfirmClearOpen={() => setConfirmClearOpen(true)}
 			/>
 

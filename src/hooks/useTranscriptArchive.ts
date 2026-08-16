@@ -24,27 +24,27 @@ export function useTranscriptArchive(): UseTranscriptArchiveReturn {
 	const [metadata, setMetadata] = useState<VideoMetadata | null>(null);
 	const [segments, setSegments] = useState<TranscriptSegment[]>([]);
 	const [stats, setStats] = useState<TranscriptStats | null>(null);
-	const [history, setHistory] = useState<HistoryItem[]>(() => getHistory());
+	const [history, setHistory] = useState<HistoryItem[]>([]);
 
-	// Read active video item on searchParam change using startTransition
+	// Read local storage history and active video item after hydration using startTransition
 	useEffect(() => {
-		if (!videoIdParam) {
-			return;
-		}
-
 		try {
 			const loadedHistory = getHistory();
-			const targetItem = loadedHistory.find((item) => item.id === videoIdParam);
-			if (targetItem) {
-				const fullItem = loadFullHistoryItem(targetItem);
-				startTransition(() => {
-					setMetadata(fullItem.metadata);
-					setSegments(fullItem.segments);
-					setStats(fullItem.stats);
-				});
-			}
+			startTransition(() => {
+				setHistory(loadedHistory);
+
+				if (videoIdParam) {
+					const targetItem = loadedHistory.find((item) => item.id === videoIdParam);
+					if (targetItem) {
+						const fullItem = loadFullHistoryItem(targetItem);
+						setMetadata(fullItem.metadata);
+						setSegments(fullItem.segments);
+						setStats(fullItem.stats);
+					}
+				}
+			});
 		} catch (err) {
-			console.error('Error reading video item from localStorage:', err);
+			console.error('Error reading history from localStorage:', err);
 		}
 	}, [videoIdParam]);
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect, startTransition } from 'react';
 import { Paper, Box, Typography, Button, TextField, InputAdornment, Stack, Tooltip, IconButton } from '@mui/material';
 import HistoryIcon from '@mui/icons-material/History';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
@@ -18,6 +19,14 @@ export default function ArchiveHeader({
 	onSearchChange,
 	onConfirmClearOpen,
 }: ArchiveHeaderProps) {
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		startTransition(() => {
+			setMounted(true);
+		});
+	}, []);
+
 	return (
 		<Paper
 			elevation={0}
@@ -60,12 +69,12 @@ export default function ArchiveHeader({
 								Archiwum Transkrypcji
 							</Typography>
 							<Typography variant="caption" sx={{ color: 'text.secondary' }}>
-								Zapisano lokalnie: {historyCount} materiałów wideo
+								{mounted ? `Zapisano lokalnie: ${historyCount} materiałów wideo` : 'Zapisano lokalnie materiały wideo'}
 							</Typography>
 						</Box>
 					</Stack>
 
-					{historyCount > 0 && (
+					{mounted && historyCount > 0 && (
 						<Tooltip title="Wyczyść całą historię">
 							<IconButton
 								color="error"
@@ -96,7 +105,7 @@ export default function ArchiveHeader({
 						}}
 					/>
 
-					{historyCount > 0 && (
+					{mounted && historyCount > 0 && (
 						<Tooltip title="Wyczyść całą historię">
 							<Button
 								variant="outlined"
