@@ -1,5 +1,7 @@
 import { YoutubeTranscript, TranscriptResponse } from 'youtube-transcript';
 
+export type PreferredLanguage = 'pl' | 'en' | 'auto';
+
 export interface TranscriptSegment {
 	text: string;
 	duration: number;

@@ -15,17 +15,20 @@ import {
 	Select,
 	MenuItem,
 	FormControl,
+	Tooltip,
+	Divider,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CancelIcon from '@mui/icons-material/Cancel';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import LanguageIcon from '@mui/icons-material/Language';
-import { extractYouTubeVideoId } from '@/lib/youtube';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { extractYouTubeVideoId, PreferredLanguage } from '@/lib/youtube';
 import { getUserPreferences, saveUserPreferences } from '@/lib/storage';
 
 interface UrlInputFormProps {
-	onFetchTranscript: (url: string, preferredLanguage: 'pl' | 'en' | 'auto') => void;
+	onFetchTranscript: (url: string, preferredLanguage: PreferredLanguage) => void;
 	isLoading: boolean;
 	error: string | null;
 }
@@ -38,7 +41,7 @@ const SAMPLE_VIDEOS = [
 export default function UrlInputForm({ onFetchTranscript, isLoading, error }: UrlInputFormProps) {
 	const [inputUrl, setInputUrl] = useState('');
 	const [validationError, setValidationError] = useState<string | null>(null);
-	const [preferredLanguage, setPreferredLanguage] = useState<'pl' | 'en' | 'auto'>('pl');
+	const [preferredLanguage, setPreferredLanguage] = useState<PreferredLanguage>('pl');
 
 	// Odczytaj zapisane w localStorage preferencje użytkownika
 	useEffect(() => {
@@ -139,11 +142,11 @@ export default function UrlInputForm({ onFetchTranscript, isLoading, error }: Ur
 						}}
 					/>
 
-					<FormControl size="small" sx={{ minWidth: { sm: 160 } }}>
+					<FormControl size="small" sx={{ minWidth: { sm: 170 } }}>
 						<Select
 							id="preferred-language-select"
 							value={preferredLanguage}
-							onChange={(e) => handleLanguageChange(e.target.value as 'pl' | 'en' | 'auto')}
+							onChange={(e) => handleLanguageChange(e.target.value as PreferredLanguage)}
 							disabled={isLoading}
 							sx={{
 								height: '56px',
@@ -183,6 +186,26 @@ export default function UrlInputForm({ onFetchTranscript, isLoading, error }: Ur
 					>
 						{isLoading ? 'Pobieranie...' : 'Pobierz tekst'}
 					</Button>
+				</Stack>
+
+				{/* Sleek helper bar below the inputs */}
+				<Stack
+					direction="row"
+					spacing={1}
+					sx={{
+						mt: 2,
+						alignItems: 'center',
+						bgcolor: 'rgba(255, 255, 255, 0.02)',
+						py: 1,
+						px: 2,
+						borderRadius: 1.5,
+						border: '1px solid rgba(255, 255, 255, 0.05)',
+					}}
+				>
+					<InfoOutlinedIcon sx={{ fontSize: 16, color: '#3b82f6', flexShrink: 0 }} />
+					<Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.78rem', lineHeight: 1.3 }}>
+						<strong>Wskazówka dotycząca języka:</strong> Wybrany język jest preferencją – jeśli film nie zawiera tej wersji językowej, system automatycznie pobierze dostępną wersję domyślną.
+					</Typography>
 				</Stack>
 			</form>
 

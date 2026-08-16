@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { VideoMetadata, TranscriptSegment, TranscriptStats } from '@/lib/youtube';
+import { VideoMetadata, TranscriptSegment, TranscriptStats, PreferredLanguage } from '@/lib/youtube';
 import { getHistory, saveToHistory, loadFullHistoryItem, HistoryItem } from '@/lib/storage';
 
 export interface UseTranscriptArchiveReturn {
@@ -12,7 +12,7 @@ export interface UseTranscriptArchiveReturn {
 	segments: TranscriptSegment[];
 	stats: TranscriptStats | null;
 	history: HistoryItem[];
-	handleFetchTranscript: (url: string, preferredLanguage?: 'pl' | 'en' | 'auto') => Promise<void>;
+	handleFetchTranscript: (url: string, preferredLanguage?: PreferredLanguage) => Promise<void>;
 }
 
 export function useTranscriptArchive(): UseTranscriptArchiveReturn {
@@ -46,44 +46,41 @@ export function useTranscriptArchive(): UseTranscriptArchiveReturn {
 		}
 	}, [videoIdParam]);
 
-	const handleFetchTranscript = useCallback(
-		async (url: string, preferredLanguage?: 'pl' | 'en' | 'auto') => {
-			setIsLoading(true);
-			setError(null);
+	const handleFetchTranscript = async (url: string, preferredLanguage?: 'pl' | 'en' | 'auto') => {
+		setIsLoading(true);
+		setError(null);
 
-			try {
-				const res = await fetch('/api/transcript', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ url, preferredLanguage }),
-				});
+		try {
+			const res = await fetch('/api/transcript', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ url, preferredLanguage }),
+			});
 
-				const data = await res.json();
+			const data = await res.json();
 
-				if (!res.ok) {
-					setError(data.error || 'An error occurred while fetching the transcript.');
-					if (data.metadata) {
-						setMetadata(data.metadata);
-					}
-					return;
+			if (!res.ok) {
+				setError(data.error || 'An error occurred while fetching the transcript.');
+				if (data.metadata) {
+					setMetadata(data.metadata);
 				}
-
-				setMetadata(data.metadata);
-				setSegments(data.segments);
-				setStats(data.stats);
-
-				// Auto-save to localStorage history
-				const updatedHistory = saveToHistory(data.metadata, data.segments, data.stats);
-				setHistory(updatedHistory);
-			} catch (err: unknown) {
-				const msg = err instanceof Error ? err.message : 'Unexpected network error.';
-				setError(`Connection error: ${msg}`);
-			} finally {
-				setIsLoading(false);
+				return;
 			}
-		},
-		[]
-	);
+
+			setMetadata(data.metadata);
+			setSegments(data.segments);
+			setStats(data.stats);
+
+			// Auto-save to localStorage history
+			const updatedHistory = saveToHistory(data.metadata, data.segments, data.stats);
+			setHistory(updatedHistory);
+		} catch (err: unknown) {
+			const msg = err instanceof Error ? err.message : 'Unexpected network error.';
+			setError(`Connection error: ${msg}`);
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
 	return {
 		isLoading,
