@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, startTransition } from 'react';
 import { SignedIn, SignedOut, UserButton, useClerk, useUser } from '@clerk/nextjs';
 import { Box, Button, Skeleton } from '@mui/material';
 
@@ -10,7 +10,9 @@ export default function AuthButtonSlot() {
 	const { isSignedIn } = useUser();
 
 	useEffect(() => {
-		setMounted(true);
+		startTransition(() => {
+			setMounted(true);
+		});
 	}, []);
 
 	const targetWidth = mounted && isSignedIn ? 34 : 104;

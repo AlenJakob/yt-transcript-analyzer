@@ -61,3 +61,7 @@ This repository (**yt-transcript-analyzer**) is a Next.js web application built 
 
 - never use shorter users.map((u) => u.name)
 - always use full name for example users.map((user) => user.name)
+
+## 7. nested return
+
+- if (!videoIdParam) return; wrong always use nested return in curly braces {}

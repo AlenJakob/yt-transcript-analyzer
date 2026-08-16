@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, startTransition } from 'react';
 import { useAuthUser } from '@/hooks/useAuthUser';
 import { useAuth } from '@clerk/nextjs';
 
@@ -34,7 +34,9 @@ export function useAdminUsers(initialUsers: AdminUser[] = []) {
 
 	useEffect(() => {
 		if (initialUsers && initialUsers.length > 0) {
-			setUsers(initialUsers);
+			startTransition(() => {
+				setUsers(initialUsers);
+			});
 		}
 	}, [initialUsers]);
 
@@ -54,7 +56,9 @@ export function useAdminUsers(initialUsers: AdminUser[] = []) {
 			const data = await res.json();
 			console.log('[/api/admin/users Response]:', data);
 			if (res.ok && data.users) {
-				setUsers(data.users);
+				startTransition(() => {
+					setUsers(data.users);
+				});
 			} else {
 				console.error('Błąd pobierania użytkowników:', data.error);
 			}
@@ -67,7 +71,9 @@ export function useAdminUsers(initialUsers: AdminUser[] = []) {
 
 	useEffect(() => {
 		if (userAuth.isLoaded && userAuth.isSignedIn && userAuth.isAdmin && users.length === 0) {
-			fetchAdminUsers();
+			startTransition(() => {
+				fetchAdminUsers();
+			});
 		}
 	}, [userAuth.isLoaded, userAuth.isSignedIn, userAuth.isAdmin, users.length, fetchAdminUsers]);
 

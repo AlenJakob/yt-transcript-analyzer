@@ -16,7 +16,9 @@ const MAX_HISTORY_ITEMS = 50;
  * Calculates total localStorage usage in KB and MB across all keys
  */
 export function getLocalStorageUsage(): { totalKb: number; totalMb: number; historyKb: number } {
-	if (typeof window === 'undefined') return { totalKb: 0, totalMb: 0, historyKb: 0 };
+	if (typeof window === 'undefined') {
+		return { totalKb: 0, totalMb: 0, historyKb: 0 };
+	}
 	try {
 		let totalChars = 0;
 		for (let i = 0; i < localStorage.length; i++) {
@@ -40,10 +42,14 @@ export function getLocalStorageUsage(): { totalKb: number; totalMb: number; hist
  * Gets cached segments for a specific video
  */
 export function getSegmentsForVideo(videoId: string): TranscriptSegment[] {
-	if (typeof window === 'undefined') return [];
+	if (typeof window === 'undefined') {
+		return [];
+	}
 	try {
 		const raw = localStorage.getItem(`${SEGMENTS_PREFIX}${videoId}`);
-		if (!raw) return [];
+		if (!raw) {
+			return [];
+		}
 		return JSON.parse(raw) as TranscriptSegment[];
 	} catch (err) {
 		console.error(`Błąd podczas odczytu segmentów dla wideo ${videoId}:`, err);
@@ -69,11 +75,15 @@ export function loadFullHistoryItem(item: HistoryItem): HistoryItem {
  * Loads saved transcript history metadata index with auto-migration and performance logging
  */
 export function getHistory(): HistoryItem[] {
-	if (typeof window === 'undefined') return [];
+	if (typeof window === 'undefined') {
+		return [];
+	}
 	const startTime = performance.now();
 	try {
 		const raw = localStorage.getItem(STORAGE_KEY);
-		if (!raw) return [];
+		if (!raw) {
+			return [];
+		}
 		let parsed = JSON.parse(raw) as HistoryItem[];
 
 		// Automatyczna migracja: wyciągnij ciężkie tablice segments do osobnych kluczy
@@ -124,7 +134,9 @@ export function saveToHistory(
 	segments: TranscriptSegment[],
 	stats: TranscriptStats
 ): HistoryItem[] {
-	if (typeof window === 'undefined') return [];
+	if (typeof window === 'undefined') {
+		return [];
+	}
 	const startTime = performance.now();
 	try {
 		// Zapisz ciężką transkrypcję pod dedykowanym kluczem
@@ -168,7 +180,9 @@ export function saveToHistory(
  * Removes a single item from history by videoId
  */
 export function removeFromHistory(videoId: string): HistoryItem[] {
-	if (typeof window === 'undefined') return [];
+	if (typeof window === 'undefined') {
+		return [];
+	}
 	try {
 		const history = getHistory();
 		const updated = history.filter((item) => item.id !== videoId);
@@ -190,7 +204,9 @@ export function removeFromHistory(videoId: string): HistoryItem[] {
  * Clears all items from history and segment caches
  */
 export function clearHistory(): HistoryItem[] {
-	if (typeof window === 'undefined') return [];
+	if (typeof window === 'undefined') {
+		return [];
+	}
 	try {
 		const keysToRemove: string[] = [];
 		for (let i = 0; i < localStorage.length; i++) {
@@ -224,10 +240,14 @@ const DEFAULT_PREFERENCES: UserPreferences = {
  * Loads user preferences from localStorage
  */
 export function getUserPreferences(): UserPreferences {
-	if (typeof window === 'undefined') return DEFAULT_PREFERENCES;
+	if (typeof window === 'undefined') {
+		return DEFAULT_PREFERENCES;
+	}
 	try {
 		const raw = localStorage.getItem(PREFERENCES_STORAGE_KEY);
-		if (!raw) return DEFAULT_PREFERENCES;
+		if (!raw) {
+			return DEFAULT_PREFERENCES;
+		}
 		return { ...DEFAULT_PREFERENCES, ...JSON.parse(raw) };
 	} catch (err) {
 		console.error('Błąd podczas odczytu preferencji użytkownika:', err);
@@ -239,7 +259,9 @@ export function getUserPreferences(): UserPreferences {
  * Saves user preferences to localStorage
  */
 export function saveUserPreferences(prefs: Partial<UserPreferences>): UserPreferences {
-	if (typeof window === 'undefined') return DEFAULT_PREFERENCES;
+	if (typeof window === 'undefined') {
+		return DEFAULT_PREFERENCES;
+	}
 	try {
 		const current = getUserPreferences();
 		const updated = { ...current, ...prefs };

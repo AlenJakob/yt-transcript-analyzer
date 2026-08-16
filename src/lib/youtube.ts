@@ -71,7 +71,9 @@ export async function fetchTranscriptWithFallback(
  * - Plain Video ID (11 chars)
  */
 export function extractYouTubeVideoId(urlOrId: string): string | null {
-	if (!urlOrId || typeof urlOrId !== 'string') return null;
+	if (!urlOrId || typeof urlOrId !== 'string') {
+		return null;
+	}
 
 	const trimmed = urlOrId.trim();
 
@@ -166,7 +168,9 @@ export function groupTranscriptSegments(
 	segments: TranscriptSegment[],
 	groupDurationSeconds: number = 30
 ): TranscriptSegment[] {
-	if (!segments || segments.length === 0) return [];
+	if (!segments || segments.length === 0) {
+		return [];
+	}
 
 	const grouped: TranscriptSegment[] = [];
 	let currentGroupText: string[] = [];
@@ -206,7 +210,9 @@ export function groupTranscriptSegments(
  * Formats full transcript text into beautifully clean, structured paragraphs
  */
 export function formatContinuousParagraphs(segments: TranscriptSegment[]): string[] {
-	if (!segments || segments.length === 0) return [];
+	if (!segments || segments.length === 0) {
+		return [];
+	}
 
 	// Join all raw segment texts
 	let rawText = segments.map((s) => s.text.trim()).join(' ');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, startTransition } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { VideoMetadata, TranscriptSegment, TranscriptStats, PreferredLanguage } from '@/lib/youtube';
 import { getHistory, saveToHistory, loadFullHistoryItem, HistoryItem } from '@/lib/storage';
@@ -24,25 +24,27 @@ export function useTranscriptArchive(): UseTranscriptArchiveReturn {
 	const [metadata, setMetadata] = useState<VideoMetadata | null>(null);
 	const [segments, setSegments] = useState<TranscriptSegment[]>([]);
 	const [stats, setStats] = useState<TranscriptStats | null>(null);
-	const [history, setHistory] = useState<HistoryItem[]>([]);
+	const [history, setHistory] = useState<HistoryItem[]>(() => getHistory());
 
-	// Read local storage history and active video item on mount/searchParam change
+	// Read active video item on searchParam change using startTransition
 	useEffect(() => {
+		if (!videoIdParam) {
+			return;
+		}
+
 		try {
 			const loadedHistory = getHistory();
-			setHistory(loadedHistory);
-
-			if (videoIdParam) {
-				const targetItem = loadedHistory.find((item) => item.id === videoIdParam);
-				if (targetItem) {
-					const fullItem = loadFullHistoryItem(targetItem);
+			const targetItem = loadedHistory.find((item) => item.id === videoIdParam);
+			if (targetItem) {
+				const fullItem = loadFullHistoryItem(targetItem);
+				startTransition(() => {
 					setMetadata(fullItem.metadata);
 					setSegments(fullItem.segments);
 					setStats(fullItem.stats);
-				}
+				});
 			}
 		} catch (err) {
-			console.error('Error reading history from localStorage:', err);
+			console.error('Error reading video item from localStorage:', err);
 		}
 	}, [videoIdParam]);
 

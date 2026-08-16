@@ -27,15 +27,17 @@ export default function ModelSelect({ selectedModel, setSelectedModel }: ModelSe
 			const data = await res.json();
 
 			const mappedModels = mapModels(data.models.freeModels);
-			setModels(mappedModels);
+			startTransition(() => {
+				setModels(mappedModels);
 
-			if (mappedModels.length > 0 && mappedModels[0].id) {
-				setSelectedModel(mappedModels[0].id);
-			}
+				if (mappedModels.length > 0 && mappedModels[0].id) {
+					setSelectedModel(mappedModels[0].id);
+				}
+			});
 		};
 
 		getModels();
-	}, []);
+	}, [setSelectedModel]);
 
 	return (
 		<Paper
