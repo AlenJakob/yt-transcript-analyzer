@@ -1,5 +1,6 @@
-import { Box, Button, CircularProgress, Paper, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Grid, Paper, Stack, Tooltip, Typography } from '@mui/material';
 import ModelSelect from '../ModelSelect';
+import LanguageSelect from '../LanguageSelect';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import StopIcon from '@mui/icons-material/Stop';
@@ -20,6 +21,7 @@ export default function TranscriptGenerator({
 	setSelectedModel,
 	formattedParagraphs,
 }: TranscriptGeneratorProps) {
+	const [selectedLanguage, setSelectedLanguage] = useState<string>('pl');
 	const { aiResponse, isAiLoading, error, generateSummary, abort } = useAiSummary();
 	const { isAdmin } = useAuthUser();
 	const isAllowed = isAdmin;
@@ -29,7 +31,7 @@ export default function TranscriptGenerator({
 	const handleGenerateAiSummary = () => {
 		const transcriptText = formattedParagraphs.join('\n\n');
 		setCopied(false);
-		generateSummary(transcriptText, selectedModel);
+		generateSummary(transcriptText, selectedModel, undefined, selectedLanguage);
 	};
 
 	const handleCopy = () => {
@@ -59,13 +61,27 @@ export default function TranscriptGenerator({
 					letterSpacing: '0.015em',
 					color: 'text.primary',
 					fontSize: '1.1rem',
-					mb: '8px',
+					mb: '16px',
 				}}
 			>
-				Generowanie podsumowania
+				Generowanie podsumowania AI
 			</Typography>
-			<Stack spacing={2} sx={{ mb: 2 }}>
-				<ModelSelect setSelectedModel={setSelectedModel} selectedModel={selectedModel} />
+
+			<Stack spacing={2.5} sx={{ mb: 3 }}>
+				{/* Controls: Model Select & Language Select */}
+				<Grid container spacing={2}>
+					<Grid size={{ xs: 12, sm: 6 }}>
+						<ModelSelect setSelectedModel={setSelectedModel} selectedModel={selectedModel} />
+					</Grid>
+					<Grid size={{ xs: 12, sm: 6 }}>
+						<LanguageSelect
+							selectedLanguage={selectedLanguage}
+							setSelectedLanguage={setSelectedLanguage}
+						/>
+					</Grid>
+				</Grid>
+
+				{/* Action Buttons */}
 				<Stack
 					direction="row"
 					spacing={1.5}
@@ -98,23 +114,6 @@ export default function TranscriptGenerator({
 						</span>
 					</Tooltip>
 
-					<Button
-						disabled={!aiResponse || isAiLoading}
-						variant="contained"
-						size="small"
-						startIcon={
-							copied ? (
-								<CheckIcon sx={{ fontSize: 16 }} />
-							) : (
-								<ContentCopyIcon sx={{ fontSize: 16 }} />
-							)
-						}
-						onClick={handleCopy}
-						sx={{ bgcolor: '#3b82f6', '&:hover': { bgcolor: '#2563eb' } }}
-					>
-						{copied ? 'Skopiowano!' : 'Kopiuj podsumowanie'}
-					</Button>
-
 					{isAllowed && (
 						<Button
 							disabled={!isAiLoading}
@@ -129,32 +128,80 @@ export default function TranscriptGenerator({
 					)}
 				</Stack>
 			</Stack>
+
+			{/* AI Output Section */}
 			<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-				<Typography
-					variant="body1"
-					component="div"
-					sx={{
-						lineHeight: 1.85,
-						letterSpacing: '0.015em',
-						color: 'text.primary',
-						fontSize: '1.1rem',
-					}}
-				>
-					{isAiLoading ? (
-						<Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-							Generuję odpowiedź AI...
+				{isAiLoading ? (
+					<Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+						Generuję odpowiedź AI...
+					</Typography>
+				) : error ? (
+					<Typography variant="body2" color="error">
+						{error}
+					</Typography>
+				) : aiResponse ? (
+					<Paper
+						elevation={0}
+						sx={{
+							p: 2.5,
+							bgcolor: (theme) =>
+								theme.palette.mode === 'dark'
+									? 'rgba(59, 130, 246, 0.05)'
+									: 'rgba(59, 130, 246, 0.03)',
+							border: '1px solid',
+							borderColor: (theme) =>
+								theme.palette.mode === 'dark'
+									? 'rgba(59, 130, 246, 0.2)'
+									: 'rgba(59, 130, 246, 0.15)',
+							borderRadius: 2,
+						}}
+					>
+						<Stack
+							direction="row"
+							sx={{
+								alignItems: 'center',
+								justifyContent: 'space-between',
+								mb: 1.5,
+								pb: 1,
+								borderBottom: '1px dashed',
+								borderColor: 'divider',
+							}}
+						>
+							<Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#3b82f6' }}>
+								Odpowiedź AI ({selectedLanguage.toUpperCase()})
+							</Typography>
+							<Button
+								disabled={!aiResponse || isAiLoading}
+								variant="contained"
+								size="small"
+								startIcon={
+									copied ? (
+										<CheckIcon sx={{ fontSize: 16 }} />
+									) : (
+										<ContentCopyIcon sx={{ fontSize: 16 }} />
+									)
+								}
+								onClick={handleCopy}
+								sx={{ bgcolor: '#3b82f6', '&:hover': { bgcolor: '#2563eb' } }}
+							>
+								{copied ? 'Skopiowano!' : 'Kopiuj podsumowanie'}
+							</Button>
+						</Stack>
+						<Typography
+							variant="body1"
+							sx={{
+								lineHeight: 1.85,
+								letterSpacing: '0.015em',
+								color: 'text.primary',
+								whiteSpace: 'pre-line',
+							}}
+						>
+							{aiResponse}
 						</Typography>
-					) : error ? (
-						<Typography variant="body2" color="error">
-							{error}
-						</Typography>
-					) : aiResponse ? (
-						<>
-							<b>Odpowiedź AI:</b> <br /> {aiResponse}
-						</>
-					) : null}
-				</Typography>
+					</Paper>
+				) : null}
 			</Box>
 		</Paper>
 	);
 }
+

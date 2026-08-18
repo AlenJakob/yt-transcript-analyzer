@@ -29,7 +29,9 @@ export default function RootLayout({
 	return (
 		<html lang="pl" className={`${geistSans.variable} ${geistMono.variable}`}>
 			<body>
-				<ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
+				<ClerkProvider
+					publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+				>
 					<ThemeRegistry>{children}</ThemeRegistry>
 				</ClerkProvider>
 			</body>

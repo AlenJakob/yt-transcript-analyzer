@@ -7,7 +7,8 @@ interface UseAiSummaryReturn {
 	generateSummary: (
 		transcriptText: string,
 		selectedModel: string,
-		promptPreset?: string
+		promptPreset?: string,
+		language?: string
 	) => Promise<void>;
 	abort: () => void;
 	reset: () => void;
@@ -43,7 +44,8 @@ export function useAiSummary(): UseAiSummaryReturn {
 		async (
 			transcriptText: string,
 			selectedModel: string,
-			promptPreset: string = 'Przeanalizuj poniższą transkrypcję i stwórz streszczenie. Zbierz najważniejsze informacje, nie pomijaj istotnych szczegółów'
+			promptPreset: string = 'Przeanalizuj poniższą transkrypcję i stwórz streszczenie. Zbierz najważniejsze informacje, nie pomijaj istotnych szczegółów',
+			language: string = 'pl'
 		) => {
 			if (abortControllerRef.current) {
 				abortControllerRef.current.abort();
@@ -67,6 +69,7 @@ export function useAiSummary(): UseAiSummaryReturn {
 						model: selectedModel,
 						transcriptText,
 						promptPreset,
+						language,
 					}),
 				});
 

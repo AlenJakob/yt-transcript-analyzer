@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
-		const { model, transcriptText, promptPreset } = await req.json();
+		const { model, transcriptText, promptPreset, language = 'pl' } = await req.json();
 
 		if (!transcriptText || !promptPreset) {
 			return NextResponse.json(
@@ -49,6 +49,16 @@ export async function POST(req: NextRequest) {
 				{ status: 400 }
 			);
 		}
+
+		const languageInstructions: Record<string, string> = {
+			pl: 'odpowiadaj po polsku',
+			en: 'respond in English',
+			de: 'respond in German',
+			es: 'respond in Spanish',
+			fr: 'respond in French',
+		};
+		const targetLanguageInstruction =
+			languageInstructions[language] || `respond in ${language}`;
 
 		const openai = getOpenAIClient();
 		const defaultModel = 'openrouter/free';
@@ -58,7 +68,7 @@ export async function POST(req: NextRequest) {
 				{
 					role: 'system',
 					content: `Jesteś ekspertem od analizy transkrypcji wideo. Zawsze:
-								- odpowiadaj po polsku,
+								- ${targetLanguageInstruction},
 								- używaj wyłącznie zwykłego tekstu,
 								- nie używaj Markdown,
 								- nie stosuj list,

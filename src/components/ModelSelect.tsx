@@ -44,7 +44,7 @@ export default function ModelSelect({ selectedModel, setSelectedModel }: ModelSe
 			elevation={0}
 			sx={{
 				p: { xs: 2.5, sm: 3.5 },
-				mb: 4,
+				height: '100%',
 				bgcolor: 'background.paper',
 				border: '1px solid',
 				borderColor: 'divider',
