@@ -45,3 +45,29 @@ This repository (**yt-transcript-analyzer**) is a Next.js web application built 
 ## 4. Code Formatting & Quality
 - Keep code formatted according to Prettier and ESLint rules configured in the project (`npm run format` / `npm run lint`).
 - Ensure proper error handling in API routes (`src/app/api/...`) and return typed JSON responses with standard status codes.
+
+---
+
+## 5. Components Rule
+- Keep components max 500 lines.
+- If longer than 500 lines, split into smaller components where possible.
+
+---
+
+## 6. Props & Variable Naming
+- Never use single-letter item names, e.g. `users.map((u) => u.name)`.
+- Always use full names, e.g. `users.map((user) => user.name)`.
+
+---
+
+## 7. Nested Return Syntax
+- Do not use single-line `if (!id) return;`.
+- Always use curly braces for returns: `if (!id) { return; }`.
+
+---
+
+## 8. Commit Message Rules
+- Always use Conventional Commits format: `feat:`, `fix:`, `refactor:`, `docs:`, `chore:`, `ci:`, `test:`, `style:`.
+- Include scope when applicable, e.g. `feat(archive): ...`, `fix(auth): ...`.
+- Language: English.
+- Keep the title concise (max 72 characters).
