@@ -37,23 +37,31 @@ export default function ArchiveDeleteDialogs({
 				slotProps={{
 					paper: {
 						sx: {
-							bgcolor: '#121824',
+							bgcolor: 'background.paper',
 							backgroundImage: 'none',
-							border: '1px solid rgba(255, 255, 255, 0.1)',
+							border: '1px solid',
+							borderColor: 'divider',
 							borderRadius: 2,
 						},
 					},
 				}}
 			>
-				<DialogTitle sx={{ fontWeight: 700 }}>Wyczyścić całą historię?</DialogTitle>
+				<DialogTitle sx={{ fontWeight: 700 }}>
+					Wyczyścić całą historię?
+				</DialogTitle>
 				<DialogContent>
 					<DialogContentText sx={{ color: 'text.secondary' }}>
-						Czy na pewno chcesz usunąć wszystkie zapisane transkrypcje ({historyLength} wideo) z
-						pamięci lokalnej? Ta akcja jest nieodwracalna.
+						Czy na pewno chcesz usunąć wszystkie zapisane transkrypcje (
+						{historyLength} wideo) z pamięci lokalnej? Ta akcja jest
+						nieodwracalna.
 					</DialogContentText>
 				</DialogContent>
 				<DialogActions sx={{ p: 2.5, pt: 1 }}>
-					<Button onClick={onCloseConfirmClear} variant="outlined" color="inherit">
+					<Button
+						onClick={onCloseConfirmClear}
+						variant="outlined"
+						color="inherit"
+					>
 						Anuluj
 					</Button>
 					<Button
@@ -76,9 +84,10 @@ export default function ArchiveDeleteDialogs({
 				slotProps={{
 					paper: {
 						sx: {
-							bgcolor: '#121824',
+							bgcolor: 'background.paper',
 							backgroundImage: 'none',
-							border: '1px solid rgba(255, 255, 255, 0.1)',
+							border: '1px solid',
+							borderColor: 'divider',
 							borderRadius: 2,
 						},
 					},
@@ -91,7 +100,11 @@ export default function ArchiveDeleteDialogs({
 					</DialogContentText>
 				</DialogContent>
 				<DialogActions sx={{ p: 2.5, pt: 1 }}>
-					<Button onClick={onCloseItemToDelete} variant="outlined" color="inherit">
+					<Button
+						onClick={onCloseItemToDelete}
+						variant="outlined"
+						color="inherit"
+					>
 						Anuluj
 					</Button>
 					<Button

@@ -7,7 +7,7 @@ import { Box, Button, Skeleton } from '@mui/material';
 export default function AuthButtonSlot() {
 	const [mounted, setMounted] = useState(false);
 	const { openSignIn } = useClerk();
-	const { isSignedIn } = useUser();
+	const { isLoaded } = useUser();
 
 	useEffect(() => {
 		startTransition(() => {
@@ -15,28 +15,29 @@ export default function AuthButtonSlot() {
 		});
 	}, []);
 
-	const targetWidth = mounted && isSignedIn ? 34 : 104;
+	const isReady = mounted && isLoaded;
 
 	return (
 		<Box
 			sx={{
 				display: 'inline-flex',
 				alignItems: 'center',
-				justifyContent: 'flex-end',
-				minWidth: targetWidth,
+				justifyContent: 'center',
+				minWidth: 34,
 				height: 34,
 				ml: 0.5,
-				transition: 'min-width 0.2s ease-in-out',
 			}}
 		>
-			{!mounted ? (
+			{!isReady ? (
 				<Skeleton
-					variant="rectangular"
-					width={targetWidth}
-					height={32}
+					variant="circular"
+					width={34}
+					height={34}
 					sx={{
-						bgcolor: 'rgba(255, 255, 255, 0.06)',
-						borderRadius: 3,
+						bgcolor: (theme) =>
+							theme.palette.mode === 'dark'
+								? 'rgba(255, 255, 255, 0.08)'
+								: 'rgba(0, 0, 0, 0.08)',
 					}}
 				/>
 			) : (
@@ -47,14 +48,18 @@ export default function AuthButtonSlot() {
 							size="small"
 							onClick={() => openSignIn()}
 							sx={{
-								borderColor: 'rgba(255, 255, 255, 0.2)',
-								color: '#ffffff',
+								borderColor: 'divider',
+								color: 'text.primary',
 								px: 2,
 								whiteSpace: 'nowrap',
-								borderRadius: 3,
+								borderRadius: 2,
+								fontWeight: 600,
 								'&:hover': {
 									borderColor: '#3b82f6',
-									bgcolor: 'rgba(59, 130, 246, 0.08)',
+									bgcolor: (theme) =>
+										theme.palette.mode === 'dark'
+											? 'rgba(59, 130, 246, 0.15)'
+											: 'rgba(59, 130, 246, 0.08)',
 								},
 							}}
 						>
