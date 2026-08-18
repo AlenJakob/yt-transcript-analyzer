@@ -64,6 +64,16 @@ jobs:
 
       - run: npm ci
 
+      - name: Debug Clerk env
+        run: |
+          if [ -n "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" ]; then
+            echo "✅ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is set"
+          else
+            echo "❌ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is MISSING"
+          fi
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+
       - name: Build
         run: npm run build
         env:
