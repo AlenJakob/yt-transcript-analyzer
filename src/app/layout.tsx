@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: 'YouTube Transcript Analyzer',
+	title: 'TubeDigest – YouTube Transcript & AI Analyzer',
 	description:
-		'Narzędzie do pobierania, przeglądania i analizy transkrypcji z filmów YouTube z szablonami promptów AI.',
+		'Inteligentne narzędzie do pobierania, przeglądania i analizy transkrypcji z filmów YouTube z szablonami promptów AI.',
 };
 
 import ThemeRegistry from '@/components/ThemeRegistry';

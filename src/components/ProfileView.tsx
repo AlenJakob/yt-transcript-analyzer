@@ -192,13 +192,29 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 								py: 2.2,
 								fontSize: '0.9rem',
 								fontWeight: 700,
-								bgcolor: userAuth.isAdmin
-									? 'rgba(168, 85, 247, 0.15)'
-									: userAuth.isPro
-										? 'rgba(16, 185, 129, 0.15)'
-										: 'rgba(59, 130, 246, 0.15)',
-								color: userAuth.isAdmin ? '#c084fc' : userAuth.isPro ? '#34d399' : '#60a5fa',
-								border: '1px solid rgba(255, 255, 255, 0.1)',
+								bgcolor: (theme) =>
+									userAuth.isAdmin
+										? theme.palette.mode === 'dark'
+											? 'rgba(168, 85, 247, 0.15)'
+											: 'rgba(126, 34, 206, 0.12)'
+										: userAuth.isPro
+											? 'rgba(16, 185, 129, 0.15)'
+											: 'rgba(59, 130, 246, 0.15)',
+								color: (theme) =>
+									userAuth.isAdmin
+										? theme.palette.mode === 'dark'
+											? '#c084fc'
+											: '#6b21a8'
+										: userAuth.isPro
+											? '#34d399'
+											: '#60a5fa',
+								border: '1px solid',
+								borderColor: (theme) =>
+									userAuth.isAdmin
+										? theme.palette.mode === 'dark'
+											? 'rgba(168, 85, 247, 0.3)'
+											: 'rgba(126, 34, 206, 0.35)'
+										: 'divider',
 								borderRadius: 2,
 							}}
 						/>
@@ -213,7 +229,11 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 					sx={{
 						p: { xs: 3, sm: 4 },
 						bgcolor: 'background.paper',
-						border: '1px solid rgba(168, 85, 247, 0.3)',
+						border: '1px solid',
+						borderColor: (theme) =>
+							theme.palette.mode === 'dark'
+								? 'rgba(168, 85, 247, 0.35)'
+								: 'rgba(126, 34, 206, 0.4)',
 						borderRadius: 2,
 					}}
 				>
@@ -223,7 +243,13 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 						sx={{ alignItems: { sm: 'center' }, justifyContent: 'space-between', mb: 3 }}
 					>
 						<Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-							<AdminPanelSettingsIcon sx={{ color: '#c084fc', fontSize: 32 }} />
+							<AdminPanelSettingsIcon
+								sx={{
+									color: (theme) =>
+										theme.palette.mode === 'dark' ? '#c084fc' : '#7e22ce',
+									fontSize: 32,
+								}}
+							/>
 							<Box>
 								<Typography variant="h6" sx={{ fontWeight: 700 }}>
 									Panel Zarządzania Użytkownikami (Admin)

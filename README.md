@@ -1,4 +1,4 @@
-# 🎬 YouTube Transcript Analyzer
+# 🎬 TubeDigest – YouTube Transcript & AI Analyzer
 
 > **Zaawansowana aplikacja internetowa w Next.js do wyciągania transkrypcji wideo z YouTube, szybkiej obróbki tekstu oraz analizy za pomocą sztucznej inteligencji (AI Prompt Presets & Direct AI Analysis).**
 

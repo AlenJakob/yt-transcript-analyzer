@@ -14,9 +14,10 @@ export const darkTheme: Theme = createTheme({
 			contrastText: '#ffffff',
 		},
 		secondary: {
-			main: '#ef4444',
-			light: '#f87171',
-			dark: '#dc2626',
+			main: '#a855f7',
+			light: '#c084fc',
+			dark: '#7e22ce',
+			contrastText: '#ffffff',
 		},
 		info: {
 			main: '#06b6d4',
@@ -162,9 +163,10 @@ export const lightTheme: Theme = createTheme({
 			contrastText: '#ffffff',
 		},
 		secondary: {
-			main: '#ef4444',
-			light: '#f87171',
-			dark: '#dc2626',
+			main: '#7e22ce',
+			light: '#9333ea',
+			dark: '#581c87',
+			contrastText: '#ffffff',
 		},
 		info: {
 			main: '#0891b2',

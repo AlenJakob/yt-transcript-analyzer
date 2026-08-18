@@ -180,7 +180,13 @@ export default function ArchiveCard({ item, onSelect, onDelete }: ArchiveCardPro
 							size="small"
 							startIcon={<PlayArrowIcon sx={{ fontSize: 16 }} />}
 							onClick={() => onSelect(item)}
-							sx={{ bgcolor: '#3b82f6', '&:hover': { bgcolor: '#2563eb' } }}
+							sx={{
+								bgcolor: '#3b82f6',
+								height: 34,
+								px: 2,
+								borderRadius: 2,
+								'&:hover': { bgcolor: '#2563eb' },
+							}}
 						>
 							Otwórz
 						</Button>
@@ -190,7 +196,28 @@ export default function ArchiveCard({ item, onSelect, onDelete }: ArchiveCardPro
 								size="small"
 								color="error"
 								onClick={() => onDelete(item.id)}
-								sx={{ opacity: 0.7, '&:hover': { opacity: 1 } }}
+								sx={{
+									color: '#ef4444',
+									height: 34,
+									width: 34,
+									bgcolor: (theme) =>
+										theme.palette.mode === 'dark'
+											? 'rgba(239, 68, 68, 0.12)'
+											: 'rgba(239, 68, 68, 0.08)',
+									border: '1px solid',
+									borderColor: (theme) =>
+										theme.palette.mode === 'dark'
+											? 'rgba(239, 68, 68, 0.3)'
+											: 'rgba(239, 68, 68, 0.25)',
+									borderRadius: 2,
+									transition: 'all 0.2s ease-in-out',
+									'&:hover': {
+										bgcolor: '#ef4444',
+										color: '#ffffff',
+										borderColor: '#ef4444',
+										boxShadow: '0 2px 8px rgba(239, 68, 68, 0.35)',
+									},
+								}}
 							>
 								<DeleteIcon sx={{ fontSize: 18 }} />
 							</IconButton>
