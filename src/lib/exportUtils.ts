@@ -97,3 +97,32 @@ export function exportToPdf(
 	`);
 	printWindow.document.close();
 }
+
+export async function exportToAudioMp3(
+	content: string,
+	filename: string = 'podsumowanie-ai.mp3',
+	language: string = 'pl'
+): Promise<void> {
+	const response = await fetch('/api/ai/tts', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ text: content, language }),
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json().catch(() => ({}));
+		throw new Error(errorData.error || 'Nie udało się pobrać pliku audio MP3');
+	}
+
+	const blob = await response.blob();
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement('a');
+	a.href = url;
+	a.download = filename;
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+	URL.revokeObjectURL(url);
+}

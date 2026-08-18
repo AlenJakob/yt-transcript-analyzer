@@ -26,6 +26,7 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import PauseIcon from '@mui/icons-material/Pause';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import AudiotrackIcon from '@mui/icons-material/Audiotrack';
 import { Dispatch, SetStateAction } from 'react';
 import { useTranscriptGenerator } from '@/hooks/useTranscriptGenerator';
 
@@ -195,7 +196,7 @@ export default function TranscriptGenerator({
 								{isAdmin && speech.isSupported && (
 									<>
 										<Button
-											disabled={!ai.response || ai.isLoading}
+											disabled={!ai.response || ai.isLoading || speech.isLoading}
 											variant={speech.isSpeaking ? 'contained' : 'outlined'}
 											color={
 												speech.isSpeaking && speech.isPaused
@@ -206,7 +207,9 @@ export default function TranscriptGenerator({
 											}
 											size="small"
 											startIcon={
-												speech.isSpeaking && speech.isPaused ? (
+												speech.isLoading ? (
+													<CircularProgress size={14} sx={{ color: 'inherit' }} />
+												) : speech.isSpeaking && speech.isPaused ? (
 													<PlayArrowIcon sx={{ fontSize: 16 }} />
 												) : speech.isSpeaking ? (
 													<PauseIcon sx={{ fontSize: 16 }} />
@@ -216,11 +219,13 @@ export default function TranscriptGenerator({
 											}
 											onClick={speech.toggle}
 										>
-											{speech.isSpeaking && speech.isPaused
-												? 'Wznów'
-												: speech.isSpeaking
-													? 'Pauza'
-													: 'Odsłuchaj'}
+											{speech.isLoading
+												? 'Wczytuję...'
+												: speech.isSpeaking && speech.isPaused
+													? 'Wznów'
+													: speech.isSpeaking
+														? 'Pauza'
+														: 'Odsłuchaj'}
 										</Button>
 
 										{speech.isSpeaking && (
@@ -269,6 +274,25 @@ export default function TranscriptGenerator({
 										</ListItemIcon>
 										<ListItemText>Drukuj / Pobierz PDF</ListItemText>
 									</MenuItem>
+									{isAdmin && (
+										<MenuItem
+											onClick={exportActions.mp3}
+											disabled={exportActions.isExportingAudio}
+										>
+											<ListItemIcon>
+												{exportActions.isExportingAudio ? (
+													<CircularProgress size={16} />
+												) : (
+													<AudiotrackIcon fontSize="small" />
+												)}
+											</ListItemIcon>
+											<ListItemText>
+												{exportActions.isExportingAudio
+													? 'Generuję plik audio MP3...'
+													: 'Pobierz audio (.MP3)'}
+											</ListItemText>
+										</MenuItem>
+									)}
 								</Menu>
 
 								<Button

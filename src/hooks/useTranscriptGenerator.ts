@@ -3,7 +3,7 @@ import { useAiSummary } from '@/hooks/useAiSummary';
 import { useAuthUser } from '@/hooks/useAuthUser';
 import { useCopyClipboard } from '@/hooks/useCopyClipboad';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
-import { exportToTxt, exportToMarkdown, exportToPdf } from '@/lib/exportUtils';
+import { exportToTxt, exportToMarkdown, exportToPdf, exportToAudioMp3 } from '@/lib/exportUtils';
 import { Language } from '@/components/LanguageSelect';
 
 interface UseTranscriptGeneratorParams {
@@ -19,10 +19,12 @@ export function useTranscriptGenerator({
 	const { aiResponse, isAiLoading, error, generateSummary, abort } = useAiSummary();
 	const { isAdmin } = useAuthUser();
 	const [copied, setCopied] = useState(false);
+	const [isExportingAudio, setIsExportingAudio] = useState(false);
 	const { copyClipBoard } = useCopyClipboard();
 	const {
 		isSpeaking,
 		isPaused,
+		isLoading: isTtsLoading,
 		toggle: toggleSpeech,
 		stop: stopSpeaking,
 		isSupported: isTtsSupported,
@@ -76,6 +78,18 @@ export function useTranscriptGenerator({
 		});
 	}, [aiResponse, selectedModel, selectedLanguage]);
 
+	const handleExportMp3 = useCallback(async () => {
+		setExportAnchorEl(null);
+		setIsExportingAudio(true);
+		try {
+			await exportToAudioMp3(aiResponse, 'podsumowanie-ai.mp3', selectedLanguage);
+		} catch (err) {
+			console.error('Błąd pobierania MP3:', err);
+		} finally {
+			setIsExportingAudio(false);
+		}
+	}, [aiResponse, selectedLanguage]);
+
 	const handleGenerateAiSummary = useCallback(() => {
 		const transcriptText = formattedParagraphs.join('\n\n');
 		setCopied(false);
@@ -114,6 +128,7 @@ export function useTranscriptGenerator({
 		speech: {
 			isSpeaking,
 			isPaused,
+			isLoading: isTtsLoading,
 			toggle: handleToggleSpeak,
 			stop: stopSpeaking,
 			isSupported: isTtsSupported,
@@ -121,11 +136,13 @@ export function useTranscriptGenerator({
 		export: {
 			anchorEl: exportAnchorEl,
 			isOpen: isExportOpen,
+			isExportingAudio,
 			open: handleExportClick,
 			close: handleExportClose,
 			txt: handleExportTxt,
 			markdown: handleExportMd,
 			pdf: handleExportPdf,
+			mp3: handleExportMp3,
 		},
 		language: {
 			selected: selectedLanguage,

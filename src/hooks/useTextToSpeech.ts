@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 interface UseTextToSpeechReturn {
 	isSpeaking: boolean;
 	isPaused: boolean;
+	isLoading: boolean;
 	speak: (text: string, langCode?: string) => void;
 	pause: () => void;
 	resume: () => void;
@@ -56,6 +57,7 @@ function selectBestVoice(langCode: string): SpeechSynthesisVoice | null {
 export function useTextToSpeech(): UseTextToSpeechReturn {
 	const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
 	const [isPaused, setIsPaused] = useState<boolean>(false);
+	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [isSupported, setIsSupported] = useState<boolean>(false);
 	const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
@@ -80,6 +82,7 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 	const stop = useCallback(() => {
 		if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
 			window.speechSynthesis.cancel();
+			setIsLoading(false);
 			setIsSpeaking(false);
 			setIsPaused(false);
 		}
@@ -105,6 +108,7 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 		}
 
 		window.speechSynthesis.cancel();
+		setIsLoading(true);
 
 		const utterance = new SpeechSynthesisUtterance(text);
 		utteranceRef.current = utterance;
@@ -127,16 +131,19 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 		utterance.pitch = 1.0;
 
 		utterance.onstart = () => {
+			setIsLoading(false);
 			setIsSpeaking(true);
 			setIsPaused(false);
 		};
 
 		utterance.onend = () => {
+			setIsLoading(false);
 			setIsSpeaking(false);
 			setIsPaused(false);
 		};
 
 		utterance.onerror = () => {
+			setIsLoading(false);
 			setIsSpeaking(false);
 			setIsPaused(false);
 		};
@@ -168,6 +175,7 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 	return {
 		isSpeaking,
 		isPaused,
+		isLoading,
 		speak,
 		pause,
 		resume,
