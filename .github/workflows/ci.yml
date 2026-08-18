@@ -64,18 +64,15 @@ jobs:
 
       - run: npm ci
 
-      - name: Debug Clerk env
-        run: |
-          if [ -n "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" ]; then
-            echo "✅ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is set"
-          else
-            echo "❌ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is MISSING"
-          fi
+      - name: Check Environment Variables
+        run: bash scripts/check-env.sh
         env:
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Build
         run: npm run build
         env:
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
