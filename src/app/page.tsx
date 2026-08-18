@@ -8,6 +8,7 @@ import VideoMetadataCard from '@/components/VideoMetadataCard';
 import TranscriptViewer from '@/components/TranscriptViewer/TranscriptViewer';
 import AiAnalysisPresets from '@/components/AiAnalysisPresets';
 import { useTranscriptArchive } from '@/hooks/useTranscriptArchive';
+import { useAuthUser } from '@/hooks/useAuthUser';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import InfoIcon from '@mui/icons-material/Info';
 
@@ -21,6 +22,7 @@ function AnalyzerContent() {
 		history,
 		handleFetchTranscript,
 	} = useTranscriptArchive();
+	const { isAdmin } = useAuthUser();
 
 	return (
 		<Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 8 }}>
@@ -43,10 +45,12 @@ function AnalyzerContent() {
 				{segments.length > 0 && metadata && (
 					<>
 						<TranscriptViewer segments={segments} videoId={metadata.videoId} />
-						<AiAnalysisPresets
-							segments={segments}
-							videoTitle={metadata.title}
-						/>
+						{isAdmin && (
+							<AiAnalysisPresets
+								segments={segments}
+								videoTitle={metadata.title}
+							/>
+						)}
 					</>
 				)}
 

@@ -22,6 +22,10 @@ import DownloadIcon from '@mui/icons-material/Download';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DescriptionIcon from '@mui/icons-material/Description';
 import CodeIcon from '@mui/icons-material/Code';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import PauseIcon from '@mui/icons-material/Pause';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { Dispatch, SetStateAction } from 'react';
 import { useTranscriptGenerator } from '@/hooks/useTranscriptGenerator';
 
@@ -39,6 +43,7 @@ export default function TranscriptGenerator({
 	const {
 		ai,
 		clipboard,
+		speech,
 		export: exportActions,
 		language,
 		isAdmin,
@@ -187,6 +192,51 @@ export default function TranscriptGenerator({
 								Odpowiedź AI ({language.selected.toUpperCase()})
 							</Typography>
 							<Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+								{speech.isSupported && (
+									<>
+										<Button
+											disabled={!ai.response || ai.isLoading}
+											variant={speech.isSpeaking ? 'contained' : 'outlined'}
+											color={
+												speech.isSpeaking && speech.isPaused
+													? 'success'
+													: speech.isSpeaking
+														? 'warning'
+														: 'primary'
+											}
+											size="small"
+											startIcon={
+												speech.isSpeaking && speech.isPaused ? (
+													<PlayArrowIcon sx={{ fontSize: 16 }} />
+												) : speech.isSpeaking ? (
+													<PauseIcon sx={{ fontSize: 16 }} />
+												) : (
+													<VolumeUpIcon sx={{ fontSize: 16 }} />
+												)
+											}
+											onClick={speech.toggle}
+										>
+											{speech.isSpeaking && speech.isPaused
+												? 'Wznów'
+												: speech.isSpeaking
+													? 'Pauza'
+													: 'Odsłuchaj'}
+										</Button>
+
+										{speech.isSpeaking && (
+											<Button
+												variant="outlined"
+												color="error"
+												size="small"
+												startIcon={<VolumeOffIcon sx={{ fontSize: 16 }} />}
+												onClick={speech.stop}
+											>
+												Stop
+											</Button>
+										)}
+									</>
+								)}
+
 								<Button
 									disabled={!ai.response || ai.isLoading}
 									variant="outlined"

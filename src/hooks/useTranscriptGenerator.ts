@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect, MouseEvent } from 'react';
 import { useAiSummary } from '@/hooks/useAiSummary';
 import { useAuthUser } from '@/hooks/useAuthUser';
 import { useCopyClipboard } from '@/hooks/useCopyClipboad';
+import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { exportToTxt, exportToMarkdown, exportToPdf } from '@/lib/exportUtils';
 import { Language } from '@/components/LanguageSelect';
 
@@ -19,6 +20,13 @@ export function useTranscriptGenerator({
 	const { isAdmin } = useAuthUser();
 	const [copied, setCopied] = useState(false);
 	const { copyClipBoard } = useCopyClipboard();
+	const {
+		isSpeaking,
+		isPaused,
+		toggle: toggleSpeech,
+		stop: stopSpeaking,
+		isSupported: isTtsSupported,
+	} = useTextToSpeech();
 	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 	useEffect(() => {
@@ -31,6 +39,12 @@ export function useTranscriptGenerator({
 
 	const [exportAnchorEl, setExportAnchorEl] = useState<null | HTMLElement>(null);
 	const isExportOpen = Boolean(exportAnchorEl);
+
+	const handleToggleSpeak = useCallback(() => {
+		if (aiResponse) {
+			toggleSpeech(aiResponse, selectedLanguage);
+		}
+	}, [toggleSpeech, aiResponse, selectedLanguage]);
 
 	const handleExportClick = useCallback((event: MouseEvent<HTMLButtonElement>) => {
 		setExportAnchorEl(event.currentTarget);
@@ -64,8 +78,9 @@ export function useTranscriptGenerator({
 	const handleGenerateAiSummary = useCallback(() => {
 		const transcriptText = formattedParagraphs.join('\n\n');
 		setCopied(false);
+		stopSpeaking();
 		generateSummary(transcriptText, selectedModel, undefined, selectedLanguage);
-	}, [formattedParagraphs, selectedModel, selectedLanguage, generateSummary]);
+	}, [formattedParagraphs, selectedModel, selectedLanguage, generateSummary, stopSpeaking]);
 
 	const handleCopy = useCallback(() => {
 		if (aiResponse) {
@@ -94,6 +109,13 @@ export function useTranscriptGenerator({
 		clipboard: {
 			copied,
 			copy: handleCopy,
+		},
+		speech: {
+			isSpeaking,
+			isPaused,
+			toggle: handleToggleSpeak,
+			stop: stopSpeaking,
+			isSupported: isTtsSupported,
 		},
 		export: {
 			anchorEl: exportAnchorEl,
