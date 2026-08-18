@@ -192,7 +192,7 @@ export default function TranscriptGenerator({
 								Odpowiedź AI ({language.selected.toUpperCase()})
 							</Typography>
 							<Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-								{speech.isSupported && (
+								{isAdmin && speech.isSupported && (
 									<>
 										<Button
 											disabled={!ai.response || ai.isLoading}

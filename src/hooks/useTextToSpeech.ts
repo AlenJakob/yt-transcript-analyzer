@@ -11,6 +11,48 @@ interface UseTextToSpeechReturn {
 	isSupported: boolean;
 }
 
+function selectBestVoice(langCode: string): SpeechSynthesisVoice | null {
+	if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+		return null;
+	}
+
+	const voices = window.speechSynthesis.getVoices();
+	if (!voices || voices.length === 0) {
+		return null;
+	}
+
+	const langMap: Record<string, string> = {
+		pl: 'pl-PL',
+		en: 'en-US',
+		de: 'de-DE',
+		es: 'es-ES',
+		fr: 'fr-FR',
+	};
+	const targetLang = (langMap[langCode] || langCode).toLowerCase();
+	const shortLang = targetLang.split('-')[0];
+
+	const matchingVoices = voices.filter((v) =>
+		v.lang.toLowerCase().startsWith(shortLang)
+	);
+	if (matchingVoices.length === 0) {
+		return null;
+	}
+
+	// Prioritize high-quality "Natural", "Google", "Neural", "Online", or "Premium" voices
+	const naturalVoice = matchingVoices.find((v) => {
+		const name = v.name.toLowerCase();
+		return (
+			name.includes('natural') ||
+			name.includes('google') ||
+			name.includes('neural') ||
+			name.includes('online') ||
+			name.includes('premium')
+		);
+	});
+
+	return naturalVoice || matchingVoices[0];
+}
+
 export function useTextToSpeech(): UseTextToSpeechReturn {
 	const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
 	const [isPaused, setIsPaused] = useState<boolean>(false);
@@ -20,6 +62,10 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 	useEffect(() => {
 		if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
 			setIsSupported(true);
+			window.speechSynthesis.getVoices();
+			window.speechSynthesis.onvoiceschanged = () => {
+				window.speechSynthesis.getVoices();
+			};
 		}
 	}, []);
 
@@ -72,6 +118,14 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 		};
 		utterance.lang = langMap[langCode] || langCode;
 
+		// Automatically assign best natural voice if available
+		const bestVoice = selectBestVoice(langCode);
+		if (bestVoice) {
+			utterance.voice = bestVoice;
+		}
+		utterance.rate = 0.95; // Slightly calmer speaking rate for clarity
+		utterance.pitch = 1.0;
+
 		utterance.onstart = () => {
 			setIsSpeaking(true);
 			setIsPaused(false);
@@ -90,23 +144,26 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 		window.speechSynthesis.speak(utterance);
 	}, []);
 
-	const toggle = useCallback((text: string, langCode: string = 'pl') => {
-		if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-			return;
-		}
-
-		if (window.speechSynthesis.speaking) {
-			if (window.speechSynthesis.paused) {
-				window.speechSynthesis.resume();
-				setIsPaused(false);
-			} else {
-				window.speechSynthesis.pause();
-				setIsPaused(true);
+	const toggle = useCallback(
+		(text: string, langCode: string = 'pl') => {
+			if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+				return;
 			}
-		} else {
-			speak(text, langCode);
-		}
-	}, [speak]);
+
+			if (window.speechSynthesis.speaking) {
+				if (window.speechSynthesis.paused) {
+					window.speechSynthesis.resume();
+					setIsPaused(false);
+				} else {
+					window.speechSynthesis.pause();
+					setIsPaused(true);
+				}
+			} else {
+				speak(text, langCode);
+			}
+		},
+		[speak]
+	);
 
 	return {
 		isSpeaking,

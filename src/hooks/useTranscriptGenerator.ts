@@ -41,10 +41,11 @@ export function useTranscriptGenerator({
 	const isExportOpen = Boolean(exportAnchorEl);
 
 	const handleToggleSpeak = useCallback(() => {
+		if (!isAdmin) return;
 		if (aiResponse) {
 			toggleSpeech(aiResponse, selectedLanguage);
 		}
-	}, [toggleSpeech, aiResponse, selectedLanguage]);
+	}, [isAdmin, toggleSpeech, aiResponse, selectedLanguage]);
 
 	const handleExportClick = useCallback((event: MouseEvent<HTMLButtonElement>) => {
 		setExportAnchorEl(event.currentTarget);
