@@ -16,6 +16,7 @@ export function useTranscriptGenerator({
 	formattedParagraphs,
 }: UseTranscriptGeneratorParams) {
 	const [selectedLanguage, setSelectedLanguage] = useState<Language>('pl');
+	const [responseLanguage, setResponseLanguage] = useState<Language>('pl');
 	const { aiResponse, isAiLoading, error, generateSummary, abort } = useAiSummary();
 	const { isAdmin } = useAuthUser();
 	const [copied, setCopied] = useState(false);
@@ -25,6 +26,10 @@ export function useTranscriptGenerator({
 		isSpeaking,
 		isPaused,
 		isLoading: isTtsLoading,
+		rate: ttsRate,
+		setRate: setTtsRate,
+		gender: ttsGender,
+		setGender: setTtsGender,
 		toggle: toggleSpeech,
 		stop: stopSpeaking,
 		isSupported: isTtsSupported,
@@ -45,9 +50,9 @@ export function useTranscriptGenerator({
 	const handleToggleSpeak = useCallback(() => {
 		if (!isAdmin) return;
 		if (aiResponse) {
-			toggleSpeech(aiResponse, selectedLanguage);
+			toggleSpeech(aiResponse, responseLanguage);
 		}
-	}, [isAdmin, toggleSpeech, aiResponse, selectedLanguage]);
+	}, [isAdmin, toggleSpeech, aiResponse, responseLanguage]);
 
 	const handleExportClick = useCallback((event: MouseEvent<HTMLButtonElement>) => {
 		setExportAnchorEl(event.currentTarget);
@@ -66,34 +71,35 @@ export function useTranscriptGenerator({
 		setExportAnchorEl(null);
 		exportToMarkdown(aiResponse, 'podsumowanie-ai.md', {
 			model: selectedModel,
-			language: selectedLanguage,
+			language: responseLanguage,
 		});
-	}, [aiResponse, selectedModel, selectedLanguage]);
+	}, [aiResponse, selectedModel, responseLanguage]);
 
 	const handleExportPdf = useCallback(() => {
 		setExportAnchorEl(null);
 		exportToPdf(aiResponse, {
 			model: selectedModel,
-			language: selectedLanguage,
+			language: responseLanguage,
 		});
-	}, [aiResponse, selectedModel, selectedLanguage]);
+	}, [aiResponse, selectedModel, responseLanguage]);
 
 	const handleExportMp3 = useCallback(async () => {
 		setExportAnchorEl(null);
 		setIsExportingAudio(true);
 		try {
-			await exportToAudioMp3(aiResponse, 'podsumowanie-ai.mp3', selectedLanguage);
+			await exportToAudioMp3(aiResponse, 'podsumowanie-ai.mp3', responseLanguage);
 		} catch (err) {
 			console.error('Błąd pobierania MP3:', err);
 		} finally {
 			setIsExportingAudio(false);
 		}
-	}, [aiResponse, selectedLanguage]);
+	}, [aiResponse, responseLanguage]);
 
 	const handleGenerateAiSummary = useCallback(() => {
 		const transcriptText = formattedParagraphs.join('\n\n');
 		setCopied(false);
 		stopSpeaking();
+		setResponseLanguage(selectedLanguage);
 		generateSummary(transcriptText, selectedModel, undefined, selectedLanguage);
 	}, [formattedParagraphs, selectedModel, selectedLanguage, generateSummary, stopSpeaking]);
 
@@ -129,6 +135,10 @@ export function useTranscriptGenerator({
 			isSpeaking,
 			isPaused,
 			isLoading: isTtsLoading,
+			rate: ttsRate,
+			setRate: setTtsRate,
+			gender: ttsGender,
+			setGender: setTtsGender,
 			toggle: handleToggleSpeak,
 			stop: stopSpeaking,
 			isSupported: isTtsSupported,
