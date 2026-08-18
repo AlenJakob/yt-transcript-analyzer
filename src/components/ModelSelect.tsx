@@ -4,6 +4,12 @@ import { Paper, Box, Select, MenuItem, Typography } from '@mui/material';
 import { ModelOpenRouter } from '@/types/openRouter';
 import { useEffect, useState, startTransition } from 'react';
 
+const AUTO_MODEL = {
+	id: 'openrouter/free',
+	name: '⚡ OpenRouter Auto Free (Automatyczny)',
+	description: 'Automatycznie wybiera obecnie dostępny darmowy model',
+};
+
 const mapModels = (models: ModelOpenRouter[]) =>
 	models.map((model) => {
 		return {
@@ -23,21 +29,28 @@ export default function ModelSelect({ selectedModel, setSelectedModel }: ModelSe
 
 	useEffect(() => {
 		const getModels = async () => {
-			const res = await fetch('/api/ai/models');
-			const data = await res.json();
+			try {
+				const res = await fetch('/api/ai/models');
+				const data = await res.json();
 
-			const mappedModels = mapModels(data.models.freeModels);
-			startTransition(() => {
-				setModels(mappedModels);
+				const fetchedModels = data.models?.freeModels ? mapModels(data.models.freeModels) : [];
+				const mappedModels = [AUTO_MODEL, ...fetchedModels];
 
-				if (mappedModels.length > 0 && mappedModels[0].id) {
-					setSelectedModel(mappedModels[0].id);
-				}
-			});
+				startTransition(() => {
+					setModels(mappedModels);
+
+					if (!selectedModel && mappedModels.length > 0 && mappedModels[0].id) {
+						setSelectedModel(mappedModels[0].id);
+					}
+				});
+			} catch (err) {
+				console.error('Failed to fetch AI models:', err);
+				setModels([AUTO_MODEL]);
+			}
 		};
 
 		getModels();
-	}, [setSelectedModel]);
+	}, [selectedModel, setSelectedModel]);
 
 	return (
 		<Paper

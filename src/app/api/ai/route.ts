@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
 			messages: [
 				{
 					role: 'system',
-					content: `Jesteś ekspertem od analizy transkrypcji wideo. Zawsze:
+					content: `Jesteś ekspertem od analizy i streszczania transkrypcji wideo. Twoim jedynym celem jest przeanalizowanie podanego tekstu z wideo i wygenerowanie wartościowego podsumowania. Zawsze:
 								- ${targetLanguageInstruction},
 								- używaj wyłącznie zwykłego tekstu,
 								- nie używaj Markdown,

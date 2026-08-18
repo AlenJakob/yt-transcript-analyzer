@@ -50,7 +50,7 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 	const [groupInterval, setGroupInterval] = useState<number>(30);
 	const [searchQuery, setSearchQuery] = useState('');
 	const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
-	const [selectedModel, setSelectedModel] = useState<string>('');
+	const [selectedModel, setSelectedModel] = useState<string>('openrouter/free');
 
 	const processedSegments = useMemo(() => {
 		if (groupInterval === 0) {
