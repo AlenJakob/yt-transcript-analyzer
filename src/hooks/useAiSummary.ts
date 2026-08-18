@@ -74,7 +74,9 @@ export function useAiSummary(): UseAiSummaryReturn {
 				});
 
 				if (!resp.ok) {
-					throw new Error(`Błąd serwera: ${resp.status}`);
+					const errorData = await resp.json().catch(() => null);
+					const serverMsg = errorData?.error;
+					throw new Error(serverMsg || `Błąd serwera: ${resp.status}`);
 				}
 
 				const data = await resp.json();

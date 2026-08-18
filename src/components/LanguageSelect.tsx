@@ -2,8 +2,10 @@
 
 import { Paper, Box, Select, MenuItem, Typography } from '@mui/material';
 
+export type Language = 'pl' | 'en' | 'de' | 'es' | 'fr';
+
 export interface LanguageOption {
-	code: string;
+	code: Language;
 	label: string;
 }
 
@@ -16,8 +18,8 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
 ];
 
 interface LanguageSelectProps {
-	selectedLanguage: string;
-	setSelectedLanguage: (lang: string) => void;
+	selectedLanguage: Language;
+	setSelectedLanguage: (lang: Language) => void;
 }
 
 export default function LanguageSelect({
@@ -49,7 +51,7 @@ export default function LanguageSelect({
 					size="medium"
 					fullWidth
 					value={selectedLanguage}
-					onChange={(e) => setSelectedLanguage(e.target.value)}
+					onChange={(e) => setSelectedLanguage(e.target.value as Language)}
 				>
 					{SUPPORTED_LANGUAGES.map((lang) => (
 						<MenuItem key={lang.code} value={lang.code}>
