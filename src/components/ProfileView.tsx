@@ -222,6 +222,8 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 				</Stack>
 			</Paper>
 
+			{/* TODO: Add user settings UI to customize/change OpenRouter API Key (currently non-configurable by user) */}
+
 			{/* PANEL ADMINISTRATORA (Dla kont z uprawnieniami Admina) */}
 			{userAuth.isAdmin && (
 				<Paper

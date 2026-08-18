@@ -14,6 +14,7 @@
 ## 🌟 Kluczowe Funkcje
 
 ### 📺 1. Wyciąganie i Prezentacja Transkrypcji
+
 - **Obsługa dowolnych linków YouTube**: Standardowe `watch?v=`, skrócone `youtu.be/`, formaty `shorts/` oraz `embed/`.
 - **Wykrywanie języków napisów**: Obsługa języka polskiego (pl), angielskiego (en) oraz automatycznego (auto fallback).
 - **Dwa elastyczne widoki**:
@@ -23,6 +24,7 @@
 - **Jednoklikowy Eksport**: Możliwość pobrania transkrypcji w formatach `.txt`, `.md` (Markdown) oraz `.json`.
 
 ### 🤖 2. Szablony Promptów AI & Generowanie Podsumowań
+
 - **Gotowe szablony zapytania dla LLM**:
   - `[ TL;DR ]` – Błyskawiczna synteza głównej tezy.
   - `[ Notatki i Punkty ]` – Ustrukturyzowane wypunktowanie wiedzy.
@@ -34,10 +36,12 @@
 - **Bezpośrednie generowanie AI**: Integracja z modelami LLM (OpenRouter) dla użytkowników z odpowiednimi uprawnieniami.
 
 ### 🌓 3. Tryb Jasny i Ciemny (Light & Dark Mode)
+
 - Pełna obsługa motywu **Light Mode** oraz **Dark Mode** w oparciu o czysty system MUI v9.
 - Zapamiętywanie preferencji w `localStorage` oraz wygładzony przełącznik w nagłówku.
 
 ### 👤 4. System Użytkowników & Panel Administratora
+
 - Autoryzacja kont oparta o **Clerk**.
 - Zarządzanie rolami: Użytkownicy Basic, Plan PRO oraz Administrator.
 - Panel Admina w profilu umożliwiający zarządzenie pakietami PRO i rolami użytkowników.
@@ -77,21 +81,25 @@ graph TD
 ## 🚀 Uruchomienie Projektu Lokalnie
 
 ### Wymagania wstępne
+
 - Node.js `v18.x` lub nowszy
 - Menedżer pakietów `npm`, `pnpm` lub `yarn`
 
 ### 1. Klonowanie repozytorium
+
 ```bash
 git clone https://github.com/AlenJakob/yt-transcript-analyzer.git
 cd yt-transcript-analyzer
 ```
 
 ### 2. Instalacja zależności
+
 ```bash
 npm install
 ```
 
 ### 3. Konfiguracja zmiennych środowiskowych `.env.local`
+
 Utwórz plik `.env.local` w głównym katalogu projektu i uzupełnij klucze:
 
 ```env
@@ -105,6 +113,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
 ### 4. Uruchomienie serwera deweloperskiego
+
 ```bash
 npm run dev
 ```
@@ -115,14 +124,14 @@ Aplikacja będzie dostępna pod adresem: [http://localhost:3000](http://localhos
 
 ## 🧪 Skrypty Deweloperskie & Testowanie
 
-| Polecenie | Opis |
-| :--- | :--- |
-| `npm run dev` | Uruchamia serwer deweloperski Next.js z Hot Reload |
-| `npm run build` | Kompiluje aplikację do wydania produkcyjnego |
-| `npm run start` | Uruchamia serwer produkcyjny |
-| `npm run lint` | Uruchamia sprawdzanie jakości kodu (ESLint) |
-| `npm test` | Uruchamia zestaw testów jednostkowych (Jest) |
-| `npx tsc --noEmit` | Weryfikacja spójności typów TypeScript |
+| Polecenie          | Opis                                               |
+| :----------------- | :------------------------------------------------- |
+| `npm run dev`      | Uruchamia serwer deweloperski Next.js z Hot Reload |
+| `npm run build`    | Kompiluje aplikację                                |
+| `npm run start`    | Uruchamia serwer produkcyjny                       |
+| `npm run lint`     | Uruchamia sprawdzanie jakości kodu (ESLint)        |
+| `npm test`         | Uruchamia zestaw testów jednostkowych (Jest)       |
+| `npx tsc --noEmit` | Weryfikacja spójności typów TypeScript             |
 
 ---
 
@@ -131,10 +140,10 @@ Aplikacja będzie dostępna pod adresem: [http://localhost:3000](http://localhos
 ```text
 yt-transcript-analyzer/
 ├── .github/workflows/     # Konfiguracja CI/CD GitHub Actions
-├── public/                # Zasoby statyczne (obrazy, favikona)
+├── public/                # Zasoby statyczne (obrazy, favicon)
 ├── src/
 │   ├── app/               # Next.js App Router (Strony & API Routes)
-│   │   ├── api/           # API Routes (/transcript, /ai, /user, /admin/users)
+│   │   ├── api/           # API Routes (/transcript, /ai)
 │   │   ├── archive/       # Strona archiwum historii
 │   │   ├── profile/       # Strona profilu i panelu admina
 │   │   ├── layout.tsx     # Główny układ aplikacji
@@ -158,4 +167,4 @@ yt-transcript-analyzer/
 
 ## 🛡️ Licencja
 
-Projekt dystrybuowany na licencji **MIT**. Szczegóły w pliku LICENSE.
+Projekt dystrybuowany na licencji **MIT**.

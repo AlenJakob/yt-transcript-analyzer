@@ -5,6 +5,7 @@ import { verifyAdminAccess } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 
 // OpenRouter wymaga własnego baseURL i opcjonalnych nagłówków
+// TODO: Allow user-customizable OpenRouter API Key (currently non-configurable from UI, defaults to OPENROUTER_API_KEY env var)
 const openai = new OpenAI({
 	apiKey: process.env.OPENROUTER_API_KEY,
 	baseURL: 'https://openrouter.ai/api/v1',
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
 	try {
 		const { isAdmin } = await verifyAdminAccess(req);
 
-		// Zabezpieczenie: tylko administrator ma dostęp do generowania AI z OpenRouter
+		// Guard: tylko administrator ma dostęp do generowania AI z OpenRouter
 		if (!isAdmin) {
 			return NextResponse.json(
 				{
@@ -59,10 +60,17 @@ export async function POST(req: NextRequest) {
 			],
 		});
 
-		return NextResponse.json({ result: response.choices[0].message.content, modelUsed: model });
+		return NextResponse.json({
+			result: response.choices[0].message.content,
+			modelUsed: model,
+		});
 	} catch (err: unknown) {
-		const message = err instanceof Error ? err.message : 'Nieznany błąd serwera';
+		const message =
+			err instanceof Error ? err.message : 'Nieznany błąd serwera';
 		console.error('[/api/ai] Error:', message);
-		return NextResponse.json({ error: `Błąd serwera: ${message}` }, { status: 500 });
+		return NextResponse.json(
+			{ error: `Błąd serwera: ${message}` },
+			{ status: 500 }
+		);
 	}
 }
