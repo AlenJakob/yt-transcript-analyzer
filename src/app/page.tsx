@@ -12,8 +12,15 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import InfoIcon from '@mui/icons-material/Info';
 
 function AnalyzerContent() {
-	const { isLoading, error, metadata, segments, stats, history, handleFetchTranscript } =
-		useTranscriptArchive();
+	const {
+		isLoading,
+		error,
+		metadata,
+		segments,
+		stats,
+		history,
+		handleFetchTranscript,
+	} = useTranscriptArchive();
 
 	return (
 		<Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 8 }}>
@@ -28,13 +35,18 @@ function AnalyzerContent() {
 				/>
 
 				{/* Dane wideo oraz Statystyki */}
-				{metadata && stats && <VideoMetadataCard metadata={metadata} stats={stats} />}
+				{metadata && stats && (
+					<VideoMetadataCard metadata={metadata} stats={stats} />
+				)}
 
 				{/* Podgląd Transkrypcji & Szablony AI */}
 				{segments.length > 0 && metadata && (
 					<>
 						<TranscriptViewer segments={segments} videoId={metadata.videoId} />
-						<AiAnalysisPresets segments={segments} videoTitle={metadata.title} />
+						<AiAnalysisPresets
+							segments={segments}
+							videoTitle={metadata.title}
+						/>
 					</>
 				)}
 
@@ -77,8 +89,9 @@ function AnalyzerContent() {
 							variant="body2"
 							sx={{ color: 'text.secondary', maxWidth: 500, mx: 'auto', mb: 3 }}
 						>
-							Wklej dowolny adres URL z serwisu YouTube w powyższym polu lub otwórz wcześniej
-							zapisaną transkrypcję z zakładki <strong>Archiwum ({history.length})</strong>.
+							Wklej dowolny adres URL z serwisu YouTube w powyższym polu lub
+							otwórz wcześniej zapisaną transkrypcję z zakładki{' '}
+							<strong>Archiwum ({history.length})</strong>.
 						</Typography>
 						<Typography
 							variant="caption"
@@ -89,8 +102,8 @@ function AnalyzerContent() {
 								gap: 0.5,
 							}}
 						>
-							<InfoIcon sx={{ fontSize: 16 }} /> Obsługuje filmy wideo, YouTube Shorts oraz linki
-							skrócone `youtu.be`.
+							<InfoIcon sx={{ fontSize: 16 }} /> Obsługuje filmy wideo, YouTube
+							Shorts oraz linki skrócone `youtu.be`.
 						</Typography>
 					</Paper>
 				)}
