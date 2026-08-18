@@ -4,22 +4,33 @@ import { verifyAdminAccess } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-// OpenRouter wymaga własnego baseURL i opcjonalnych nagłówków
-// TODO: Allow user-customizable OpenRouter API Key (currently non-configurable from UI, defaults to OPENROUTER_API_KEY env var)
-const openai = new OpenAI({
-	apiKey: process.env.OPENROUTER_API_KEY,
-	baseURL: 'https://openrouter.ai/api/v1',
-	defaultHeaders: {
-		'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-		'X-Title': 'YT Transcript Analyzer',
-	},
-});
+/**
+ * Lazily creates and returns an OpenAI client instance configured for OpenRouter.
+ */
+function getOpenAIClient(): OpenAI {
+	const apiKey = process.env.OPENROUTER_API_KEY;
+	if (!apiKey) {
+		throw new Error(
+			'OPENROUTER_API_KEY environment variable is not configured.'
+		);
+	}
+
+	return new OpenAI({
+		apiKey,
+		baseURL: 'https://openrouter.ai/api/v1',
+		defaultHeaders: {
+			'HTTP-Referer':
+				process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+			'X-Title': 'YT Transcript Analyzer',
+		},
+	});
+}
 
 export async function POST(req: NextRequest) {
 	try {
 		const { isAdmin } = await verifyAdminAccess(req);
 
-		// Guard: tylko administrator ma dostęp do generowania AI z OpenRouter
+		// Guard: only administrator has access to generate AI with OpenRouter
 		if (!isAdmin) {
 			return NextResponse.json(
 				{
@@ -39,6 +50,7 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
+		const openai = getOpenAIClient();
 		const defaultModel = 'openrouter/free';
 		const response = await openai.chat.completions.create({
 			model: model || defaultModel,
