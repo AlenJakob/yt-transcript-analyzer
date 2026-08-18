@@ -71,7 +71,7 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 				if (!isNaN(parsed)) return parsed;
 			}
 		}
-		return 0.95;
+		return 1.0;
 	});
 
 	const setRate = useCallback((newRate: number) => {
