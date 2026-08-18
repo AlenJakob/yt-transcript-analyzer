@@ -129,8 +129,9 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 					gap: 2,
 					alignItems: { xs: 'stretch', xl: 'center' },
 					justifyContent: 'space-between',
-					bgcolor: '#121824',
-					border: '1px solid rgba(255, 255, 255, 0.08)',
+					bgcolor: 'background.paper',
+					border: '1px solid',
+					borderColor: 'divider',
 					borderRadius: 2,
 				}}
 			>
@@ -400,8 +401,9 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 					elevation={0}
 					sx={{
 						p: { xs: 3, sm: 4 },
-						bgcolor: '#121824',
-						border: '1px solid rgba(255, 255, 255, 0.08)',
+						bgcolor: 'background.paper',
+						border: '1px solid',
+						borderColor: 'divider',
 						borderRadius: 2,
 					}}
 				>
@@ -413,7 +415,8 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 							alignItems: 'center',
 							mb: 3,
 							pb: 2,
-							borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+							borderBottom: '1px solid',
+							borderColor: 'divider',
 						}}
 					>
 						<Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'text.primary' }}>

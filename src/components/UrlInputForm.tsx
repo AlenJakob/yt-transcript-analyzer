@@ -89,10 +89,14 @@ export default function UrlInputForm({ onFetchTranscript, isLoading, error }: Ur
 			sx={{
 				p: { xs: 2.5, sm: 3.5 },
 				mb: 4,
-				background: 'linear-gradient(145deg, #121824 0%, #0e131d 100%)',
-				border: '1px solid rgba(255, 255, 255, 0.08)',
+				bgcolor: 'background.paper',
+				border: '1px solid',
+				borderColor: 'divider',
 				borderRadius: 2,
-				boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+				boxShadow: (theme) =>
+					theme.palette.mode === 'dark'
+						? '0 8px 32px rgba(0, 0, 0, 0.4)'
+						: '0 4px 20px rgba(0, 0, 0, 0.05)',
 			}}
 		>
 			<Box sx={{ mb: 2 }}>
@@ -125,13 +129,13 @@ export default function UrlInputForm({ onFetchTranscript, isLoading, error }: Ur
 							input: {
 								startAdornment: (
 									<InputAdornment position="start">
-										<SearchIcon sx={{ color: '#9ca3af', fontSize: 22 }} />
+										<SearchIcon sx={{ color: 'text.secondary', fontSize: 22 }} />
 									</InputAdornment>
 								),
 								endAdornment: inputUrl ? (
 									<InputAdornment position="end">
 										<CancelIcon
-											sx={{ color: '#9ca3af', fontSize: 20, cursor: 'pointer' }}
+											sx={{ color: 'text.secondary', fontSize: 20, cursor: 'pointer' }}
 											onClick={() => setInputUrl('')}
 										/>
 									</InputAdornment>
@@ -149,13 +153,13 @@ export default function UrlInputForm({ onFetchTranscript, isLoading, error }: Ur
 							sx={{
 								height: '56px',
 								borderRadius: 2,
-								bgcolor: 'rgba(255, 255, 255, 0.03)',
+								bgcolor: 'action.hover',
 								fontWeight: 600,
 								fontSize: '0.9rem',
 							}}
 							startAdornment={
 								<InputAdornment position="start" sx={{ ml: 1, mr: 0 }}>
-									<LanguageIcon sx={{ fontSize: 18, color: '#9ca3af' }} />
+									<LanguageIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
 								</InputAdornment>
 							}
 						>
@@ -193,11 +197,12 @@ export default function UrlInputForm({ onFetchTranscript, isLoading, error }: Ur
 					sx={{
 						mt: 2,
 						alignItems: 'center',
-						bgcolor: 'rgba(255, 255, 255, 0.02)',
+						bgcolor: 'action.hover',
 						py: 1,
 						px: 2,
 						borderRadius: 1.5,
-						border: '1px solid rgba(255, 255, 255, 0.05)',
+						border: '1px solid',
+						borderColor: 'divider',
 					}}
 				>
 					<InfoOutlinedIcon sx={{ fontSize: 16, color: '#3b82f6', flexShrink: 0 }} />
@@ -232,8 +237,8 @@ export default function UrlInputForm({ onFetchTranscript, isLoading, error }: Ur
 						disabled={isLoading}
 						clickable
 						sx={{
-							bgcolor: 'rgba(255, 255, 255, 0.05)',
-							borderColor: 'rgba(255, 255, 255, 0.1)',
+							bgcolor: 'action.hover',
+							borderColor: 'divider',
 							'&:hover': { bgcolor: 'rgba(59, 130, 246, 0.15)', borderColor: '#3b82f6' },
 						}}
 					/>

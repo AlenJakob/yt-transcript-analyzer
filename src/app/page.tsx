@@ -12,15 +12,8 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import InfoIcon from '@mui/icons-material/Info';
 
 function AnalyzerContent() {
-	const {
-		isLoading,
-		error,
-		metadata,
-		segments,
-		stats,
-		history,
-		handleFetchTranscript,
-	} = useTranscriptArchive();
+	const { isLoading, error, metadata, segments, stats, history, handleFetchTranscript } =
+		useTranscriptArchive();
 
 	return (
 		<Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 8 }}>
@@ -52,9 +45,14 @@ function AnalyzerContent() {
 						sx={{
 							p: { xs: 4, sm: 6 },
 							textAlign: 'center',
-							bgcolor: 'rgba(18, 24, 36, 0.5)',
-							border: '1px dashed rgba(255, 255, 255, 0.1)',
+							bgcolor: 'background.paper',
+							border: '1px dashed',
+							borderColor: 'divider',
 							borderRadius: 2,
+							boxShadow: (theme) =>
+								theme.palette.mode === 'dark'
+									? '0 8px 24px rgba(0, 0, 0, 0.35)'
+									: '0 2px 12px rgba(0, 0, 0, 0.04)',
 						}}
 					>
 						<Box
@@ -80,7 +78,7 @@ function AnalyzerContent() {
 							sx={{ color: 'text.secondary', maxWidth: 500, mx: 'auto', mb: 3 }}
 						>
 							Wklej dowolny adres URL z serwisu YouTube w powyższym polu lub otwórz wcześniej
-							zapisaną transkrypcję z zakłdaki <strong>Archiwum ({history.length})</strong>.
+							zapisaną transkrypcję z zakładki <strong>Archiwum ({history.length})</strong>.
 						</Typography>
 						<Typography
 							variant="caption"

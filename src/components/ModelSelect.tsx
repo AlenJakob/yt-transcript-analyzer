@@ -45,10 +45,14 @@ export default function ModelSelect({ selectedModel, setSelectedModel }: ModelSe
 			sx={{
 				p: { xs: 2.5, sm: 3.5 },
 				mb: 4,
-				background: 'linear-gradient(145deg, #121824 0%, #0e131d 100%)',
-				border: '1px solid rgba(255, 255, 255, 0.08)',
+				bgcolor: 'background.paper',
+				border: '1px solid',
+				borderColor: 'divider',
 				borderRadius: 2,
-				boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+				boxShadow: (theme) =>
+					theme.palette.mode === 'dark'
+						? '0 8px 32px rgba(0, 0, 0, 0.4)'
+						: '0 4px 20px rgba(0, 0, 0, 0.05)',
 			}}
 		>
 			<Typography variant="body2" sx={{ mb: 1, color: 'text.secondary', fontWeight: 600 }}>

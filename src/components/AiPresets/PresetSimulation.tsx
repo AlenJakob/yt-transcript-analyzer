@@ -21,10 +21,11 @@ export default function PresetSimulation({
 	return (
 		<Box
 			sx={{
-				bgcolor: '#0a0d14',
+				bgcolor: 'background.default',
 				p: 3,
 				borderRadius: 2,
-				border: '1px solid rgba(255, 255, 255, 0.06)',
+				border: '1px solid',
+				borderColor: 'divider',
 			}}
 		>
 			<Stack
@@ -41,7 +42,7 @@ export default function PresetSimulation({
 						<Chip
 							label={activePreset.title}
 							size="small"
-							sx={{ bgcolor: 'rgba(255, 255, 255, 0.08)', fontWeight: 600 }}
+							sx={{ bgcolor: 'action.hover', fontWeight: 600 }}
 						/>
 					</Typography>
 					<Typography variant="caption" sx={{ color: 'text.secondary' }}>
@@ -65,9 +66,10 @@ export default function PresetSimulation({
 				<Box
 					sx={{
 						p: 2.5,
-						bgcolor: '#121824',
+						bgcolor: 'background.paper',
 						borderRadius: 2,
-						border: '1px dashed rgba(255, 255, 255, 0.15)',
+						border: '1px dashed',
+						borderColor: 'divider',
 					}}
 				>
 					<Typography
@@ -87,8 +89,9 @@ export default function PresetSimulation({
 					sx={{
 						py: 4,
 						textAlign: 'center',
-						color: 'text.disabled',
-						border: '1px dashed rgba(255, 255, 255, 0.08)',
+						color: 'text.secondary',
+						border: '1px dashed',
+						borderColor: 'divider',
 						borderRadius: 2,
 					}}
 				>

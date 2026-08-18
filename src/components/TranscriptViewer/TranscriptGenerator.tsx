@@ -46,8 +46,9 @@ export default function TranscriptGenerator({
 			sx={{
 				mb: 2,
 				p: { xs: 3, sm: 4 },
-				bgcolor: '#121824',
-				border: '1px solid rgba(255, 255, 255, 0.08)',
+				bgcolor: 'background.paper',
+				border: '1px solid',
+				borderColor: 'divider',
 				borderRadius: 2,
 			}}
 		>

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Box, Container, Typography, Chip, Stack, Button, Badge } from '@mui/material';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import HistoryIcon from '@mui/icons-material/History';
 import SearchIcon from '@mui/icons-material/Search';
@@ -12,6 +13,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import AuthButtonSlot from '@/components/AuthButtonSlot';
 import { useAuthUser } from '@/hooks/useAuthUser';
+import { useColorMode } from '@/context/ColorModeContext';
 
 interface HeaderProps {
 	historyCount?: number;
@@ -21,6 +23,7 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 	const pathname = usePathname();
 	const router = useRouter();
 	const { isAdmin } = useAuthUser();
+	const { mode, toggleColorMode } = useColorMode();
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
@@ -38,9 +41,12 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 			component="header"
 			sx={{
 				py: 2.5,
-				borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+				borderBottom: '1px solid',
+				borderColor: 'divider',
 				background:
-					'linear-gradient(180deg, rgba(18, 24, 36, 0.85) 0%, rgba(10, 13, 20, 0.95) 100%)',
+					mode === 'dark'
+						? 'linear-gradient(180deg, rgba(18, 24, 36, 0.85) 0%, rgba(10, 13, 20, 0.95) 100%)'
+						: 'linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.95) 100%)',
 				backdropFilter: 'blur(12px)',
 				sticky: 'top',
 				top: 0,
@@ -92,16 +98,31 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 
 					<Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
 						<Chip
-							icon={<DarkModeIcon sx={{ fontSize: 15 }} />}
-							label="Dark Mode"
+							icon={
+								mode === 'dark' ? (
+									<LightModeIcon sx={{ fontSize: 16, color: '#f59e0b' }} />
+								) : (
+									<DarkModeIcon sx={{ fontSize: 16, color: '#3b82f6' }} />
+								)
+							}
+							label={mode === 'dark' ? 'Tryb jasny' : 'Tryb ciemny'}
+							onClick={toggleColorMode}
 							variant="outlined"
 							size="medium"
+							clickable
 							sx={{
-								borderColor: 'rgba(255, 255, 255, 0.1)',
-								bgcolor: 'rgba(255, 255, 255, 0.03)',
-								color: 'text.secondary',
-								borderRadius: 3,
+								borderColor: 'divider',
+								bgcolor: mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)',
+								color: 'text.primary',
+								borderRadius: 2.5,
+								fontWeight: 600,
+								fontSize: '0.82rem',
+								transition: 'all 0.2s ease',
 								display: { xs: 'none', md: 'inline-flex' },
+								'&:hover': {
+									borderColor: mode === 'dark' ? '#f59e0b' : '#3b82f6',
+									bgcolor: mode === 'dark' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+								},
 							}}
 						/>
 						<Button
@@ -111,7 +132,7 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 							onClick={() => router.push('/')}
 							sx={{
 								bgcolor: isAnalyzer ? '#3b82f6' : 'transparent',
-								borderColor: 'rgba(255, 255, 255, 0.15)',
+								borderColor: isAnalyzer ? '#3b82f6' : 'divider',
 								color: isAnalyzer ? '#ffffff' : 'text.secondary',
 								px: 2,
 								borderRadius: 1.5,
@@ -140,7 +161,7 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 							onClick={() => router.push('/archive')}
 							sx={{
 								bgcolor: isArchive ? '#3b82f6' : 'transparent',
-								borderColor: 'rgba(255, 255, 255, 0.15)',
+								borderColor: isArchive ? '#3b82f6' : 'divider',
 								color: isArchive ? '#ffffff' : 'text.secondary',
 								px: 2,
 								borderRadius: 1.5,
@@ -162,7 +183,11 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 							onClick={() => router.push('/profile')}
 							sx={{
 								bgcolor: isProfile ? (isAdmin ? '#9333ea' : '#3b82f6') : 'transparent',
-								borderColor: isAdmin ? 'rgba(168, 85, 247, 0.3)' : 'rgba(255, 255, 255, 0.15)',
+								borderColor: isAdmin
+									? 'rgba(168, 85, 247, 0.3)'
+									: isProfile
+										? '#3b82f6'
+										: 'divider',
 								color: isProfile ? '#ffffff' : isAdmin ? '#c084fc' : 'text.secondary',
 								px: 2,
 								borderRadius: 1.5,

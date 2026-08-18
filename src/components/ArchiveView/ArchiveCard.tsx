@@ -34,14 +34,18 @@ export default function ArchiveCard({ item, onSelect, onDelete }: ArchiveCardPro
 					height: '100%',
 					display: 'flex',
 					flexDirection: 'column',
-					bgcolor: '#121824',
-					border: '1px solid rgba(255, 255, 255, 0.08)',
+					bgcolor: 'background.paper',
+					border: '1px solid',
+					borderColor: 'divider',
 					borderRadius: 2,
 					transition: 'all 0.2s ease-in-out',
 					'&:hover': {
 						borderColor: 'rgba(59, 130, 246, 0.4)',
 						transform: 'translateY(-3px)',
-						boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
+						boxShadow: (theme) =>
+							theme.palette.mode === 'dark'
+								? '0 8px 24px rgba(0, 0, 0, 0.35)'
+								: '0 8px 24px rgba(0, 0, 0, 0.08)',
 					},
 				}}
 			>
@@ -142,7 +146,7 @@ export default function ArchiveCard({ item, onSelect, onDelete }: ArchiveCardPro
 							size="small"
 							variant="outlined"
 							sx={{
-								borderColor: 'rgba(255, 255, 255, 0.1)',
+								borderColor: 'divider',
 								color: 'text.secondary',
 								fontSize: '0.7rem',
 								height: 22,
@@ -153,7 +157,7 @@ export default function ArchiveCard({ item, onSelect, onDelete }: ArchiveCardPro
 							size="small"
 							variant="outlined"
 							sx={{
-								borderColor: 'rgba(255, 255, 255, 0.1)',
+								borderColor: 'divider',
 								color: 'text.secondary',
 								fontSize: '0.7rem',
 								height: 22,
@@ -167,7 +171,8 @@ export default function ArchiveCard({ item, onSelect, onDelete }: ArchiveCardPro
 							alignItems: 'center',
 							justifyContent: 'space-between',
 							pt: 1,
-							borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+							borderTop: '1px solid',
+							borderColor: 'divider',
 						}}
 					>
 						<Button

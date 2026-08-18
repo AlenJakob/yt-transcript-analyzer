@@ -48,8 +48,9 @@ export default function AiAnalysisPresets({ segments, videoTitle }: AiAnalysisPr
 			sx={{
 				p: { xs: 2.5, sm: 3.5 },
 				mb: 6,
-				bgcolor: '#121824',
-				border: '1px solid rgba(255, 255, 255, 0.08)',
+				bgcolor: 'background.paper',
+				border: '1px solid',
+				borderColor: 'divider',
 				borderRadius: 2,
 			}}
 		>

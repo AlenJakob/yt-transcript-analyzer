@@ -95,8 +95,9 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 				elevation={0}
 				sx={{
 					p: { xs: 3, sm: 4 },
-					bgcolor: '#121824',
-					border: '1px solid rgba(255, 255, 255, 0.08)',
+					bgcolor: 'background.paper',
+					border: '1px solid',
+					borderColor: 'divider',
 					borderRadius: 2,
 					mb: 4,
 				}}
@@ -211,7 +212,7 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 					elevation={0}
 					sx={{
 						p: { xs: 3, sm: 4 },
-						bgcolor: '#121824',
+						bgcolor: 'background.paper',
 						border: '1px solid rgba(168, 85, 247, 0.3)',
 						borderRadius: 2,
 					}}
