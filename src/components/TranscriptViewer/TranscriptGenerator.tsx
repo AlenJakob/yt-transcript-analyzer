@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Paper, Stack, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Paper, Stack, Tooltip, Typography } from '@mui/material';
 import ModelSelect from '../ModelSelect';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
@@ -7,7 +7,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { useCopyClipboard } from '@/hooks/useCopyClipboad';
 import { useAiSummary } from '@/hooks/useAiSummary';
-import { useFakeAuth } from '@/hooks/useFakeAuth';
+import { useAuthUser } from '@/hooks/useAuthUser';
 
 interface TranscriptGeneratorProps {
 	selectedModel: string;
@@ -21,7 +21,8 @@ export default function TranscriptGenerator({
 	formattedParagraphs,
 }: TranscriptGeneratorProps) {
 	const { aiResponse, isAiLoading, error, generateSummary, abort } = useAiSummary();
-	const { isAllowed } = useFakeAuth();
+	const { isAdmin } = useAuthUser();
+	const isAllowed = isAdmin;
 	const [copied, setCopied] = useState(false);
 	const { copyClipBoard } = useCopyClipboard();
 
@@ -47,7 +48,7 @@ export default function TranscriptGenerator({
 				p: { xs: 3, sm: 4 },
 				bgcolor: '#121824',
 				border: '1px solid rgba(255, 255, 255, 0.08)',
-				borderRadius: 1,
+				borderRadius: 2,
 			}}
 		>
 			<Typography
@@ -69,22 +70,32 @@ export default function TranscriptGenerator({
 					spacing={1.5}
 					sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 1 }}
 				>
-					<Button
-						disabled={isAiLoading}
-						variant="contained"
-						size="small"
-						startIcon={
-							isAiLoading ? (
-								<CircularProgress sx={{ color: 'inherit' }} size={14} />
-							) : (
-								<SmartToyIcon sx={{ fontSize: 16 }} />
-							)
+					<Tooltip
+						title={
+							!isAllowed
+								? 'Generowanie podsumowań jest obecnie dostępne tylko dla administratora.'
+								: ''
 						}
-						onClick={handleGenerateAiSummary}
-						sx={{ bgcolor: '#10b981', '&:hover': { bgcolor: '#059669' } }}
 					>
-						Generuj podsumowanie
-					</Button>
+						<span>
+							<Button
+								disabled={isAiLoading || !isAllowed}
+								variant="contained"
+								size="small"
+								startIcon={
+									isAiLoading ? (
+										<CircularProgress sx={{ color: 'inherit' }} size={14} />
+									) : (
+										<SmartToyIcon sx={{ fontSize: 16 }} />
+									)
+								}
+								onClick={handleGenerateAiSummary}
+								sx={{ bgcolor: '#10b981', '&:hover': { bgcolor: '#059669' } }}
+							>
+								Generuj podsumowanie
+							</Button>
+						</span>
+					</Tooltip>
 
 					<Button
 						disabled={!aiResponse || isAiLoading}

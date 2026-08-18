@@ -39,7 +39,6 @@ import {
 	formatContinuousParagraphs,
 } from '@/lib/youtube';
 import TranscriptGenerator from './TranscriptGenerator';
-import { useFakeAuth } from '@/hooks/useFakeAuth';
 
 interface TranscriptViewerProps {
 	segments: TranscriptSegment[];
@@ -52,8 +51,6 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 	const [searchQuery, setSearchQuery] = useState('');
 	const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 	const [selectedModel, setSelectedModel] = useState<string>('');
-
-	const { isAllowed } = useFakeAuth();
 
 	const processedSegments = useMemo(() => {
 		if (groupInterval === 0) {
@@ -134,7 +131,7 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 					justifyContent: 'space-between',
 					bgcolor: '#121824',
 					border: '1px solid rgba(255, 255, 255, 0.08)',
-					borderRadius: 3,
+					borderRadius: 2,
 				}}
 			>
 				{/* Przełącznik widoków + grupowanie */}
@@ -150,7 +147,7 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 							borderRadius: 2,
 							'& .MuiToggleButton-root': {
 								border: 0,
-								borderRadius: 1.5,
+								borderRadius: 2,
 								px: 2,
 								py: 0.75,
 								color: 'text.secondary',
@@ -316,13 +313,11 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 				</Typography>
 			)}
 
-			{isAllowed && (
-				<TranscriptGenerator
-					selectedModel={selectedModel}
-					setSelectedModel={setSelectedModel}
-					formattedParagraphs={formattedParagraphs}
-				/>
-			)}
+			<TranscriptGenerator
+				selectedModel={selectedModel}
+				setSelectedModel={setSelectedModel}
+				formattedParagraphs={formattedParagraphs}
+			/>
 
 			{/* WIDOK 1: CZASÓWKI */}
 			{viewMode === 'timestamps' && (
@@ -407,7 +402,7 @@ export default function TranscriptViewer({ segments, videoId }: TranscriptViewer
 						p: { xs: 3, sm: 4 },
 						bgcolor: '#121824',
 						border: '1px solid rgba(255, 255, 255, 0.08)',
-						borderRadius: 3,
+						borderRadius: 2,
 					}}
 				>
 					<Stack

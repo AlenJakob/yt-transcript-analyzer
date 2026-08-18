@@ -86,7 +86,9 @@ export function useAiSummary(): UseAiSummaryReturn {
 				}
 			} finally {
 				setIsAiLoading(false);
-				abortControllerRef.current = null;
+				if (abortControllerRef.current === controller) {
+					abortControllerRef.current = null;
+				}
 			}
 		},
 		[]

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { verifyAdminAccess } from '@/lib/auth';
+
+export const dynamic = 'force-dynamic';
 
 // OpenRouter wymaga własnego baseURL i opcjonalnych nagłówków
 const openai = new OpenAI({
@@ -13,10 +16,17 @@ const openai = new OpenAI({
 
 export async function POST(req: NextRequest) {
 	try {
-		// TODO: temporary authentication - refactor before deployment
-		const testCookie = req.cookies.get('test')?.value;
-		if (testCookie !== 'alen') {
-			return NextResponse.json({ error: 'Brak autoryzacji.' }, { status: 401 });
+		const { isAdmin } = await verifyAdminAccess(req);
+
+		// Zabezpieczenie: tylko administrator ma dostęp do generowania AI z OpenRouter
+		if (!isAdmin) {
+			return NextResponse.json(
+				{
+					error:
+						'Dostęp ograniczony. Generowanie AI z OpenRouter jest obecnie dostępne tylko dla administratora.',
+				},
+				{ status: 403 }
+			);
 		}
 
 		const { model, transcriptText, promptPreset } = await req.json();
@@ -27,6 +37,7 @@ export async function POST(req: NextRequest) {
 				{ status: 400 }
 			);
 		}
+
 		const defaultModel = 'openrouter/free';
 		const response = await openai.chat.completions.create({
 			model: model || defaultModel,

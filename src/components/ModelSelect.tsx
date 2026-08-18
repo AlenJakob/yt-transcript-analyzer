@@ -27,15 +27,17 @@ export default function ModelSelect({ selectedModel, setSelectedModel }: ModelSe
 			const data = await res.json();
 
 			const mappedModels = mapModels(data.models.freeModels);
-			setModels(mappedModels);
+			startTransition(() => {
+				setModels(mappedModels);
 
-			if (mappedModels.length > 0 && mappedModels[0].id) {
-				setSelectedModel(mappedModels[0].id);
-			}
+				if (mappedModels.length > 0 && mappedModels[0].id) {
+					setSelectedModel(mappedModels[0].id);
+				}
+			});
 		};
 
 		getModels();
-	}, []);
+	}, [setSelectedModel]);
 
 	return (
 		<Paper
@@ -45,7 +47,7 @@ export default function ModelSelect({ selectedModel, setSelectedModel }: ModelSe
 				mb: 4,
 				background: 'linear-gradient(145deg, #121824 0%, #0e131d 100%)',
 				border: '1px solid rgba(255, 255, 255, 0.08)',
-				borderRadius: 1,
+				borderRadius: 2,
 				boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
 			}}
 		>

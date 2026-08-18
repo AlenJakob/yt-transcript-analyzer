@@ -1,16 +1,19 @@
 # Project Guidelines & Agent Instructions
 
 ## Overview
+
 This repository (**yt-transcript-analyzer**) is a Next.js web application built with React 19, TypeScript, and Material UI (MUI v9). It fetches YouTube video transcripts, parses them, and analyzes them using AI prompt templates.
 
 ---
 
 ## 1. Language & Documentation
+
 - **Language**: All code, comments, docstrings, variable names, function names, types, and commit messages MUST be in **English**.
 
 ---
 
 ## 2. TypeScript & Component Architecture
+
 - Use functional React components (`React.FC` or standard function declarations with typed props).
 - **Strict Typing**: Never use `any`. Explicitly define interfaces and types for props, API responses, and state objects.
 - Keep components modular, focused, and organized within `src/components/`.
@@ -21,6 +24,7 @@ This repository (**yt-transcript-analyzer**) is a Next.js web application built 
 ## 3. Material UI (MUI v9) & Layout Best Practices
 
 ### Grid Component Syntax (CRITICAL)
+
 - **Do NOT use legacy Grid syntax**: Avoid `<Grid item xs={12} md={6}>`.
 - **ALWAYS use MUI v9 Grid syntax**:
   ```tsx
@@ -36,6 +40,7 @@ This repository (**yt-transcript-analyzer**) is a Next.js web application built 
   ```
 
 ### Styling Guidelines
+
 - Use the `sx` prop for component styling and layout adjustments.
 - Avoid plain CSS / external stylesheet hacks when MUI theme tokens or `sx` props are available.
 - Maintain consistent dark/light theme tokens using `@mui/material/styles`.
@@ -43,5 +48,27 @@ This repository (**yt-transcript-analyzer**) is a Next.js web application built 
 ---
 
 ## 4. Code Formatting & Quality
+
 - Keep code formatted according to Prettier and ESLint rules configured in the project (`npm run format` / `npm run lint`).
 - Ensure proper error handling in API routes (`src/app/api/...`) and return typed JSON responses with standard status codes.
+
+## 5. Components Rule
+
+- Keep components max 500~~ lines
+- otherwise if is longer then 500 line split to smaller if is possible
+
+## 6. Props name
+
+- never use shorter users.map((u) => u.name)
+- always use full name for example users.map((user) => user.name)
+
+## 7. nested return
+
+- if (!videoIdParam) return; wrong always use nested return in curly braces {}
+
+## 8. Commit Message Rules
+
+- Always use Conventional Commits format: `feat:`, `fix:`, `refactor:`, `docs:`, `chore:`, `ci:`, `test:`, `style:`.
+- Include scope when applicable, e.g. `feat(archive): ...`, `fix(auth): ...`.
+- Language: English.
+- Keep the title concise (max 72 characters).
