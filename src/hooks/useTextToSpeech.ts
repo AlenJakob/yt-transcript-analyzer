@@ -1,15 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-export type VoiceGender = 'female' | 'male';
-
 interface UseTextToSpeechReturn {
 	isSpeaking: boolean;
 	isPaused: boolean;
 	isLoading: boolean;
 	rate: number;
 	setRate: (rate: number) => void;
-	gender: VoiceGender;
-	setGender: (gender: VoiceGender) => void;
 	speak: (text: string, langCode?: string) => void;
 	pause: () => void;
 	resume: () => void;
@@ -18,7 +14,7 @@ interface UseTextToSpeechReturn {
 	isSupported: boolean;
 }
 
-function selectBestVoice(langCode: string, gender: VoiceGender = 'female'): SpeechSynthesisVoice | null {
+function selectBestVoice(langCode: string): SpeechSynthesisVoice | null {
 	if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
 		return null;
 	}
@@ -45,53 +41,38 @@ function selectBestVoice(langCode: string, gender: VoiceGender = 'female'): Spee
 		return null;
 	}
 
-	const preferredVoice = matchingVoices.find((v) => {
+	const naturalVoice = matchingVoices.find((v) => {
 		const name = v.name.toLowerCase();
-		if (gender === 'male') {
-			return (
-				name.includes('marek') ||
-				name.includes('paul') ||
-				name.includes('adam') ||
-				name.includes('guy') ||
-				name.includes('male')
-			);
-		} else {
-			return (
-				name.includes('zofia') ||
-				name.includes('agnieszka') ||
-				name.includes('google') ||
-				name.includes('jenny') ||
-				name.includes('natural')
-			);
-		}
+		return (
+			name.includes('natural') ||
+			name.includes('google') ||
+			name.includes('neural') ||
+			name.includes('online') ||
+			name.includes('premium')
+		);
 	});
 
-	return preferredVoice || matchingVoices[0];
+	return naturalVoice || matchingVoices[0];
 }
 
 export function useTextToSpeech(): UseTextToSpeechReturn {
 	const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
 	const [isPaused, setIsPaused] = useState<boolean>(false);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
-	const [isSupported, setIsSupported] = useState<boolean>(false);
+	const [isSupported] = useState<boolean>(() => {
+		return typeof window !== 'undefined' && 'speechSynthesis' in window;
+	});
 
-	const [rate, setRateState] = useState<number>(0.95);
-	const [gender, setGenderState] = useState<VoiceGender>('female');
-
-	useEffect(() => {
+	const [rate, setRateState] = useState<number>(() => {
 		if (typeof window !== 'undefined') {
 			const savedRate = localStorage.getItem('yt_analyzer_tts_rate');
 			if (savedRate) {
 				const parsed = parseFloat(savedRate);
-				if (!isNaN(parsed)) setRateState(parsed);
-			}
-
-			const savedGender = localStorage.getItem('yt_analyzer_tts_gender') as VoiceGender;
-			if (savedGender === 'female' || savedGender === 'male') {
-				setGenderState(savedGender);
+				if (!isNaN(parsed)) return parsed;
 			}
 		}
-	}, []);
+		return 0.95;
+	});
 
 	const setRate = useCallback((newRate: number) => {
 		setRateState(newRate);
@@ -100,18 +81,10 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 		}
 	}, []);
 
-	const setGender = useCallback((newGender: VoiceGender) => {
-		setGenderState(newGender);
-		if (typeof window !== 'undefined') {
-			localStorage.setItem('yt_analyzer_tts_gender', newGender);
-		}
-	}, []);
-
 	const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
 	useEffect(() => {
 		if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-			setIsSupported(true);
 			window.speechSynthesis.getVoices();
 			window.speechSynthesis.onvoiceschanged = () => {
 				window.speechSynthesis.getVoices();
@@ -171,7 +144,7 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 			};
 			utterance.lang = langMap[langCode] || langCode;
 
-			const bestVoice = selectBestVoice(langCode, gender);
+			const bestVoice = selectBestVoice(langCode);
 			if (bestVoice) {
 				utterance.voice = bestVoice;
 			}
@@ -198,7 +171,7 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 
 			window.speechSynthesis.speak(utterance);
 		},
-		[rate, gender]
+		[rate]
 	);
 
 	const toggle = useCallback(
@@ -228,8 +201,6 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 		isLoading,
 		rate,
 		setRate,
-		gender,
-		setGender,
 		speak,
 		pause,
 		resume,

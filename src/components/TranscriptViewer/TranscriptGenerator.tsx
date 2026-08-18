@@ -11,6 +11,8 @@ import {
 	MenuItem,
 	ListItemIcon,
 	ListItemText,
+	FormControl,
+	Select,
 } from '@mui/material';
 import ModelSelect from '../ModelSelect';
 import LanguageSelect from '../LanguageSelect';
@@ -27,11 +29,7 @@ import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import PauseIcon from '@mui/icons-material/Pause';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AudiotrackIcon from '@mui/icons-material/Audiotrack';
-import SettingsIcon from '@mui/icons-material/Settings';
-import FemaleIcon from '@mui/icons-material/Female';
-import MaleIcon from '@mui/icons-material/Male';
-import { Popover, IconButton, ToggleButtonGroup, ToggleButton, Divider } from '@mui/material';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import { useTranscriptGenerator } from '@/hooks/useTranscriptGenerator';
 
 interface TranscriptGeneratorProps {
@@ -56,9 +54,6 @@ export default function TranscriptGenerator({
 		selectedModel,
 		formattedParagraphs,
 	});
-
-	const [ttsSettingsAnchorEl, setTtsSettingsAnchorEl] = useState<null | HTMLElement>(null);
-	const isTtsSettingsOpen = Boolean(ttsSettingsAnchorEl);
 
 	return (
 		<Paper
@@ -235,69 +230,30 @@ export default function TranscriptGenerator({
 														: 'Odsłuchaj'}
 										</Button>
 
-										<Tooltip title="Ustawienia głosu (Płeć, Szybkość)">
-											<IconButton
-												size="small"
-												onClick={(e) => setTtsSettingsAnchorEl(e.currentTarget)}
-												sx={{ color: 'text.secondary', '&:hover': { color: '#3b82f6' } }}
-											>
-												<SettingsIcon sx={{ fontSize: 18 }} />
-											</IconButton>
+										<Tooltip title="Prędkość odtwarzania mowy">
+											<FormControl size="small">
+												<Select
+													value={speech.rate}
+													onChange={(e) => speech.setRate(Number(e.target.value))}
+													size="small"
+													sx={{
+														fontSize: '0.75rem',
+														fontWeight: 700,
+														height: 30,
+														borderRadius: 1.5,
+														'& .MuiSelect-select': {
+															py: 0.4,
+															px: 1,
+														},
+													}}
+												>
+													<MenuItem value={0.85}>0.85x</MenuItem>
+													<MenuItem value={1.0}>1.0x</MenuItem>
+													<MenuItem value={1.25}>1.25x</MenuItem>
+													<MenuItem value={1.5}>1.5x</MenuItem>
+												</Select>
+											</FormControl>
 										</Tooltip>
-										<Popover
-											open={isTtsSettingsOpen}
-											anchorEl={ttsSettingsAnchorEl}
-											onClose={() => setTtsSettingsAnchorEl(null)}
-											anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-											transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-											PaperProps={{ sx: { p: 2, minWidth: 240, borderRadius: 2 } }}
-										>
-											<Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
-												Ustawienia Mowy (TTS)
-											</Typography>
-											<Divider sx={{ mb: 1.5 }} />
-
-											<Typography
-												variant="caption"
-												sx={{ color: 'text.secondary', display: 'block', mb: 0.5, fontWeight: 600 }}
-											>
-												Głos (Płeć):
-											</Typography>
-											<ToggleButtonGroup
-												value={speech.gender}
-												exclusive
-												size="small"
-												fullWidth
-												onChange={(_, val) => val && speech.setGender(val)}
-												sx={{ mb: 2 }}
-											>
-												<ToggleButton value="female">
-													<FemaleIcon sx={{ fontSize: 16, mr: 0.5 }} /> Damski
-												</ToggleButton>
-												<ToggleButton value="male">
-													<MaleIcon sx={{ fontSize: 16, mr: 0.5 }} /> Męski
-												</ToggleButton>
-											</ToggleButtonGroup>
-
-											<Typography
-												variant="caption"
-												sx={{ color: 'text.secondary', display: 'block', mb: 0.5, fontWeight: 600 }}
-											>
-												Szybkość Mowy:
-											</Typography>
-											<ToggleButtonGroup
-												value={speech.rate}
-												exclusive
-												size="small"
-												fullWidth
-												onChange={(_, val) => val && speech.setRate(val)}
-											>
-												<ToggleButton value={0.85}>0.85x</ToggleButton>
-												<ToggleButton value={1.0}>1.0x</ToggleButton>
-												<ToggleButton value={1.25}>1.25x</ToggleButton>
-												<ToggleButton value={1.5}>1.5x</ToggleButton>
-											</ToggleButtonGroup>
-										</Popover>
 
 										{speech.isSpeaking && (
 											<Button
