@@ -17,6 +17,7 @@ import ApiIcon from '@mui/icons-material/Api';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import SpeedIcon from '@mui/icons-material/Speed';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useOpenRouterUsage } from '@/hooks/useOpenRouterUsage';
 
 interface OpenRouterUsageCardProps {
@@ -103,15 +104,19 @@ export default function OpenRouterUsageCard({
 					{error}
 				</Alert>
 			) : (
-				<Grid container spacing={2}>
-					<Grid size={{ xs: 12, sm: 6, md: 4 }}>
+				<Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
+					<Grid size={{ xs: 12, sm: 6, md: 3 }} sx={{ display: 'flex' }}>
 						<Box
 							sx={{
 								p: 2,
+								width: '100%',
 								borderRadius: 2,
 								bgcolor: 'background.paper',
 								border: '1px solid',
 								borderColor: 'divider',
+								display: 'flex',
+								flexDirection: 'column',
+								justifyContent: 'space-between',
 							}}
 						>
 							<Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 1 }}>
@@ -120,20 +125,27 @@ export default function OpenRouterUsageCard({
 									Wykorzystano (USD)
 								</Typography>
 							</Stack>
-							<Typography variant="h6" sx={{ fontWeight: 700, color: '#10b981' }}>
+							<Typography
+								variant="h6"
+								sx={{ fontWeight: 700, color: '#10b981', fontSize: '1.1rem' }}
+							>
 								{formattedInfo.totalUsageUsd}
 							</Typography>
 						</Box>
 					</Grid>
 
-					<Grid size={{ xs: 12, sm: 6, md: 4 }}>
+					<Grid size={{ xs: 12, sm: 6, md: 3 }} sx={{ display: 'flex' }}>
 						<Box
 							sx={{
 								p: 2,
+								width: '100%',
 								borderRadius: 2,
 								bgcolor: 'background.paper',
 								border: '1px solid',
 								borderColor: 'divider',
+								display: 'flex',
+								flexDirection: 'column',
+								justifyContent: 'space-between',
 							}}
 						>
 							<Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 1 }}>
@@ -142,20 +154,27 @@ export default function OpenRouterUsageCard({
 									Szacowany koszt (PLN)
 								</Typography>
 							</Stack>
-							<Typography variant="h6" sx={{ fontWeight: 700, color: '#60a5fa' }}>
+							<Typography
+								variant="h6"
+								sx={{ fontWeight: 700, color: '#60a5fa', fontSize: '1.1rem' }}
+							>
 								{formattedInfo.totalUsagePln}
 							</Typography>
 						</Box>
 					</Grid>
 
-					<Grid size={{ xs: 12, sm: 12, md: 4 }}>
+					<Grid size={{ xs: 12, sm: 6, md: 3 }} sx={{ display: 'flex' }}>
 						<Box
 							sx={{
 								p: 2,
+								width: '100%',
 								borderRadius: 2,
 								bgcolor: 'background.paper',
 								border: '1px solid',
 								borderColor: 'divider',
+								display: 'flex',
+								flexDirection: 'column',
+								justifyContent: 'space-between',
 							}}
 						>
 							<Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 1 }}>
@@ -164,8 +183,40 @@ export default function OpenRouterUsageCard({
 									Limit Wydatków
 								</Typography>
 							</Stack>
-							<Typography variant="h6" sx={{ fontWeight: 700, color: '#a855f7' }}>
+							<Typography
+								variant="h6"
+								sx={{ fontWeight: 700, color: '#a855f7', fontSize: '1.1rem' }}
+							>
 								{formattedInfo.limitLabel}
+							</Typography>
+						</Box>
+					</Grid>
+
+					<Grid size={{ xs: 12, sm: 6, md: 3 }} sx={{ display: 'flex' }}>
+						<Box
+							sx={{
+								p: 2,
+								width: '100%',
+								borderRadius: 2,
+								bgcolor: 'background.paper',
+								border: '1px solid',
+								borderColor: 'divider',
+								display: 'flex',
+								flexDirection: 'column',
+								justifyContent: 'space-between',
+							}}
+						>
+							<Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 1 }}>
+								<AccessTimeIcon sx={{ color: '#f59e0b', fontSize: 20 }} />
+								<Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+									Ważność Klucza
+								</Typography>
+							</Stack>
+							<Typography
+								variant="h6"
+								sx={{ fontWeight: 700, color: '#f59e0b', fontSize: '1.1rem' }}
+							>
+								{formattedInfo.expiresAtLabel}
 							</Typography>
 						</Box>
 					</Grid>
