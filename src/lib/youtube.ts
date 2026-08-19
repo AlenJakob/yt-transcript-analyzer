@@ -38,6 +38,76 @@ export interface FetchTranscriptResult {
 
 import { YoutubeTranscript } from 'youtube-transcript';
 
+const INVIDIOUS_INSTANCES = [
+	'https://vid.puffyan.us',
+	'https://invidious.nerdvpn.de',
+	'https://inv.tux.pizza',
+	'https://invidious.protokolla.fi'
+];
+
+function parseVttTime(timeStr: string): number {
+	const parts = timeStr.split(':');
+	let seconds = 0;
+	if (parts.length === 3) {
+		seconds += parseFloat(parts[0]) * 3600;
+		seconds += parseFloat(parts[1]) * 60;
+		seconds += parseFloat(parts[2].replace(',', '.'));
+	}
+	return seconds;
+}
+
+async function fetchInvidiousTranscript(videoId: string, preferredLangs: string[]): Promise<{ rawTranscript: TranscriptResponse[], finalLang: string }> {
+	for (const instance of INVIDIOUS_INSTANCES) {
+		try {
+			// 1. Get captions list
+			const infoRes = await fetch(`${instance}/api/v1/captions/${videoId}`);
+			if (!infoRes.ok) continue;
+			
+			const infoData = await infoRes.json();
+			const captions = infoData.captions;
+			if (!captions || captions.length === 0) continue;
+
+			// 2. Find preferred language or default
+			let selectedCaption = captions.find((c: any) => preferredLangs.includes(c.languageCode));
+			if (!selectedCaption) selectedCaption = captions[0];
+
+			// 3. Download VTT
+			const vttRes = await fetch(`${instance}${selectedCaption.url}`);
+			if (!vttRes.ok) continue;
+
+			const vttText = await vttRes.text();
+			
+			// 4. Parse VTT
+			const mappedTranscript: TranscriptResponse[] = [];
+			const blockRegex = /(\d{2}:\d{2}:\d{2}[\.,]\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}[\.,]\d{3}).*?\n([\s\S]*?)(?=\n\n|$)/g;
+			
+			let match;
+			while ((match = blockRegex.exec(vttText)) !== null) {
+				const start = parseVttTime(match[1]);
+				const end = parseVttTime(match[2]);
+				const text = match[3].replace(/<[^>]+>/g, '').trim().replace(/\n/g, ' ');
+				
+				if (!text) continue;
+
+				mappedTranscript.push({
+					text,
+					offset: start,
+					duration: end - start,
+					lang: selectedCaption.languageCode
+				});
+			}
+
+			if (mappedTranscript.length > 0) {
+				return { rawTranscript: mappedTranscript, finalLang: selectedCaption.languageCode };
+			}
+		} catch (err) {
+			// Ignore instance error, try next
+			continue;
+		}
+	}
+	throw new Error('Żaden serwer Invidious nie był w stanie pobrać transkrypcji (zbyt wiele zapytań lub brak dostępności).');
+}
+
 export async function fetchTranscriptWithFallback(
 	videoId: string,
 	preferredLangs: string[] = ['pl', 'en']
@@ -45,39 +115,56 @@ export async function fetchTranscriptWithFallback(
 	try {
 		let rawTranscript;
 		let finalLang = preferredLangs.length > 0 ? preferredLangs[0] : 'en';
+		let isFallback = false;
 
-		// 1. Próbujemy pobrać w pierwszym preferowanym języku (np. 'pl')
+		// ETAP 1: Próba pobrania standardowo przez youtube-transcript
 		try {
-			rawTranscript = await YoutubeTranscript.fetchTranscript(videoId, { lang: preferredLangs[0] });
-			finalLang = preferredLangs[0];
-		} catch (err) {
-			// 2. Jeśli się nie uda, próbujemy drugi język (np. 'en')
-			if (preferredLangs.length > 1) {
-				try {
-					rawTranscript = await YoutubeTranscript.fetchTranscript(videoId, { lang: preferredLangs[1] });
-					finalLang = preferredLangs[1];
-				} catch (err2) {
-					// 3. Jeśli i to się nie uda, pobieramy JAKIKOLWIEK domyślny język, który jest na wideo
+			// 1. Próbujemy pobrać w pierwszym preferowanym języku (np. 'pl')
+			try {
+				rawTranscript = await YoutubeTranscript.fetchTranscript(videoId, { lang: preferredLangs[0] });
+				finalLang = preferredLangs[0];
+			} catch (err) {
+				// 2. Jeśli się nie uda, próbujemy drugi język (np. 'en')
+				if (preferredLangs.length > 1) {
+					try {
+						rawTranscript = await YoutubeTranscript.fetchTranscript(videoId, { lang: preferredLangs[1] });
+						finalLang = preferredLangs[1];
+					} catch (err2) {
+						// 3. Jeśli i to się nie uda, pobieramy JAKIKOLWIEK domyślny język, który jest na wideo
+						rawTranscript = await YoutubeTranscript.fetchTranscript(videoId);
+						finalLang = 'domyślny';
+					}
+				} else {
+					// 3. Brak drugiego języka - pobieramy jakikolwiek domyślny
 					rawTranscript = await YoutubeTranscript.fetchTranscript(videoId);
 					finalLang = 'domyślny';
 				}
-			} else {
-				// 3. Brak drugiego języka - pobieramy jakikolwiek domyślny
-				rawTranscript = await YoutubeTranscript.fetchTranscript(videoId);
-				finalLang = 'domyślny';
 			}
+		} catch (primaryErr: unknown) {
+			// BŁĄD! Prawdopodobnie blokada Vercel (Error 429)
+			console.log('Główne API zawiodło, przełączam na Fallback Invidious...');
+			isFallback = true;
 		}
 
-		if (!rawTranscript || rawTranscript.length === 0) {
+		let mappedTranscript: TranscriptResponse[] = [];
+
+		if (!isFallback && rawTranscript && rawTranscript.length > 0) {
+			mappedTranscript = rawTranscript.map((seg) => ({
+				text: seg.text,
+				offset: seg.offset,
+				duration: seg.duration,
+				lang: finalLang
+			}));
+		} else {
+			// ETAP 2: Pobieranie przez otwarte serwery Invidious (Fallback)
+			const invidiousResult = await fetchInvidiousTranscript(videoId, preferredLangs);
+			mappedTranscript = invidiousResult.rawTranscript;
+			finalLang = invidiousResult.finalLang;
+		}
+
+		if (!mappedTranscript || mappedTranscript.length === 0) {
 			throw new Error('Transkrypcja po sparsowaniu okazała się pusta.');
 		}
-
-		const mappedTranscript: TranscriptResponse[] = rawTranscript.map((seg) => ({
-			text: seg.text,
-			offset: seg.offset,
-			duration: seg.duration,
-			lang: finalLang
-		}));
 
 		return {
 			rawTranscript: mappedTranscript,
@@ -85,7 +172,7 @@ export async function fetchTranscriptWithFallback(
 			rapidApiUsage: undefined
 		};
 	} catch (err: unknown) {
-		console.error("Szczegóły błędu youtube-transcript:", err);
+		console.error("Szczegóły błędu:", err);
 		const errorMessage = err instanceof Error ? err.message : 'Nieoczekiwany błąd';
 		throw new Error(errorMessage);
 	}
