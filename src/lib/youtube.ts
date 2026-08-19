@@ -1,5 +1,3 @@
-import { YoutubeTranscript, TranscriptResponse } from 'youtube-transcript';
-
 export type PreferredLanguage = 'pl' | 'en' | 'auto';
 
 export interface TranscriptSegment {
@@ -22,86 +20,75 @@ export interface TranscriptStats {
 	readingTimeMinutes: number;
 }
 
+export interface TranscriptResponse {
+	text: string;
+	duration: number;
+	offset: number;
+	lang?: string;
+}
+
 export interface FetchTranscriptResult {
 	rawTranscript: TranscriptResponse[];
 	language: string;
+	rapidApiUsage?: {
+		limit: string | null;
+		remaining: string | null;
+	};
 }
 
-/**
- * Custom fetch implementation for YoutubeTranscript that injects browser User-Agent,
- * Accept-Language and GDPR consent cookies to avoid datacenter IP blocking on Vercel/AWS.
- */
-const customYoutubeFetch = (
-	url: RequestInfo | URL,
-	options: RequestInit = {}
-) => {
-	const headers = new Headers(options.headers || {});
-	if (!headers.has('User-Agent')) {
-		headers.set(
-			'User-Agent',
-			'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
-		);
-	}
-	if (!headers.has('Accept-Language')) {
-		headers.set('Accept-Language', 'pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7');
-	}
-	if (!headers.has('Cookie')) {
-		headers.set(
-			'Cookie',
-			'CONSENT=YES+cb.20210328-17-p0.en+FX+417; SOCS=CAESEwgDEgk0ODE3Nzk3MjAaAmVuIAEaBgiA_LyaBg'
-		);
-	}
-	return fetch(url, { ...options, headers });
-};
+import { YoutubeTranscript } from 'youtube-transcript';
 
-/**
- * Fetches transcript with language fallback cascade (e.g. 'pl' -> 'en' -> default)
- */
 export async function fetchTranscriptWithFallback(
 	videoId: string,
 	preferredLangs: string[] = ['pl', 'en']
 ): Promise<FetchTranscriptResult> {
-	let lastError: unknown = null;
+	try {
+		let rawTranscript;
+		let finalLang = preferredLangs.length > 0 ? preferredLangs[0] : 'en';
 
-	const strategies = [
-		{ name: 'custom', fetchFn: customYoutubeFetch },
-		{ name: 'default', fetchFn: fetch }
-	];
-
-	// Try each preferred language in priority order
-	for (const lang of preferredLangs) {
-		for (const strategy of strategies) {
-			try {
-				const res = await YoutubeTranscript.fetchTranscript(videoId, {
-					lang,
-					fetch: strategy.fetchFn,
-				});
-				if (res && res.length > 0) {
-					return { rawTranscript: res, language: lang };
-				}
-			} catch (err) {
-				lastError = err;
-			}
-		}
-	}
-
-	// Fallback to default/original language transcript
-	for (const strategy of strategies) {
+		// 1. Próbujemy pobrać w pierwszym preferowanym języku (np. 'pl')
 		try {
-			const res = await YoutubeTranscript.fetchTranscript(videoId, {
-				fetch: strategy.fetchFn,
-			});
-			if (res && res.length > 0) {
-				return { rawTranscript: res, language: 'default' };
-			}
+			rawTranscript = await YoutubeTranscript.fetchTranscript(videoId, { lang: preferredLangs[0] });
+			finalLang = preferredLangs[0];
 		} catch (err) {
-			lastError = err;
+			// 2. Jeśli się nie uda, próbujemy drugi język (np. 'en')
+			if (preferredLangs.length > 1) {
+				try {
+					rawTranscript = await YoutubeTranscript.fetchTranscript(videoId, { lang: preferredLangs[1] });
+					finalLang = preferredLangs[1];
+				} catch (err2) {
+					// 3. Jeśli i to się nie uda, pobieramy JAKIKOLWIEK domyślny język, który jest na wideo
+					rawTranscript = await YoutubeTranscript.fetchTranscript(videoId);
+					finalLang = 'domyślny';
+				}
+			} else {
+				// 3. Brak drugiego języka - pobieramy jakikolwiek domyślny
+				rawTranscript = await YoutubeTranscript.fetchTranscript(videoId);
+				finalLang = 'domyślny';
+			}
 		}
-	}
 
-	const errorMessage =
-		lastError instanceof Error ? lastError.message : 'Brak dostępnych napisów';
-	throw new Error(errorMessage);
+		if (!rawTranscript || rawTranscript.length === 0) {
+			throw new Error('Transkrypcja po sparsowaniu okazała się pusta.');
+		}
+
+		const mappedTranscript: TranscriptResponse[] = rawTranscript.map((seg) => ({
+			text: seg.text,
+			offset: seg.offset,
+			duration: seg.duration,
+			lang: finalLang
+		}));
+
+		return {
+			rawTranscript: mappedTranscript,
+			language: finalLang,
+			rapidApiUsage: undefined
+		};
+	} catch (err: unknown) {
+		console.error("Szczegóły błędu youtube-transcript:", err);
+		const errorMessage = err instanceof Error ? err.message : 'Nieoczekiwany błąd';
+		throw new Error(errorMessage);
+	}
 }
 
 /**
@@ -170,7 +157,7 @@ export async function fetchVideoMetadata(
 		if (!res.ok) {
 			throw new Error(`OEmbed error: ${res.statusText}`);
 		}
-		const data = await res.json();
+		const data = await res.json() as any;
 		return {
 			videoId,
 			title: data.title || 'Brak tytułu',
