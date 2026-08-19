@@ -1,16 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyAdminAccess } from '@/lib/auth';
 import {
 	extractYouTubeVideoId,
 	fetchVideoMetadata,
-	fetchTranscriptWithFallback,
 	formatTimestamp,
 	calculateTranscriptStats,
 	TranscriptSegment,
+	fetchTranscriptWithFallback,
 } from '@/lib/youtube';
 import { decodeHtmlEntities, normalizeTime } from '@/utils/helper';
 
 export async function POST(req: NextRequest) {
 	try {
+		const { isAdmin } = await verifyAdminAccess(req);
+		if (!isAdmin) {
+			return NextResponse.json(
+				{
+					error:
+						'Tylko administratorzy mogą obecnie pobierać nowe transkrypcje.',
+				},
+				{ status: 403 }
+			);
+		}
+
 		const body = await req.json();
 		const { url, preferredLanguage } = body;
 
@@ -24,7 +36,9 @@ export async function POST(req: NextRequest) {
 		const videoId = extractYouTubeVideoId(url);
 		if (!videoId) {
 			return NextResponse.json(
-				{ error: 'Nieprawidłowy adres URL filmu YouTube. Podaj poprawny link.' },
+				{
+					error: 'Nieprawidłowy adres URL filmu YouTube. Podaj poprawny link.',
+				},
 				{ status: 400 }
 			);
 		}
@@ -64,7 +78,8 @@ export async function POST(req: NextRequest) {
 				language,
 			});
 		} catch (err: unknown) {
-			const errorMessage = err instanceof Error ? err.message : 'Brak dostępnych napisów';
+			const errorMessage =
+				err instanceof Error ? err.message : 'Brak dostępnych napisów';
 			return NextResponse.json(
 				{
 					error: `Nie udało się pobrać transkrypcji dla tego filmu. Upewnij się, że film posiada włączone napisy. (${errorMessage})`,
@@ -74,7 +89,11 @@ export async function POST(req: NextRequest) {
 			);
 		}
 	} catch (error: unknown) {
-		const errMessage = error instanceof Error ? error.message : 'Wystąpił nieoczekiwany błąd';
-		return NextResponse.json({ error: `Błąd serwera: ${errMessage}` }, { status: 500 });
+		const errMessage =
+			error instanceof Error ? error.message : 'Wystąpił nieoczekiwany błąd';
+		return NextResponse.json(
+			{ error: `Błąd serwera: ${errMessage}` },
+			{ status: 500 }
+		);
 	}
 }
