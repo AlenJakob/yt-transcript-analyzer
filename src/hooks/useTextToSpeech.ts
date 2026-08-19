@@ -68,7 +68,9 @@ function splitIntoSentences(text: string): string[] {
 			continue;
 		}
 
-		const sentences = trimmedParagraph.match(/[^.!?;\n]+[.!?;\n]*/g) || [trimmedParagraph];
+		const sentences = trimmedParagraph.match(/[^.!?;\n]+[.!?;\n]*/g) || [
+			trimmedParagraph,
+		];
 		for (const sentence of sentences) {
 			const trimmedSentence = sentence.trim();
 			if (trimmedSentence.length > 0) {
