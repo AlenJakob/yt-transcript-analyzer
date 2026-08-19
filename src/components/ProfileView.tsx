@@ -33,6 +33,7 @@ import StarIcon from '@mui/icons-material/Star';
 import { useAuthUser } from '@/hooks/useAuthUser';
 import { AdminUser, useAdminUsers } from '@/hooks/useAdminUsers';
 import { useClerk } from '@clerk/nextjs';
+import OpenRouterUsageCard from '@/components/OpenRouterUsageCard';
 
 interface ProfileViewProps {
 	initialUsers?: AdminUser[];
@@ -74,8 +75,8 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 					Zaloguj się, aby zobaczyć profil
 				</Typography>
 				<Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
-					Zalogowani użytkownicy mają dostęp do historii transkrypcji, statystyk konta i wyższych
-					limitów AI.
+					Zalogowani użytkownicy mają dostęp do historii transkrypcji, statystyk
+					konta i wyższych limitów AI.
 				</Typography>
 				<Button
 					variant="contained"
@@ -105,7 +106,10 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 				<Stack
 					direction={{ xs: 'column', sm: 'row' }}
 					spacing={3}
-					sx={{ alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between' }}
+					sx={{
+						alignItems: { xs: 'flex-start', sm: 'center' },
+						justifyContent: 'space-between',
+					}}
 				>
 					<Stack direction="row" spacing={2.5} sx={{ alignItems: 'center' }}>
 						<Avatar
@@ -122,7 +126,11 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 							{userAuth.fullName?.[0] || userAuth.userEmail?.[0] || 'U'}
 						</Avatar>
 						<Box>
-							<Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 0.5 }}>
+							<Stack
+								direction="row"
+								spacing={1}
+								sx={{ alignItems: 'center', mb: 0.5 }}
+							>
 								<Typography variant="h5" sx={{ fontWeight: 700 }}>
 									{userAuth.fullName || 'Użytkownik'}
 								</Typography>
@@ -178,7 +186,11 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 						</Typography>
 						<Chip
 							icon={
-								userAuth.isPro || userAuth.isAdmin ? <WorkspacePremiumIcon /> : <CheckCircleIcon />
+								userAuth.isPro || userAuth.isAdmin ? (
+									<WorkspacePremiumIcon />
+								) : (
+									<CheckCircleIcon />
+								)
 							}
 							label={
 								userAuth.isAdmin
@@ -222,12 +234,11 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 				</Stack>
 			</Paper>
 
-			{/* TODO: Add user settings UI to customize/change OpenRouter API Key (currently non-configurable by user) */}
-
-			{/* PANEL ADMINISTRATORA (Dla kont z uprawnieniami Admina) */}
 			{userAuth.isAdmin && (
-				<Paper
-					elevation={0}
+				<>
+					<OpenRouterUsageCard isAdmin={userAuth.isAdmin} />
+					<Paper
+						elevation={0}
 					sx={{
 						p: { xs: 3, sm: 4 },
 						bgcolor: 'background.paper',
@@ -242,7 +253,11 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 					<Stack
 						direction={{ xs: 'column', sm: 'row' }}
 						spacing={2}
-						sx={{ alignItems: { sm: 'center' }, justifyContent: 'space-between', mb: 3 }}
+						sx={{
+							alignItems: { sm: 'center' },
+							justifyContent: 'space-between',
+							mb: 3,
+						}}
 					>
 						<Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
 							<AdminPanelSettingsIcon
@@ -257,7 +272,8 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 									Panel Zarządzania Użytkownikami (Admin)
 								</Typography>
 								<Typography variant="caption" sx={{ color: 'text.secondary' }}>
-									Przeglądaj zarejestrowane konta i przyznawaj pakiety PRO lub rolę Admina.
+									Przeglądaj zarejestrowane konta i przyznawaj pakiety PRO lub
+									rolę Admina.
 								</Typography>
 							</Box>
 						</Stack>
@@ -280,7 +296,11 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 								}}
 							/>
 							<Tooltip title="Odśwież listę">
-								<IconButton onClick={fetchAdminUsers} disabled={isLoadingUsers} color="primary">
+								<IconButton
+									onClick={fetchAdminUsers}
+									disabled={isLoadingUsers}
+									color="primary"
+								>
 									<RefreshIcon />
 								</IconButton>
 							</Tooltip>
@@ -295,7 +315,8 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 						</Box>
 					) : filteredUsers.length === 0 ? (
 						<Alert severity="info" sx={{ borderRadius: 2 }}>
-							Brak zarejestrowanych użytkowników spełniających kryteria wyszukiwania.
+							Brak zarejestrowanych użytkowników spełniających kryteria
+							wyszukiwania.
 						</Alert>
 					) : (
 						<TableContainer
@@ -310,14 +331,25 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 							<Table size="small">
 								<TableHead sx={{ bgcolor: 'rgba(255, 255, 255, 0.03)' }}>
 									<TableRow>
-										<TableCell sx={{ color: 'text.secondary', fontWeight: 700 }}>
+										<TableCell
+											sx={{ color: 'text.secondary', fontWeight: 700 }}
+										>
 											Użytkownik
 										</TableCell>
-										<TableCell sx={{ color: 'text.secondary', fontWeight: 700 }}>
+										<TableCell
+											sx={{ color: 'text.secondary', fontWeight: 700 }}
+										>
 											Pakiet (Tier)
 										</TableCell>
-										<TableCell sx={{ color: 'text.secondary', fontWeight: 700 }}>Rola</TableCell>
-										<TableCell align="right" sx={{ color: 'text.secondary', fontWeight: 700 }}>
+										<TableCell
+											sx={{ color: 'text.secondary', fontWeight: 700 }}
+										>
+											Rola
+										</TableCell>
+										<TableCell
+											align="right"
+											sx={{ color: 'text.secondary', fontWeight: 700 }}
+										>
 											Akcje Zarządzania
 										</TableCell>
 									</TableRow>
@@ -333,16 +365,32 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 											<TableRow
 												key={user.id}
 												hover
-												sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+												sx={{
+													'&:last-child td, &:last-child th': { border: 0 },
+												}}
 											>
 												<TableCell>
-													<Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-														<Avatar src={user.imageUrl} sx={{ width: 32, height: 32 }}>
+													<Stack
+														direction="row"
+														spacing={1.5}
+														sx={{ alignItems: 'center' }}
+													>
+														<Avatar
+															src={user.imageUrl}
+															sx={{ width: 32, height: 32 }}
+														>
 															{user.firstName?.[0] || user.email[0]}
 														</Avatar>
 														<Box>
-															<Stack direction="row" spacing={0.8} sx={{ alignItems: 'center' }}>
-																<Typography variant="body2" sx={{ fontWeight: 600 }}>
+															<Stack
+																direction="row"
+																spacing={0.8}
+																sx={{ alignItems: 'center' }}
+															>
+																<Typography
+																	variant="body2"
+																	sx={{ fontWeight: 600 }}
+																>
 																	{user.firstName || user.lastName
 																		? `${user.firstName} ${user.lastName}`.trim()
 																		: user.email}
@@ -364,7 +412,10 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 															</Stack>
 															<Typography
 																variant="caption"
-																sx={{ color: 'text.secondary', display: 'block' }}
+																sx={{
+																	color: 'text.secondary',
+																	display: 'block',
+																}}
 															>
 																{user.email}
 															</Typography>
@@ -397,13 +448,20 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 															sx={{ fontWeight: 700, borderRadius: 2 }}
 														/>
 													) : (
-														<Typography variant="caption" sx={{ color: 'text.secondary' }}>
+														<Typography
+															variant="caption"
+															sx={{ color: 'text.secondary' }}
+														>
 															User
 														</Typography>
 													)}
 												</TableCell>
 												<TableCell align="right">
-													<Stack direction="row" spacing={1} sx={{ justifyContent: 'flex-end' }}>
+													<Stack
+														direction="row"
+														spacing={1}
+														sx={{ justifyContent: 'flex-end' }}
+													>
 														{/* Przełącznik PRO */}
 														<Tooltip
 															title={
@@ -425,7 +483,12 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 																			undefined
 																		)
 																	}
-																	sx={{ fontSize: '0.75rem', px: 1.5, py: 0.3, borderRadius: 2 }}
+																	sx={{
+																		fontSize: '0.75rem',
+																		px: 1.5,
+																		py: 0.3,
+																		borderRadius: 2,
+																	}}
 																>
 																	{isUpdating ? (
 																		<CircularProgress size={12} />
@@ -449,9 +512,13 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 															<span>
 																<Button
 																	size="small"
-																	variant={isUserAdmin ? 'outlined' : 'contained'}
+																	variant={
+																		isUserAdmin ? 'outlined' : 'contained'
+																	}
 																	color={isUserAdmin ? 'inherit' : 'secondary'}
-																	disabled={isUpdating || (isSelf && isUserAdmin)}
+																	disabled={
+																		isUpdating || (isSelf && isUserAdmin)
+																	}
 																	onClick={() =>
 																		handleUpdateUser(
 																			user.id,
@@ -459,7 +526,12 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 																			isUserAdmin ? 'user' : 'admin'
 																		)
 																	}
-																	sx={{ fontSize: '0.75rem', px: 1.5, py: 0.3, borderRadius: 2 }}
+																	sx={{
+																		fontSize: '0.75rem',
+																		px: 1.5,
+																		py: 0.3,
+																		borderRadius: 2,
+																	}}
 																>
 																	{isUpdating ? (
 																		<CircularProgress size={12} />
@@ -481,6 +553,7 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 						</TableContainer>
 					)}
 				</Paper>
+				</>
 			)}
 
 			<Snackbar
@@ -489,7 +562,11 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 				onClose={() => setSnackbarMsg(null)}
 				anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
 			>
-				<Alert severity="success" onClose={() => setSnackbarMsg(null)} sx={{ borderRadius: 2 }}>
+				<Alert
+					severity="success"
+					onClose={() => setSnackbarMsg(null)}
+					sx={{ borderRadius: 2 }}
+				>
 					{snackbarMsg}
 				</Alert>
 			</Snackbar>

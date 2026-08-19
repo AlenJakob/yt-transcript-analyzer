@@ -34,15 +34,15 @@ function selectBestVoice(langCode: string): SpeechSynthesisVoice | null {
 	const targetLang = (langMap[langCode] || langCode).toLowerCase();
 	const shortLang = targetLang.split('-')[0];
 
-	const matchingVoices = voices.filter((v) =>
-		v.lang.toLowerCase().startsWith(shortLang)
+	const matchingVoices = voices.filter((voice) =>
+		voice.lang.toLowerCase().startsWith(shortLang)
 	);
 	if (matchingVoices.length === 0) {
 		return null;
 	}
 
-	const naturalVoice = matchingVoices.find((v) => {
-		const name = v.name.toLowerCase();
+	const naturalVoice = matchingVoices.find((voice) => {
+		const name = voice.name.toLowerCase();
 		return (
 			name.includes('natural') ||
 			name.includes('google') ||
@@ -53,6 +53,31 @@ function selectBestVoice(langCode: string): SpeechSynthesisVoice | null {
 	});
 
 	return naturalVoice || matchingVoices[0];
+}
+
+function splitIntoSentences(text: string): string[] {
+	if (!text) {
+		return [];
+	}
+	const paragraphs = text.split('\n');
+	const chunks: string[] = [];
+
+	for (const paragraph of paragraphs) {
+		const trimmedParagraph = paragraph.trim();
+		if (!trimmedParagraph) {
+			continue;
+		}
+
+		const sentences = trimmedParagraph.match(/[^.!?;\n]+[.!?;\n]*/g) || [trimmedParagraph];
+		for (const sentence of sentences) {
+			const trimmedSentence = sentence.trim();
+			if (trimmedSentence.length > 0) {
+				chunks.push(trimmedSentence);
+			}
+		}
+	}
+
+	return chunks.length > 0 ? chunks : [text];
 }
 
 export function useTextToSpeech(): UseTextToSpeechReturn {
@@ -68,20 +93,19 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 			const savedRate = localStorage.getItem('yt_analyzer_tts_rate');
 			if (savedRate) {
 				const parsed = parseFloat(savedRate);
-				if (!isNaN(parsed)) return parsed;
+				if (!isNaN(parsed)) {
+					return parsed;
+				}
 			}
 		}
 		return 1.0;
 	});
 
-	const setRate = useCallback((newRate: number) => {
-		setRateState(newRate);
-		if (typeof window !== 'undefined') {
-			localStorage.setItem('yt_analyzer_tts_rate', newRate.toString());
-		}
-	}, []);
-
-	const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+	const sentencesRef = useRef<string[]>([]);
+	const sentenceIndexRef = useRef<number>(0);
+	const langCodeRef = useRef<string>('pl');
+	const isManualCancelRef = useRef<boolean>(false);
+	const activeRateRef = useRef<number>(1.0);
 
 	useEffect(() => {
 		if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -95,6 +119,7 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 	useEffect(() => {
 		return () => {
 			if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+				isManualCancelRef.current = true;
 				window.speechSynthesis.cancel();
 			}
 		};
@@ -102,10 +127,13 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 
 	const stop = useCallback(() => {
 		if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+			isManualCancelRef.current = true;
 			window.speechSynthesis.cancel();
 			setIsLoading(false);
 			setIsSpeaking(false);
 			setIsPaused(false);
+			sentenceIndexRef.current = 0;
+			sentencesRef.current = [];
 		}
 	}, []);
 
@@ -123,17 +151,26 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 		}
 	}, []);
 
-	const speak = useCallback(
-		(text: string, langCode: string = 'pl') => {
+	const speakSentence = useCallback(
+		(index: number, targetRate: number, langCode: string) => {
 			if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
 				return;
 			}
 
-			window.speechSynthesis.cancel();
-			setIsLoading(true);
+			const sentences = sentencesRef.current;
+			if (index < 0 || index >= sentences.length) {
+				setIsLoading(false);
+				setIsSpeaking(false);
+				setIsPaused(false);
+				sentenceIndexRef.current = 0;
+				return;
+			}
 
-			const utterance = new SpeechSynthesisUtterance(text);
-			utteranceRef.current = utterance;
+			sentenceIndexRef.current = index;
+			activeRateRef.current = targetRate;
+
+			const sentenceText = sentences[index];
+			const utterance = new SpeechSynthesisUtterance(sentenceText);
 
 			const langMap: Record<string, string> = {
 				pl: 'pl-PL',
@@ -148,7 +185,7 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 			if (bestVoice) {
 				utterance.voice = bestVoice;
 			}
-			utterance.rate = rate;
+			utterance.rate = targetRate;
 			utterance.pitch = 1.0;
 
 			utterance.onstart = () => {
@@ -158,20 +195,86 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 			};
 
 			utterance.onend = () => {
-				setIsLoading(false);
-				setIsSpeaking(false);
-				setIsPaused(false);
+				if (isManualCancelRef.current) {
+					return;
+				}
+				const nextIndex = index + 1;
+				if (nextIndex < sentencesRef.current.length) {
+					speakSentence(nextIndex, activeRateRef.current, langCode);
+				} else {
+					setIsLoading(false);
+					setIsSpeaking(false);
+					setIsPaused(false);
+					sentenceIndexRef.current = 0;
+				}
 			};
 
 			utterance.onerror = () => {
+				if (isManualCancelRef.current) {
+					return;
+				}
 				setIsLoading(false);
 				setIsSpeaking(false);
 				setIsPaused(false);
+				sentenceIndexRef.current = 0;
 			};
 
 			window.speechSynthesis.speak(utterance);
 		},
-		[rate]
+		[]
+	);
+
+	const speak = useCallback(
+		(text: string, langCode: string = 'pl') => {
+			if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+				return;
+			}
+
+			isManualCancelRef.current = true;
+			window.speechSynthesis.cancel();
+			isManualCancelRef.current = false;
+
+			setIsLoading(true);
+
+			const sentences = splitIntoSentences(text);
+			sentencesRef.current = sentences;
+			langCodeRef.current = langCode;
+
+			speakSentence(0, rate, langCode);
+		},
+		[rate, speakSentence]
+	);
+
+	const setRate = useCallback(
+		(newRate: number) => {
+			setRateState(newRate);
+			activeRateRef.current = newRate;
+			if (typeof window !== 'undefined') {
+				localStorage.setItem('yt_analyzer_tts_rate', newRate.toString());
+			}
+
+			if (
+				typeof window !== 'undefined' &&
+				'speechSynthesis' in window &&
+				(window.speechSynthesis.speaking || isSpeaking) &&
+				sentencesRef.current.length > 0
+			) {
+				const currentlyPaused = window.speechSynthesis.paused || isPaused;
+				const currentSentenceIndex = sentenceIndexRef.current;
+				const currentLang = langCodeRef.current;
+
+				isManualCancelRef.current = true;
+				window.speechSynthesis.cancel();
+				isManualCancelRef.current = false;
+
+				speakSentence(currentSentenceIndex, newRate, currentLang);
+				if (currentlyPaused) {
+					window.speechSynthesis.pause();
+					setIsPaused(true);
+				}
+			}
+		},
+		[isSpeaking, isPaused, speakSentence]
 	);
 
 	const toggle = useCallback(
@@ -180,8 +283,8 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 				return;
 			}
 
-			if (window.speechSynthesis.speaking) {
-				if (window.speechSynthesis.paused) {
+			if (window.speechSynthesis.speaking || isSpeaking) {
+				if (window.speechSynthesis.paused || isPaused) {
 					window.speechSynthesis.resume();
 					setIsPaused(false);
 				} else {
@@ -192,7 +295,7 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 				speak(text, langCode);
 			}
 		},
-		[speak]
+		[isSpeaking, isPaused, speak]
 	);
 
 	return {

@@ -62,11 +62,15 @@ export interface ProfileButtonStylesParams {
 	mode: 'light' | 'dark';
 }
 
+<<<<<<< HEAD
 export function getProfileButtonStyles({
 	isProfile,
 	isAdmin,
 	mode,
 }: ProfileButtonStylesParams) {
+=======
+export function getProfileButtonStyles({ isProfile, isAdmin, mode }: ProfileButtonStylesParams) {
+>>>>>>> a549b94 (feat: add text-to-speech hook, OpenRouter API integration, and associated UI components for usage tracking and transcript management.)
 	const isDark = mode === 'dark';
 
 	if (isProfile) {
@@ -81,9 +85,13 @@ export function getProfileButtonStyles({
 	if (isAdmin) {
 		return {
 			bgcolor: 'transparent',
+<<<<<<< HEAD
 			borderColor: isDark
 				? 'rgba(168, 85, 247, 0.35)'
 				: 'rgba(126, 34, 206, 0.4)',
+=======
+			borderColor: isDark ? 'rgba(168, 85, 247, 0.35)' : 'rgba(126, 34, 206, 0.4)',
+>>>>>>> a549b94 (feat: add text-to-speech hook, OpenRouter API integration, and associated UI components for usage tracking and transcript management.)
 			color: isDark ? '#c084fc' : '#7e22ce',
 			hoverBorderColor: isDark ? '#a855f7' : '#6b21a8',
 		};
@@ -96,3 +104,60 @@ export function getProfileButtonStyles({
 		hoverBorderColor: '#3b82f6',
 	};
 }
+<<<<<<< HEAD
+=======
+
+export interface OpenRouterUsageData {
+	label?: string;
+	usage?: number;
+	limit?: number | null;
+	limit_remaining?: number | null;
+	is_free_tier?: boolean;
+	usage_daily?: number;
+	usage_weekly?: number;
+	usage_monthly?: number;
+	expires_at?: string | number | null;
+}
+
+export interface FormattedUsageInfo {
+	totalUsageUsd: string;
+	totalUsagePln: string;
+	tierLabel: string;
+	isFreeTier: boolean;
+	limitLabel: string;
+	keyLabel: string;
+	expiresAtLabel: string;
+}
+
+export function formatOpenRouterUsage(data?: OpenRouterUsageData): FormattedUsageInfo {
+	if (!data) {
+		return {
+			totalUsageUsd: '$0.0000',
+			totalUsagePln: '0,0000 zł',
+			tierLabel: 'Nieznany',
+			isFreeTier: true,
+			limitLabel: 'Brak danych',
+			keyLabel: 'Brak klucza',
+			expiresAtLabel: 'Brak danych',
+		};
+	}
+
+	const usage = data.usage ?? 0;
+	const usagePln = usage * 4.0;
+
+	let expiresAtLabel = 'Bezterminowo';
+	if (data.expires_at) {
+		expiresAtLabel = formatDate(String(data.expires_at));
+	}
+
+	return {
+		totalUsageUsd: `$${usage.toFixed(6)}`,
+		totalUsagePln: `${usagePln.toFixed(4)} zł`,
+		tierLabel: data.is_free_tier ? 'Plan Free (Darmowy)' : 'Plan Paid (Płatny)',
+		isFreeTier: Boolean(data.is_free_tier),
+		limitLabel: data.limit ? `$${data.limit}` : 'Brak limitu',
+		keyLabel: data.label || 'Klucz Główny API',
+		expiresAtLabel,
+	};
+}
+>>>>>>> a549b94 (feat: add text-to-speech hook, OpenRouter API integration, and associated UI components for usage tracking and transcript management.)
