@@ -63,31 +63,40 @@ export async function fetchTranscriptWithFallback(
 ): Promise<FetchTranscriptResult> {
 	let lastError: unknown = null;
 
+	const strategies = [
+		{ name: 'custom', fetchFn: customYoutubeFetch },
+		{ name: 'default', fetchFn: fetch }
+	];
+
 	// Try each preferred language in priority order
 	for (const lang of preferredLangs) {
-		try {
-			const res = await YoutubeTranscript.fetchTranscript(videoId, {
-				lang,
-				fetch: customYoutubeFetch,
-			});
-			if (res && res.length > 0) {
-				return { rawTranscript: res, language: lang };
+		for (const strategy of strategies) {
+			try {
+				const res = await YoutubeTranscript.fetchTranscript(videoId, {
+					lang,
+					fetch: strategy.fetchFn,
+				});
+				if (res && res.length > 0) {
+					return { rawTranscript: res, language: lang };
+				}
+			} catch (err) {
+				lastError = err;
 			}
-		} catch (err) {
-			lastError = err;
 		}
 	}
 
 	// Fallback to default/original language transcript
-	try {
-		const res = await YoutubeTranscript.fetchTranscript(videoId, {
-			fetch: customYoutubeFetch,
-		});
-		if (res && res.length > 0) {
-			return { rawTranscript: res, language: 'default' };
+	for (const strategy of strategies) {
+		try {
+			const res = await YoutubeTranscript.fetchTranscript(videoId, {
+				fetch: strategy.fetchFn,
+			});
+			if (res && res.length > 0) {
+				return { rawTranscript: res, language: 'default' };
+			}
+		} catch (err) {
+			lastError = err;
 		}
-	} catch (err) {
-		lastError = err;
 	}
 
 	const errorMessage =
