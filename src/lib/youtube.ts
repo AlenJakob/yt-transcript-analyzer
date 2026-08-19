@@ -28,6 +28,33 @@ export interface FetchTranscriptResult {
 }
 
 /**
+ * Custom fetch implementation for YoutubeTranscript that injects browser User-Agent,
+ * Accept-Language and GDPR consent cookies to avoid datacenter IP blocking on Vercel/AWS.
+ */
+const customYoutubeFetch = (
+	url: RequestInfo | URL,
+	options: RequestInit = {}
+) => {
+	const headers = new Headers(options.headers || {});
+	if (!headers.has('User-Agent')) {
+		headers.set(
+			'User-Agent',
+			'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+		);
+	}
+	if (!headers.has('Accept-Language')) {
+		headers.set('Accept-Language', 'pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7');
+	}
+	if (!headers.has('Cookie')) {
+		headers.set(
+			'Cookie',
+			'CONSENT=YES+cb.20210328-17-p0.en+FX+417; SOCS=CAESEwgDEgk0ODE3Nzk3MjAaAmVuIAEaBgiA_LyaBg'
+		);
+	}
+	return fetch(url, { ...options, headers });
+};
+
+/**
  * Fetches transcript with language fallback cascade (e.g. 'pl' -> 'en' -> default)
  */
 export async function fetchTranscriptWithFallback(
@@ -39,7 +66,10 @@ export async function fetchTranscriptWithFallback(
 	// Try each preferred language in priority order
 	for (const lang of preferredLangs) {
 		try {
-			const res = await YoutubeTranscript.fetchTranscript(videoId, { lang });
+			const res = await YoutubeTranscript.fetchTranscript(videoId, {
+				lang,
+				fetch: customYoutubeFetch,
+			});
 			if (res && res.length > 0) {
 				return { rawTranscript: res, language: lang };
 			}
@@ -50,7 +80,9 @@ export async function fetchTranscriptWithFallback(
 
 	// Fallback to default/original language transcript
 	try {
-		const res = await YoutubeTranscript.fetchTranscript(videoId);
+		const res = await YoutubeTranscript.fetchTranscript(videoId, {
+			fetch: customYoutubeFetch,
+		});
 		if (res && res.length > 0) {
 			return { rawTranscript: res, language: 'default' };
 		}
@@ -58,7 +90,8 @@ export async function fetchTranscriptWithFallback(
 		lastError = err;
 	}
 
-	const errorMessage = lastError instanceof Error ? lastError.message : 'Brak dostępnych napisów';
+	const errorMessage =
+		lastError instanceof Error ? lastError.message : 'Brak dostępnych napisów';
 	throw new Error(errorMessage);
 }
 
@@ -117,7 +150,9 @@ export function formatTimestamp(seconds: number): string {
 /**
  * Fetches YouTube video metadata via public oEmbed API
  */
-export async function fetchVideoMetadata(videoId: string): Promise<VideoMetadata> {
+export async function fetchVideoMetadata(
+	videoId: string
+): Promise<VideoMetadata> {
 	const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
 	const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(videoUrl)}&format=json`;
 
@@ -146,7 +181,9 @@ export async function fetchVideoMetadata(videoId: string): Promise<VideoMetadata
 /**
  * Calculates text stats (word count, character count, estimated reading time)
  */
-export function calculateTranscriptStats(segments: TranscriptSegment[]): TranscriptStats {
+export function calculateTranscriptStats(
+	segments: TranscriptSegment[]
+): TranscriptStats {
 	const fullText = segments.map((s) => s.text).join(' ');
 	const words = fullText.trim().split(/\s+/).filter(Boolean);
 	const wordCount = words.length;
@@ -189,7 +226,10 @@ export function groupTranscriptSegments(
 
 		// Flush group if target duration reached or it's the last element
 		if (currentDuration >= groupDurationSeconds || i === segments.length - 1) {
-			const combinedText = currentGroupText.join(' ').replace(/\s+/g, ' ').trim();
+			const combinedText = currentGroupText
+				.join(' ')
+				.replace(/\s+/g, ' ')
+				.trim();
 			if (combinedText) {
 				grouped.push({
 					text: combinedText,
@@ -209,7 +249,9 @@ export function groupTranscriptSegments(
 /**
  * Formats full transcript text into beautifully clean, structured paragraphs
  */
-export function formatContinuousParagraphs(segments: TranscriptSegment[]): string[] {
+export function formatContinuousParagraphs(
+	segments: TranscriptSegment[]
+): string[] {
 	if (!segments || segments.length === 0) {
 		return [];
 	}
