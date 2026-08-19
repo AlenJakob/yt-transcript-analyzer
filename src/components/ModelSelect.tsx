@@ -4,6 +4,12 @@ import { Paper, Box, Select, MenuItem, Typography } from '@mui/material';
 import { ModelOpenRouter } from '@/types/openRouter';
 import { useEffect, useState, startTransition } from 'react';
 
+const AUTO_MODEL = {
+	id: 'openrouter/free',
+	name: '⚡ OpenRouter Auto Free (Automatyczny)',
+	description: 'Automatycznie wybiera obecnie dostępny darmowy model',
+};
+
 const mapModels = (models: ModelOpenRouter[]) =>
 	models.map((model) => {
 		return {
@@ -23,32 +29,43 @@ export default function ModelSelect({ selectedModel, setSelectedModel }: ModelSe
 
 	useEffect(() => {
 		const getModels = async () => {
-			const res = await fetch('/api/ai/models');
-			const data = await res.json();
+			try {
+				const res = await fetch('/api/ai/models');
+				const data = await res.json();
 
-			const mappedModels = mapModels(data.models.freeModels);
-			startTransition(() => {
-				setModels(mappedModels);
+				const fetchedModels = data.models?.freeModels ? mapModels(data.models.freeModels) : [];
+				const mappedModels = [AUTO_MODEL, ...fetchedModels];
 
-				if (mappedModels.length > 0 && mappedModels[0].id) {
-					setSelectedModel(mappedModels[0].id);
-				}
-			});
+				startTransition(() => {
+					setModels(mappedModels);
+
+					if (!selectedModel && mappedModels.length > 0 && mappedModels[0].id) {
+						setSelectedModel(mappedModels[0].id);
+					}
+				});
+			} catch (err) {
+				console.error('Failed to fetch AI models:', err);
+				setModels([AUTO_MODEL]);
+			}
 		};
 
 		getModels();
-	}, [setSelectedModel]);
+	}, [selectedModel, setSelectedModel]);
 
 	return (
 		<Paper
 			elevation={0}
 			sx={{
 				p: { xs: 2.5, sm: 3.5 },
-				mb: 4,
-				background: 'linear-gradient(145deg, #121824 0%, #0e131d 100%)',
-				border: '1px solid rgba(255, 255, 255, 0.08)',
+				height: '100%',
+				bgcolor: 'background.paper',
+				border: '1px solid',
+				borderColor: 'divider',
 				borderRadius: 2,
-				boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+				boxShadow: (theme) =>
+					theme.palette.mode === 'dark'
+						? '0 8px 32px rgba(0, 0, 0, 0.4)'
+						: '0 4px 20px rgba(0, 0, 0, 0.05)',
 			}}
 		>
 			<Typography variant="body2" sx={{ mb: 1, color: 'text.secondary', fontWeight: 600 }}>

@@ -11,7 +11,13 @@ export async function GET() {
 
 		const data = await resp.json();
 		const freeModels = data.data.filter((model: { id: string }) => {
-			return model.id.endsWith(':free');
+			const id = model.id.toLowerCase();
+			return (
+				id.endsWith(':free') &&
+				!id.includes('guard') &&
+				!id.includes('moderation') &&
+				!id.includes('safety')
+			);
 		});
 
 		return NextResponse.json({ models: { freeModels } });

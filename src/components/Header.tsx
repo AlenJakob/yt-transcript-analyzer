@@ -2,9 +2,19 @@
 
 import { useState, useEffect, startTransition } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Box, Container, Typography, Chip, Stack, Button, Badge } from '@mui/material';
+import {
+	Box,
+	Container,
+	Typography,
+	IconButton,
+	Tooltip,
+	Stack,
+	Button,
+	Badge,
+} from '@mui/material';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import HistoryIcon from '@mui/icons-material/History';
 import SearchIcon from '@mui/icons-material/Search';
@@ -12,6 +22,8 @@ import PersonIcon from '@mui/icons-material/Person';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import AuthButtonSlot from '@/components/AuthButtonSlot';
 import { useAuthUser } from '@/hooks/useAuthUser';
+import { useColorMode } from '@/context/ColorModeContext';
+import { getProfileButtonStyles } from '@/utils/helper';
 
 interface HeaderProps {
 	historyCount?: number;
@@ -21,6 +33,7 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 	const pathname = usePathname();
 	const router = useRouter();
 	const { isAdmin } = useAuthUser();
+	const { mode, toggleColorMode } = useColorMode();
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
@@ -33,14 +46,23 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 	const isArchive = pathname === '/archive';
 	const isProfile = pathname === '/profile';
 
+	const profileBtnStyles = getProfileButtonStyles({
+		isProfile,
+		isAdmin,
+		mode,
+	});
+
 	return (
 		<Box
 			component="header"
 			sx={{
 				py: 2.5,
-				borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+				borderBottom: '1px solid',
+				borderColor: 'divider',
 				background:
-					'linear-gradient(180deg, rgba(18, 24, 36, 0.85) 0%, rgba(10, 13, 20, 0.95) 100%)',
+					mode === 'dark'
+						? 'linear-gradient(180deg, rgba(18, 24, 36, 0.85) 0%, rgba(10, 13, 20, 0.95) 100%)'
+						: 'linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.95) 100%)',
 				backdropFilter: 'blur(12px)',
 				sticky: 'top',
 				top: 0,
@@ -77,33 +99,70 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 							<Typography
 								variant="h6"
 								component="h1"
-								sx={{ fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em' }}
+								sx={{
+									fontWeight: 800,
+									lineHeight: 1.15,
+									letterSpacing: '-0.02em',
+								}}
 							>
-								YT Transcript Analyzer
+								TubeDigest
 							</Typography>
 							<Typography
 								variant="caption"
-								sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 0.5 }}
+								sx={{
+									color: 'text.secondary',
+									display: 'flex',
+									alignItems: 'center',
+									gap: 0.5,
+									fontSize: '0.73rem',
+									fontWeight: 500,
+								}}
 							>
-								<AutoAwesomeIcon sx={{ fontSize: 13, color: '#3b82f6' }} />
+								<AutoAwesomeIcon sx={{ fontSize: 12, color: '#3b82f6' }} />
+								YouTube AI Analyzer
 							</Typography>
 						</Box>
 					</Stack>
 
 					<Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-						<Chip
-							icon={<DarkModeIcon sx={{ fontSize: 15 }} />}
-							label="Dark Mode"
-							variant="outlined"
-							size="medium"
-							sx={{
-								borderColor: 'rgba(255, 255, 255, 0.1)',
-								bgcolor: 'rgba(255, 255, 255, 0.03)',
-								color: 'text.secondary',
-								borderRadius: 3,
-								display: { xs: 'none', md: 'inline-flex' },
-							}}
-						/>
+						<Tooltip
+							title={
+								mode === 'dark'
+									? 'Przełącz na tryb jasny'
+									: 'Przełącz na tryb ciemny'
+							}
+						>
+							<IconButton
+								onClick={toggleColorMode}
+								size="small"
+								sx={{
+									color: mode === 'dark' ? '#f59e0b' : '#3b82f6',
+									border: '1px solid',
+									borderColor: 'divider',
+									bgcolor:
+										mode === 'dark'
+											? 'rgba(255, 255, 255, 0.05)'
+											: 'rgba(0, 0, 0, 0.04)',
+									borderRadius: 1.5,
+									width: 34,
+									height: 34,
+									transition: 'all 0.2s ease-in-out',
+									'&:hover': {
+										borderColor: mode === 'dark' ? '#f59e0b' : '#3b82f6',
+										bgcolor:
+											mode === 'dark'
+												? 'rgba(245, 158, 11, 0.15)'
+												: 'rgba(59, 130, 246, 0.12)',
+									},
+								}}
+							>
+								{mode === 'dark' ? (
+									<LightModeIcon sx={{ fontSize: 18 }} />
+								) : (
+									<DarkModeIcon sx={{ fontSize: 18 }} />
+								)}
+							</IconButton>
+						</Tooltip>
 						<Button
 							variant={isAnalyzer ? 'contained' : 'outlined'}
 							size="small"
@@ -111,7 +170,7 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 							onClick={() => router.push('/')}
 							sx={{
 								bgcolor: isAnalyzer ? '#3b82f6' : 'transparent',
-								borderColor: 'rgba(255, 255, 255, 0.15)',
+								borderColor: isAnalyzer ? '#3b82f6' : 'divider',
 								color: isAnalyzer ? '#ffffff' : 'text.secondary',
 								px: 2,
 								borderRadius: 1.5,
@@ -129,7 +188,13 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 										badgeContent={historyCount}
 										color="primary"
 										max={99}
-										sx={{ '& .MuiBadge-badge': { fontSize: '0.65rem', height: 16, minWidth: 16 } }}
+										sx={{
+											'& .MuiBadge-badge': {
+												fontSize: '0.65rem',
+												height: 16,
+												minWidth: 16,
+											},
+										}}
 									>
 										<HistoryIcon sx={{ fontSize: 18 }} />
 									</Badge>
@@ -140,7 +205,7 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 							onClick={() => router.push('/archive')}
 							sx={{
 								bgcolor: isArchive ? '#3b82f6' : 'transparent',
-								borderColor: 'rgba(255, 255, 255, 0.15)',
+								borderColor: isArchive ? '#3b82f6' : 'divider',
 								color: isArchive ? '#ffffff' : 'text.secondary',
 								px: 2,
 								borderRadius: 1.5,
@@ -161,13 +226,13 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 							}
 							onClick={() => router.push('/profile')}
 							sx={{
-								bgcolor: isProfile ? (isAdmin ? '#9333ea' : '#3b82f6') : 'transparent',
-								borderColor: isAdmin ? 'rgba(168, 85, 247, 0.3)' : 'rgba(255, 255, 255, 0.15)',
-								color: isProfile ? '#ffffff' : isAdmin ? '#c084fc' : 'text.secondary',
+								bgcolor: profileBtnStyles.bgcolor,
+								borderColor: profileBtnStyles.borderColor,
+								color: profileBtnStyles.color,
 								px: 2,
 								borderRadius: 1.5,
 								'&:hover': {
-									borderColor: isAdmin ? '#a855f7' : '#3b82f6',
+									borderColor: profileBtnStyles.hoverBorderColor,
 								},
 							}}
 						>

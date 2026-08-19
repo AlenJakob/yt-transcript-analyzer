@@ -24,9 +24,9 @@ export default function PresetCard({
 				sx={{
 					height: '100%',
 					cursor: 'pointer',
-					borderColor: isSelected ? preset.color : 'rgba(255, 255, 255, 0.08)',
+					borderColor: isSelected ? preset.color : 'divider',
 					borderWidth: isSelected ? '2px' : '1px',
-					bgcolor: isSelected ? 'rgba(255, 255, 255, 0.03)' : '#121824',
+					bgcolor: isSelected ? 'action.hover' : 'background.paper',
 					transition: 'all 0.2s ease',
 					'&:hover': {
 						borderColor: preset.color,

@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: 'YouTube Transcript Analyzer',
+	title: 'TubeDigest – YouTube Transcript & AI Analyzer',
 	description:
-		'Narzędzie do pobierania, przeglądania i analizy transkrypcji z filmów YouTube z szablonami promptów AI.',
+		'Inteligentne narzędzie do pobierania, przeglądania i analizy transkrypcji z filmów YouTube z szablonami promptów AI.',
 };
 
 import ThemeRegistry from '@/components/ThemeRegistry';
@@ -29,7 +29,9 @@ export default function RootLayout({
 	return (
 		<html lang="pl" className={`${geistSans.variable} ${geistMono.variable}`}>
 			<body>
-				<ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
+				<ClerkProvider
+					publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+				>
 					<ThemeRegistry>{children}</ThemeRegistry>
 				</ClerkProvider>
 			</body>

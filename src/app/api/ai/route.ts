@@ -4,21 +4,33 @@ import { verifyAdminAccess } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-// OpenRouter wymaga własnego baseURL i opcjonalnych nagłówków
-const openai = new OpenAI({
-	apiKey: process.env.OPENROUTER_API_KEY,
-	baseURL: 'https://openrouter.ai/api/v1',
-	defaultHeaders: {
-		'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-		'X-Title': 'YT Transcript Analyzer',
-	},
-});
+/**
+ * Lazily creates and returns an OpenAI client instance configured for OpenRouter.
+ */
+function getOpenAIClient(): OpenAI {
+	const apiKey = process.env.OPENROUTER_API_KEY;
+	if (!apiKey) {
+		throw new Error(
+			'OPENROUTER_API_KEY environment variable is not configured.'
+		);
+	}
+
+	return new OpenAI({
+		apiKey,
+		baseURL: 'https://openrouter.ai/api/v1',
+		defaultHeaders: {
+			'HTTP-Referer':
+				process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+			'X-Title': 'YT Transcript Analyzer',
+		},
+	});
+}
 
 export async function POST(req: NextRequest) {
 	try {
 		const { isAdmin } = await verifyAdminAccess(req);
 
-		// Zabezpieczenie: tylko administrator ma dostęp do generowania AI z OpenRouter
+		// Guard: only administrator has access to generate AI with OpenRouter
 		if (!isAdmin) {
 			return NextResponse.json(
 				{
@@ -29,7 +41,7 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
-		const { model, transcriptText, promptPreset } = await req.json();
+		const { model, transcriptText, promptPreset, language = 'pl' } = await req.json();
 
 		if (!transcriptText || !promptPreset) {
 			return NextResponse.json(
@@ -38,14 +50,25 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
+		const languageInstructions: Record<string, string> = {
+			pl: 'odpowiadaj po polsku',
+			en: 'respond in English',
+			de: 'respond in German',
+			es: 'respond in Spanish',
+			fr: 'respond in French',
+		};
+		const targetLanguageInstruction =
+			languageInstructions[language] || `respond in ${language}`;
+
+		const openai = getOpenAIClient();
 		const defaultModel = 'openrouter/free';
 		const response = await openai.chat.completions.create({
 			model: model || defaultModel,
 			messages: [
 				{
 					role: 'system',
-					content: `Jesteś ekspertem od analizy transkrypcji wideo. Zawsze:
-								- odpowiadaj po polsku,
+					content: `Jesteś ekspertem od analizy i streszczania transkrypcji wideo. Twoim jedynym celem jest przeanalizowanie podanego tekstu z wideo i wygenerowanie wartościowego podsumowania. Zawsze:
+								- ${targetLanguageInstruction},
 								- używaj wyłącznie zwykłego tekstu,
 								- nie używaj Markdown,
 								- nie stosuj list,
@@ -59,10 +82,17 @@ export async function POST(req: NextRequest) {
 			],
 		});
 
-		return NextResponse.json({ result: response.choices[0].message.content, modelUsed: model });
+		return NextResponse.json({
+			result: response.choices[0].message.content,
+			modelUsed: model,
+		});
 	} catch (err: unknown) {
-		const message = err instanceof Error ? err.message : 'Nieznany błąd serwera';
+		const message =
+			err instanceof Error ? err.message : 'Nieznany błąd serwera';
 		console.error('[/api/ai] Error:', message);
-		return NextResponse.json({ error: `Błąd serwera: ${message}` }, { status: 500 });
+		return NextResponse.json(
+			{ error: `Błąd serwera: ${message}` },
+			{ status: 500 }
+		);
 	}
 }

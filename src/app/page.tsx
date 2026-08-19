@@ -8,6 +8,7 @@ import VideoMetadataCard from '@/components/VideoMetadataCard';
 import TranscriptViewer from '@/components/TranscriptViewer/TranscriptViewer';
 import AiAnalysisPresets from '@/components/AiAnalysisPresets';
 import { useTranscriptArchive } from '@/hooks/useTranscriptArchive';
+import { useAuthUser } from '@/hooks/useAuthUser';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import InfoIcon from '@mui/icons-material/Info';
 
@@ -21,6 +22,7 @@ function AnalyzerContent() {
 		history,
 		handleFetchTranscript,
 	} = useTranscriptArchive();
+	const { isAdmin } = useAuthUser();
 
 	return (
 		<Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 8 }}>
@@ -35,13 +37,20 @@ function AnalyzerContent() {
 				/>
 
 				{/* Dane wideo oraz Statystyki */}
-				{metadata && stats && <VideoMetadataCard metadata={metadata} stats={stats} />}
+				{metadata && stats && (
+					<VideoMetadataCard metadata={metadata} stats={stats} />
+				)}
 
 				{/* Podgląd Transkrypcji & Szablony AI */}
 				{segments.length > 0 && metadata && (
 					<>
 						<TranscriptViewer segments={segments} videoId={metadata.videoId} />
-						<AiAnalysisPresets segments={segments} videoTitle={metadata.title} />
+						{isAdmin && (
+							<AiAnalysisPresets
+								segments={segments}
+								videoTitle={metadata.title}
+							/>
+						)}
 					</>
 				)}
 
@@ -52,9 +61,14 @@ function AnalyzerContent() {
 						sx={{
 							p: { xs: 4, sm: 6 },
 							textAlign: 'center',
-							bgcolor: 'rgba(18, 24, 36, 0.5)',
-							border: '1px dashed rgba(255, 255, 255, 0.1)',
+							bgcolor: 'background.paper',
+							border: '1px dashed',
+							borderColor: 'divider',
 							borderRadius: 2,
+							boxShadow: (theme) =>
+								theme.palette.mode === 'dark'
+									? '0 8px 24px rgba(0, 0, 0, 0.35)'
+									: '0 2px 12px rgba(0, 0, 0, 0.04)',
 						}}
 					>
 						<Box
@@ -79,8 +93,9 @@ function AnalyzerContent() {
 							variant="body2"
 							sx={{ color: 'text.secondary', maxWidth: 500, mx: 'auto', mb: 3 }}
 						>
-							Wklej dowolny adres URL z serwisu YouTube w powyższym polu lub otwórz wcześniej
-							zapisaną transkrypcję z zakłdaki <strong>Archiwum ({history.length})</strong>.
+							Wklej dowolny adres URL z serwisu YouTube w powyższym polu lub
+							otwórz wcześniej zapisaną transkrypcję z zakładki{' '}
+							<strong>Archiwum ({history.length})</strong>.
 						</Typography>
 						<Typography
 							variant="caption"
@@ -91,8 +106,8 @@ function AnalyzerContent() {
 								gap: 0.5,
 							}}
 						>
-							<InfoIcon sx={{ fontSize: 16 }} /> Obsługuje filmy wideo, YouTube Shorts oraz linki
-							skrócone `youtu.be`.
+							<InfoIcon sx={{ fontSize: 16 }} /> Obsługuje filmy wideo, YouTube
+							Shorts oraz linki skrócone `youtu.be`.
 						</Typography>
 					</Paper>
 				)}

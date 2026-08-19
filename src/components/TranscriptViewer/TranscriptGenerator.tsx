@@ -1,13 +1,36 @@
-import { Box, Button, CircularProgress, Paper, Stack, Tooltip, Typography } from '@mui/material';
+import {
+	Box,
+	Button,
+	CircularProgress,
+	Grid,
+	Paper,
+	Stack,
+	Tooltip,
+	Typography,
+	Menu,
+	MenuItem,
+	ListItemIcon,
+	ListItemText,
+	FormControl,
+	Select,
+} from '@mui/material';
 import ModelSelect from '../ModelSelect';
+import LanguageSelect from '../LanguageSelect';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import StopIcon from '@mui/icons-material/Stop';
 import CheckIcon from '@mui/icons-material/Check';
-import { Dispatch, SetStateAction, useState } from 'react';
-import { useCopyClipboard } from '@/hooks/useCopyClipboad';
-import { useAiSummary } from '@/hooks/useAiSummary';
-import { useAuthUser } from '@/hooks/useAuthUser';
+import DownloadIcon from '@mui/icons-material/Download';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import DescriptionIcon from '@mui/icons-material/Description';
+import CodeIcon from '@mui/icons-material/Code';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import PauseIcon from '@mui/icons-material/Pause';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import AudiotrackIcon from '@mui/icons-material/Audiotrack';
+import { Dispatch, SetStateAction } from 'react';
+import { useTranscriptGenerator } from '@/hooks/useTranscriptGenerator';
 
 interface TranscriptGeneratorProps {
 	selectedModel: string;
@@ -20,25 +43,17 @@ export default function TranscriptGenerator({
 	setSelectedModel,
 	formattedParagraphs,
 }: TranscriptGeneratorProps) {
-	const { aiResponse, isAiLoading, error, generateSummary, abort } = useAiSummary();
-	const { isAdmin } = useAuthUser();
-	const isAllowed = isAdmin;
-	const [copied, setCopied] = useState(false);
-	const { copyClipBoard } = useCopyClipboard();
-
-	const handleGenerateAiSummary = () => {
-		const transcriptText = formattedParagraphs.join('\n\n');
-		setCopied(false);
-		generateSummary(transcriptText, selectedModel);
-	};
-
-	const handleCopy = () => {
-		if (aiResponse) {
-			copyClipBoard(aiResponse);
-			setCopied(true);
-			setTimeout(() => setCopied(false), 2000);
-		}
-	};
+	const {
+		ai,
+		clipboard,
+		speech,
+		export: exportActions,
+		language,
+		isAdmin,
+	} = useTranscriptGenerator({
+		selectedModel,
+		formattedParagraphs,
+	});
 
 	return (
 		<Paper
@@ -46,8 +61,9 @@ export default function TranscriptGenerator({
 			sx={{
 				mb: 2,
 				p: { xs: 3, sm: 4 },
-				bgcolor: '#121824',
-				border: '1px solid rgba(255, 255, 255, 0.08)',
+				bgcolor: 'background.paper',
+				border: '1px solid',
+				borderColor: 'divider',
 				borderRadius: 2,
 			}}
 		>
@@ -58,13 +74,30 @@ export default function TranscriptGenerator({
 					letterSpacing: '0.015em',
 					color: 'text.primary',
 					fontSize: '1.1rem',
-					mb: '8px',
+					mb: '16px',
 				}}
 			>
-				Generowanie podsumowania
+				Generowanie podsumowania AI
 			</Typography>
-			<Stack spacing={2} sx={{ mb: 2 }}>
-				<ModelSelect setSelectedModel={setSelectedModel} selectedModel={selectedModel} />
+
+			<Stack spacing={2.5} sx={{ mb: 3 }}>
+				{/* Controls: Model Select & Language Select */}
+				<Grid container spacing={2}>
+					<Grid size={{ xs: 12, sm: 6 }}>
+						<ModelSelect
+							setSelectedModel={setSelectedModel}
+							selectedModel={selectedModel}
+						/>
+					</Grid>
+					<Grid size={{ xs: 12, sm: 6 }}>
+						<LanguageSelect
+							selectedLanguage={language.selected}
+							setSelectedLanguage={language.set}
+						/>
+					</Grid>
+				</Grid>
+
+				{/* Action Buttons */}
 				<Stack
 					direction="row"
 					spacing={1.5}
@@ -72,24 +105,24 @@ export default function TranscriptGenerator({
 				>
 					<Tooltip
 						title={
-							!isAllowed
+							!isAdmin
 								? 'Generowanie podsumowań jest obecnie dostępne tylko dla administratora.'
 								: ''
 						}
 					>
 						<span>
 							<Button
-								disabled={isAiLoading || !isAllowed}
+								disabled={ai.isLoading || !isAdmin}
 								variant="contained"
 								size="small"
 								startIcon={
-									isAiLoading ? (
+									ai.isLoading ? (
 										<CircularProgress sx={{ color: 'inherit' }} size={14} />
 									) : (
 										<SmartToyIcon sx={{ fontSize: 16 }} />
 									)
 								}
-								onClick={handleGenerateAiSummary}
+								onClick={ai.generate}
 								sx={{ bgcolor: '#10b981', '&:hover': { bgcolor: '#059669' } }}
 							>
 								Generuj podsumowanie
@@ -97,62 +130,229 @@ export default function TranscriptGenerator({
 						</span>
 					</Tooltip>
 
-					<Button
-						disabled={!aiResponse || isAiLoading}
-						variant="contained"
-						size="small"
-						startIcon={
-							copied ? (
-								<CheckIcon sx={{ fontSize: 16 }} />
-							) : (
-								<ContentCopyIcon sx={{ fontSize: 16 }} />
-							)
-						}
-						onClick={handleCopy}
-						sx={{ bgcolor: '#3b82f6', '&:hover': { bgcolor: '#2563eb' } }}
-					>
-						{copied ? 'Skopiowano!' : 'Kopiuj podsumowanie'}
-					</Button>
-
-					{isAllowed && (
+					{isAdmin && (
 						<Button
-							disabled={!isAiLoading}
+							disabled={!ai.isLoading}
 							variant="contained"
 							size="small"
 							color="error"
 							startIcon={<StopIcon sx={{ fontSize: 16 }} />}
-							onClick={abort}
+							onClick={ai.abort}
 						>
 							Anuluj generowanie
 						</Button>
 					)}
 				</Stack>
 			</Stack>
+
+			{/* AI Output Section */}
 			<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-				<Typography
-					variant="body1"
-					component="div"
-					sx={{
-						lineHeight: 1.85,
-						letterSpacing: '0.015em',
-						color: 'text.primary',
-						fontSize: '1.1rem',
-					}}
-				>
-					{isAiLoading ? (
-						<Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-							Generuję odpowiedź AI...
+				{ai.isLoading ? (
+					<Typography
+						variant="body2"
+						sx={{ color: 'text.secondary', fontStyle: 'italic' }}
+					>
+						Generuję odpowiedź AI...
+					</Typography>
+				) : ai.error ? (
+					<Typography variant="body2" color="error">
+						{ai.error}
+					</Typography>
+				) : ai.response ? (
+					<Paper
+						elevation={0}
+						sx={{
+							p: 2.5,
+							bgcolor: (theme) =>
+								theme.palette.mode === 'dark'
+									? 'rgba(59, 130, 246, 0.05)'
+									: 'rgba(59, 130, 246, 0.03)',
+							border: '1px solid',
+							borderColor: (theme) =>
+								theme.palette.mode === 'dark'
+									? 'rgba(59, 130, 246, 0.2)'
+									: 'rgba(59, 130, 246, 0.15)',
+							borderRadius: 2,
+						}}
+					>
+						<Stack
+							direction="row"
+							sx={{
+								alignItems: 'center',
+								justifyContent: 'space-between',
+								flexWrap: 'wrap',
+								gap: 1,
+								mb: 1.5,
+								pb: 1,
+								borderBottom: '1px dashed',
+								borderColor: 'divider',
+							}}
+						>
+							<Typography
+								variant="subtitle2"
+								sx={{ fontWeight: 700, color: '#3b82f6' }}
+							>
+								Odpowiedź AI ({language.selected.toUpperCase()})
+							</Typography>
+							<Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+								{isAdmin && speech.isSupported && (
+									<>
+										<Button
+											disabled={!ai.response || ai.isLoading || speech.isLoading}
+											variant={speech.isSpeaking ? 'contained' : 'outlined'}
+											color={
+												speech.isSpeaking && speech.isPaused
+													? 'success'
+													: speech.isSpeaking
+														? 'warning'
+														: 'primary'
+											}
+											size="small"
+											startIcon={
+												speech.isLoading ? (
+													<CircularProgress size={14} sx={{ color: 'inherit' }} />
+												) : speech.isSpeaking && speech.isPaused ? (
+													<PlayArrowIcon sx={{ fontSize: 16 }} />
+												) : speech.isSpeaking ? (
+													<PauseIcon sx={{ fontSize: 16 }} />
+												) : (
+													<VolumeUpIcon sx={{ fontSize: 16 }} />
+												)
+											}
+											onClick={speech.toggle}
+										>
+											{speech.isLoading
+												? 'Wczytuję...'
+												: speech.isSpeaking && speech.isPaused
+													? 'Wznów'
+													: speech.isSpeaking
+														? 'Pauza'
+														: 'Odsłuchaj'}
+										</Button>
+
+										<Tooltip title="Prędkość odtwarzania mowy">
+											<FormControl size="small">
+												<Select
+													value={speech.rate}
+													onChange={(e) => speech.setRate(Number(e.target.value))}
+													size="small"
+													sx={{
+														fontSize: '0.75rem',
+														fontWeight: 700,
+														height: 30,
+														borderRadius: 1.5,
+														'& .MuiSelect-select': {
+															py: 0.4,
+															px: 1,
+														},
+													}}
+												>
+													<MenuItem value={0.85}>0.85x</MenuItem>
+													<MenuItem value={1.0}>1.0x</MenuItem>
+													<MenuItem value={1.25}>1.25x</MenuItem>
+													<MenuItem value={1.5}>1.5x</MenuItem>
+												</Select>
+											</FormControl>
+										</Tooltip>
+
+										{speech.isSpeaking && (
+											<Button
+												variant="outlined"
+												color="error"
+												size="small"
+												startIcon={<VolumeOffIcon sx={{ fontSize: 16 }} />}
+												onClick={speech.stop}
+											>
+												Stop
+											</Button>
+										)}
+									</>
+								)}
+
+								<Button
+									disabled={!ai.response || ai.isLoading}
+									variant="outlined"
+									size="small"
+									startIcon={<DownloadIcon sx={{ fontSize: 16 }} />}
+									onClick={exportActions.open}
+								>
+									Eksportuj
+								</Button>
+								<Menu
+									anchorEl={exportActions.anchorEl}
+									open={exportActions.isOpen}
+									onClose={exportActions.close}
+								>
+									<MenuItem onClick={exportActions.txt}>
+										<ListItemIcon>
+											<DescriptionIcon fontSize="small" />
+										</ListItemIcon>
+										<ListItemText>Pobierz jako .TXT</ListItemText>
+									</MenuItem>
+									<MenuItem onClick={exportActions.markdown}>
+										<ListItemIcon>
+											<CodeIcon fontSize="small" />
+										</ListItemIcon>
+										<ListItemText>Pobierz jako .MD (Markdown)</ListItemText>
+									</MenuItem>
+									<MenuItem onClick={exportActions.pdf}>
+										<ListItemIcon>
+											<PictureAsPdfIcon fontSize="small" />
+										</ListItemIcon>
+										<ListItemText>Drukuj / Pobierz PDF</ListItemText>
+									</MenuItem>
+									{isAdmin && (
+										<MenuItem
+											onClick={exportActions.mp3}
+											disabled={exportActions.isExportingAudio}
+										>
+											<ListItemIcon>
+												{exportActions.isExportingAudio ? (
+													<CircularProgress size={16} />
+												) : (
+													<AudiotrackIcon fontSize="small" />
+												)}
+											</ListItemIcon>
+											<ListItemText>
+												{exportActions.isExportingAudio
+													? 'Generuję plik audio MP3...'
+													: 'Pobierz audio (.MP3)'}
+											</ListItemText>
+										</MenuItem>
+									)}
+								</Menu>
+
+								<Button
+									disabled={!ai.response || ai.isLoading}
+									variant="contained"
+									size="small"
+									startIcon={
+										clipboard.copied ? (
+											<CheckIcon sx={{ fontSize: 16 }} />
+										) : (
+											<ContentCopyIcon sx={{ fontSize: 16 }} />
+										)
+									}
+									onClick={clipboard.copy}
+									sx={{ bgcolor: '#3b82f6', '&:hover': { bgcolor: '#2563eb' } }}
+								>
+									{clipboard.copied ? 'Skopiowano!' : 'Kopiuj podsumowanie'}
+								</Button>
+							</Stack>
+						</Stack>
+						<Typography
+							variant="body1"
+							sx={{
+								lineHeight: 1.85,
+								letterSpacing: '0.015em',
+								color: 'text.primary',
+								whiteSpace: 'pre-line',
+							}}
+						>
+							{ai.response}
 						</Typography>
-					) : error ? (
-						<Typography variant="body2" color="error">
-							{error}
-						</Typography>
-					) : aiResponse ? (
-						<>
-							<b>Odpowiedź AI:</b> <br /> {aiResponse}
-						</>
-					) : null}
-				</Typography>
+					</Paper>
+				) : null}
 			</Box>
 		</Paper>
 	);

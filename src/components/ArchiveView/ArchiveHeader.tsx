@@ -33,8 +33,9 @@ export default function ArchiveHeader({
 			sx={{
 				p: { xs: 2.5, sm: 3 },
 				mb: 3,
-				bgcolor: '#121824',
-				border: '1px solid rgba(255, 255, 255, 0.08)',
+				bgcolor: 'background.paper',
+				border: '1px solid',
+				borderColor: 'divider',
 				borderRadius: 2,
 			}}
 		>
@@ -79,9 +80,29 @@ export default function ArchiveHeader({
 							<IconButton
 								color="error"
 								onClick={onConfirmClearOpen}
-								sx={{ display: { xs: 'inline-flex', md: 'none' } }}
+								sx={{
+									display: { xs: 'inline-flex', md: 'none' },
+									color: '#ef4444',
+									bgcolor: (theme) =>
+										theme.palette.mode === 'dark'
+											? 'rgba(239, 68, 68, 0.12)'
+											: 'rgba(239, 68, 68, 0.08)',
+									border: '1px solid',
+									borderColor: (theme) =>
+										theme.palette.mode === 'dark'
+											? 'rgba(239, 68, 68, 0.3)'
+											: 'rgba(239, 68, 68, 0.25)',
+									borderRadius: 2,
+									p: 0.75,
+									transition: 'all 0.2s ease-in-out',
+									'&:hover': {
+										bgcolor: '#ef4444',
+										color: '#ffffff',
+										borderColor: '#ef4444',
+									},
+								}}
 							>
-								<DeleteSweepIcon />
+								<DeleteSweepIcon sx={{ fontSize: 20 }} />
 							</IconButton>
 						</Tooltip>
 					)}

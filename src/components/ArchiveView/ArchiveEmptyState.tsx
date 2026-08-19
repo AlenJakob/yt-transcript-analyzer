@@ -14,9 +14,14 @@ export default function ArchiveEmptyState({ searchQuery }: ArchiveEmptyStateProp
 			sx={{
 				p: 5,
 				textAlign: 'center',
-				bgcolor: '#121824',
-				border: '1px dashed rgba(255, 255, 255, 0.1)',
+				bgcolor: 'background.paper',
+				border: '1px dashed',
+				borderColor: 'divider',
 				borderRadius: 2,
+				boxShadow: (theme) =>
+					theme.palette.mode === 'dark'
+						? '0 8px 24px rgba(0, 0, 0, 0.35)'
+						: '0 2px 12px rgba(0, 0, 0, 0.04)',
 			}}
 		>
 			<HistoryIcon sx={{ fontSize: 44, color: 'text.disabled', mb: 1.5, opacity: 0.4 }} />
