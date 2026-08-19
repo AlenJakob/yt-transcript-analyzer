@@ -62,15 +62,11 @@ export interface ProfileButtonStylesParams {
 	mode: 'light' | 'dark';
 }
 
-<<<<<<< HEAD
 export function getProfileButtonStyles({
 	isProfile,
 	isAdmin,
 	mode,
 }: ProfileButtonStylesParams) {
-=======
-export function getProfileButtonStyles({ isProfile, isAdmin, mode }: ProfileButtonStylesParams) {
->>>>>>> a549b94 (feat: add text-to-speech hook, OpenRouter API integration, and associated UI components for usage tracking and transcript management.)
 	const isDark = mode === 'dark';
 
 	if (isProfile) {
@@ -85,13 +81,9 @@ export function getProfileButtonStyles({ isProfile, isAdmin, mode }: ProfileButt
 	if (isAdmin) {
 		return {
 			bgcolor: 'transparent',
-<<<<<<< HEAD
 			borderColor: isDark
 				? 'rgba(168, 85, 247, 0.35)'
 				: 'rgba(126, 34, 206, 0.4)',
-=======
-			borderColor: isDark ? 'rgba(168, 85, 247, 0.35)' : 'rgba(126, 34, 206, 0.4)',
->>>>>>> a549b94 (feat: add text-to-speech hook, OpenRouter API integration, and associated UI components for usage tracking and transcript management.)
 			color: isDark ? '#c084fc' : '#7e22ce',
 			hoverBorderColor: isDark ? '#a855f7' : '#6b21a8',
 		};
@@ -104,8 +96,6 @@ export function getProfileButtonStyles({ isProfile, isAdmin, mode }: ProfileButt
 		hoverBorderColor: '#3b82f6',
 	};
 }
-<<<<<<< HEAD
-=======
 
 export interface OpenRouterUsageData {
 	label?: string;
@@ -160,4 +150,3 @@ export function formatOpenRouterUsage(data?: OpenRouterUsageData): FormattedUsag
 		expiresAtLabel,
 	};
 }
->>>>>>> a549b94 (feat: add text-to-speech hook, OpenRouter API integration, and associated UI components for usage tracking and transcript management.)
