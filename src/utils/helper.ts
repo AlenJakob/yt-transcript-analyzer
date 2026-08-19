@@ -96,3 +96,57 @@ export function getProfileButtonStyles({
 		hoverBorderColor: '#3b82f6',
 	};
 }
+
+export interface OpenRouterUsageData {
+	label?: string;
+	usage?: number;
+	limit?: number | null;
+	limit_remaining?: number | null;
+	is_free_tier?: boolean;
+	usage_daily?: number;
+	usage_weekly?: number;
+	usage_monthly?: number;
+	expires_at?: string | number | null;
+}
+
+export interface FormattedUsageInfo {
+	totalUsageUsd: string;
+	totalUsagePln: string;
+	tierLabel: string;
+	isFreeTier: boolean;
+	limitLabel: string;
+	keyLabel: string;
+	expiresAtLabel: string;
+}
+
+export function formatOpenRouterUsage(data?: OpenRouterUsageData): FormattedUsageInfo {
+	if (!data) {
+		return {
+			totalUsageUsd: '$0.0000',
+			totalUsagePln: '0,0000 zł',
+			tierLabel: 'Nieznany',
+			isFreeTier: true,
+			limitLabel: 'Brak danych',
+			keyLabel: 'Brak klucza',
+			expiresAtLabel: 'Brak danych',
+		};
+	}
+
+	const usage = data.usage ?? 0;
+	const usagePln = usage * 4.0;
+
+	let expiresAtLabel = 'Bezterminowo';
+	if (data.expires_at) {
+		expiresAtLabel = formatDate(String(data.expires_at));
+	}
+
+	return {
+		totalUsageUsd: `$${usage.toFixed(6)}`,
+		totalUsagePln: `${usagePln.toFixed(4)} zł`,
+		tierLabel: data.is_free_tier ? 'Plan Free (Darmowy)' : 'Plan Paid (Płatny)',
+		isFreeTier: Boolean(data.is_free_tier),
+		limitLabel: data.limit ? `$${data.limit}` : 'Brak limitu',
+		keyLabel: data.label || 'Klucz Główny API',
+		expiresAtLabel,
+	};
+}

@@ -340,17 +340,26 @@ export default function TranscriptGenerator({
 								</Button>
 							</Stack>
 						</Stack>
-						<Typography
-							variant="body1"
+						<Box
 							sx={{
-								lineHeight: 1.85,
-								letterSpacing: '0.015em',
-								color: 'text.primary',
-								whiteSpace: 'pre-line',
+								maxHeight: 450,
+								overflowY: 'auto',
+								overflowX: 'hidden',
+								pr: 1.5,
 							}}
 						>
-							{ai.response}
-						</Typography>
+							<Typography
+								variant="body1"
+								sx={{
+									lineHeight: 1.85,
+									letterSpacing: '0.015em',
+									color: 'text.primary',
+									whiteSpace: 'pre-line',
+								}}
+							>
+								{ai.response}
+							</Typography>
+						</Box>
 					</Paper>
 				) : null}
 			</Box>

@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
+import { getOpenRouterBaseUrl } from '@/lib/openrouter';
 
 export async function GET() {
-	const url = 'https://openrouter.ai/api/v1/models';
+	const url = `${getOpenRouterBaseUrl()}/models`;
+
 	try {
 		const resp = await fetch(url);
 

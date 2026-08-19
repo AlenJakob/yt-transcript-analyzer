@@ -1,36 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 import { verifyAdminAccess } from '@/lib/auth';
+import { getOpenAIClient } from '@/lib/openrouter';
 
 export const dynamic = 'force-dynamic';
-
-/**
- * Lazily creates and returns an OpenAI client instance configured for OpenRouter.
- */
-function getOpenAIClient(): OpenAI {
-	const apiKey = process.env.OPENROUTER_API_KEY;
-	if (!apiKey) {
-		throw new Error(
-			'OPENROUTER_API_KEY environment variable is not configured.'
-		);
-	}
-
-	return new OpenAI({
-		apiKey,
-		baseURL: 'https://openrouter.ai/api/v1',
-		defaultHeaders: {
-			'HTTP-Referer':
-				process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-			'X-Title': 'YT Transcript Analyzer',
-		},
-	});
-}
 
 export async function POST(req: NextRequest) {
 	try {
 		const { isAdmin } = await verifyAdminAccess(req);
 
-		// Guard: only administrator has access to generate AI with OpenRouter
 		if (!isAdmin) {
 			return NextResponse.json(
 				{
@@ -41,7 +18,12 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
-		const { model, transcriptText, promptPreset, language = 'pl' } = await req.json();
+		const {
+			model,
+			transcriptText,
+			promptPreset,
+			language = 'pl',
+		} = await req.json();
 
 		if (!transcriptText || !promptPreset) {
 			return NextResponse.json(
@@ -69,10 +51,7 @@ export async function POST(req: NextRequest) {
 					role: 'system',
 					content: `Jesteś ekspertem od analizy i streszczania transkrypcji wideo. Twoim jedynym celem jest przeanalizowanie podanego tekstu z wideo i wygenerowanie wartościowego podsumowania. Zawsze:
 								- ${targetLanguageInstruction},
-								- używaj wyłącznie zwykłego tekstu,
-								- nie używaj Markdown,
-								- nie stosuj list,
-								- nie używaj znaków #, ** ani ---,
+								- używaj czytelnego formatu,
 								- twórz tekst przeznaczony do odsłuchu przez TTS.`,
 				},
 				{
