@@ -18,7 +18,7 @@ export function useOpenRouterUsage(isAdmin: boolean): UseOpenRouterUsageReturn {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
 
-	const fetchUsage = useCallback(async () => {
+	const refreshUsage = useCallback(async () => {
 		if (!isAdmin) {
 			return;
 		}
@@ -46,8 +46,10 @@ export function useOpenRouterUsage(isAdmin: boolean): UseOpenRouterUsageReturn {
 	}, [isAdmin]);
 
 	useEffect(() => {
-		fetchUsage();
-	}, [fetchUsage]);
+		if (isAdmin) {
+			void refreshUsage();
+		}
+	}, [isAdmin, refreshUsage]);
 
 	const formattedInfo: FormattedUsageInfo = formatOpenRouterUsage(
 		usageData || undefined
@@ -58,6 +60,6 @@ export function useOpenRouterUsage(isAdmin: boolean): UseOpenRouterUsageReturn {
 		formattedInfo,
 		isLoading,
 		error,
-		refreshUsage: fetchUsage,
+		refreshUsage,
 	};
 }

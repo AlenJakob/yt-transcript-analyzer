@@ -153,6 +153,10 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 		}
 	}, []);
 
+	const speakSentenceRef = useRef<
+		((index: number, targetRate: number, langCode: string) => void) | null
+	>(null);
+
 	const speakSentence = useCallback(
 		(index: number, targetRate: number, langCode: string) => {
 			if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
@@ -202,7 +206,11 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 				}
 				const nextIndex = index + 1;
 				if (nextIndex < sentencesRef.current.length) {
-					speakSentence(nextIndex, activeRateRef.current, langCode);
+					speakSentenceRef.current?.(
+						nextIndex,
+						activeRateRef.current,
+						langCode
+					);
 				} else {
 					setIsLoading(false);
 					setIsSpeaking(false);
@@ -225,6 +233,8 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 		},
 		[]
 	);
+
+	speakSentenceRef.current = speakSentence;
 
 	const speak = useCallback(
 		(text: string, langCode: string = 'pl') => {
