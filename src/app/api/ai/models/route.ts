@@ -4,7 +4,6 @@ import { getOpenRouterBaseUrl } from '@/lib/openrouter';
 export async function GET() {
 	const url = `${getOpenRouterBaseUrl()}/models`;
 
-	console.log('url', url);
 	try {
 		const resp = await fetch(url);
 
