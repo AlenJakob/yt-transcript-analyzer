@@ -234,7 +234,9 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 		[]
 	);
 
-	speakSentenceRef.current = speakSentence;
+	useEffect(() => {
+		speakSentenceRef.current = speakSentence;
+	}, [speakSentence]);
 
 	const speak = useCallback(
 		(text: string, langCode: string = 'pl') => {
