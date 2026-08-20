@@ -45,48 +45,109 @@ export async function fetchTranscriptWithFallback(
 	try {
 		let rawTranscript;
 		let finalLang = preferredLangs.length > 0 ? preferredLangs[0] : 'en';
+		let isFallback = false;
 
-		// 1. Próbujemy pobrać w pierwszym preferowanym języku (np. 'pl')
+		// ETAP 1: Próba pobrania standardowo przez youtube-transcript
 		try {
-			rawTranscript = await YoutubeTranscript.fetchTranscript(videoId, { lang: preferredLangs[0] });
-			finalLang = preferredLangs[0];
-		} catch (err) {
-			// 2. Jeśli się nie uda, próbujemy drugi język (np. 'en')
-			if (preferredLangs.length > 1) {
-				try {
-					rawTranscript = await YoutubeTranscript.fetchTranscript(videoId, { lang: preferredLangs[1] });
-					finalLang = preferredLangs[1];
-				} catch (err2) {
-					// 3. Jeśli i to się nie uda, pobieramy JAKIKOLWIEK domyślny język, który jest na wideo
+			// 1. Próbujemy pobrać w pierwszym preferowanym języku (np. 'pl')
+			try {
+				rawTranscript = await YoutubeTranscript.fetchTranscript(videoId, {
+					lang: preferredLangs[0],
+				});
+				finalLang = preferredLangs[0];
+			} catch (err) {
+				// 2. Jeśli się nie uda, próbujemy drugi język (np. 'en')
+				if (preferredLangs.length > 1) {
+					try {
+						rawTranscript = await YoutubeTranscript.fetchTranscript(videoId, {
+							lang: preferredLangs[1],
+						});
+						finalLang = preferredLangs[1];
+					} catch (err2) {
+						// 3. Jeśli i to się nie uda, pobieramy JAKIKOLWIEK domyślny język, który jest na wideo
+						rawTranscript = await YoutubeTranscript.fetchTranscript(videoId);
+						finalLang = 'domyślny';
+					}
+				} else {
+					// 3. Brak drugiego języka - pobieramy jakikolwiek domyślny
 					rawTranscript = await YoutubeTranscript.fetchTranscript(videoId);
 					finalLang = 'domyślny';
 				}
-			} else {
-				// 3. Brak drugiego języka - pobieramy jakikolwiek domyślny
-				rawTranscript = await YoutubeTranscript.fetchTranscript(videoId);
-				finalLang = 'domyślny';
 			}
+		} catch (primaryErr: unknown) {
+			console.log(
+				'youtube-transcript API zawiodło, przełączam na Fallback RapidAPI...'
+			);
+			isFallback = true;
 		}
 
-		if (!rawTranscript || rawTranscript.length === 0) {
+		let mappedTranscript: TranscriptResponse[] = [];
+
+		if (!isFallback && rawTranscript && rawTranscript.length > 0) {
+			mappedTranscript = rawTranscript.map((seg) => ({
+				text: seg.text,
+				offset: seg.offset,
+				duration: seg.duration,
+				lang: finalLang,
+			}));
+		} else {
+			// ETAP 2: Pobieranie przez RapidAPI (Fallback)
+			if (!process.env.RAPIDAPI_KEY) {
+				throw new Error(
+					'Brak klucza RAPIDAPI_KEY w środowisku. Vercel blokuje standardowe pobieranie, a fallback jest nieskonfigurowany.'
+				);
+			}
+
+			const url = `https://youtube-video-summarizer-gpt-ai.p.rapidapi.com/api/v1/get-transcript-v2?video_id=${videoId}&platform=youtube`;
+			const options = {
+				method: 'GET',
+				headers: {
+					'x-rapidapi-key': process.env.RAPIDAPI_KEY,
+					'x-rapidapi-host': 'youtube-video-summarizer-gpt-ai.p.rapidapi.com',
+				},
+			};
+
+			const res = await fetch(url, options);
+			if (!res.ok) {
+				throw new Error(`RapidAPI zwróciło błąd: ${res.status}`);
+			}
+
+			const apiData = await res.json();
+
+			// Bardzo elastyczne parsowanie (w zależności od dokładnego układu pól w tym API)
+			const transcriptData =
+				apiData?.data?.transcript ||
+				apiData?.data?.transcripts ||
+				apiData?.data ||
+				[];
+
+			if (!Array.isArray(transcriptData) || transcriptData.length === 0) {
+				throw new Error(
+					'RapidAPI nie zwróciło poprawnej tablicy z transkrypcją.'
+				);
+			}
+
+			mappedTranscript = transcriptData.map((seg: any) => ({
+				text: seg.text || seg.transcript || '',
+				offset: parseFloat(seg.start || seg.offset || '0'),
+				duration: parseFloat(seg.duration || '0'),
+				lang: finalLang,
+			}));
+		}
+
+		if (!mappedTranscript || mappedTranscript.length === 0) {
 			throw new Error('Transkrypcja po sparsowaniu okazała się pusta.');
 		}
-
-		const mappedTranscript: TranscriptResponse[] = rawTranscript.map((seg) => ({
-			text: seg.text,
-			offset: seg.offset,
-			duration: seg.duration,
-			lang: finalLang
-		}));
 
 		return {
 			rawTranscript: mappedTranscript,
 			language: finalLang,
-			rapidApiUsage: undefined
+			rapidApiUsage: undefined,
 		};
 	} catch (err: unknown) {
-		console.error("Szczegóły błędu youtube-transcript:", err);
-		const errorMessage = err instanceof Error ? err.message : 'Nieoczekiwany błąd';
+		console.error('Szczegóły błędu:', err);
+		const errorMessage =
+			err instanceof Error ? err.message : 'Nieoczekiwany błąd';
 		throw new Error(errorMessage);
 	}
 }
@@ -157,7 +218,7 @@ export async function fetchVideoMetadata(
 		if (!res.ok) {
 			throw new Error(`OEmbed error: ${res.statusText}`);
 		}
-		const data = await res.json() as any;
+		const data = (await res.json()) as any;
 		return {
 			videoId,
 			title: data.title || 'Brak tytułu',
