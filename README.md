@@ -53,12 +53,19 @@
 
 ```mermaid
 graph TD
-    A[Użytkownik - Podanie URL YouTube] --> B[Next.js App Router Frontend]
-    B --> C[API Route: /api/transcript]
-    C --> D[YouTube Transcript Service / oEmbed]
-    D --> E[Przetworzenie czanków & metadanych]
-    E --> F[Widok Czasówek / Tekstu Ciągłego]
-    F --> G[Szablony Promptów AI & Kopiowanie]
+    A[Użytkownik] --> B[Podanie URL YouTube]
+    B --> C[Next.js App Router Frontend]
+    C --> D[API Route: /api/transcript]
+
+    subgraph Pobieranie Transkrypcji
+        D -->|DEV / Lokalnie| E1[Paczka npm: youtube-transcript]
+        D -->|PROD / Cloud| E2[RapidAPI / Zewnętrzne API]
+    end
+
+    E1 --> F[Przetworzenie Czanków & Metadanych]
+    E2 --> F
+    F --> G[Widok Czasówek / Tekstu Ciągłego]
+    G --> H[Szablony Promptów AI & Kopiowanie]
     F --> H[Generowanie Podsumowania via /api/ai]
     H --> I[OpenRouter LLM API]
 ```
