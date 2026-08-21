@@ -62,7 +62,8 @@ graph TD
         D -->|PROD / Cloud| E2[RapidAPI / Zewnętrzne API]
     end
 
-    E1 --> F[Przetworzenie Chunków & Metadanych]
+    E1 --> F[Przetwarzanie Chunków & Metadanych]
+    E2 --> F
     F --> G[Widok Czasówek / Tekstu Ciągłego]
     G --> H[Szablony Promptów AI & Kopiowanie]
     F --> H[Generowanie Podsumowania via /api/ai]
