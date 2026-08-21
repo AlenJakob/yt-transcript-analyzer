@@ -62,8 +62,7 @@ graph TD
         D -->|PROD / Cloud| E2[RapidAPI / Zewnętrzne API]
     end
 
-    E1 --> F[Przetworzenie Czanków & Metadanych]
-    E2 --> F
+    E1 --> F[Przetworzenie Chunków & Metadanych]
     F --> G[Widok Czasówek / Tekstu Ciągłego]
     G --> H[Szablony Promptów AI & Kopiowanie]
     F --> H[Generowanie Podsumowania via /api/ai]
@@ -146,7 +145,7 @@ Aplikacja będzie dostępna pod adresem: [http://localhost:3000](http://localhos
 
 ```text
 yt-transcript-analyzer/
-├── .github/workflows/     # Konfiguracja CI/CD GitHub Actions
+├── .github/workflows/     # Konfiguracja CI
 ├── public/                # Zasoby statyczne (obrazy, favicon)
 ├── src/
 │   ├── app/               # Next.js App Router (Strony & API Routes)
