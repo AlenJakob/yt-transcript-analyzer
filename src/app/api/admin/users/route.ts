@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
 const ALLOWED_ROLES = ['admin', 'user'] as const;
-const ALLOWED_TIERS = ['pro', 'free'] as const;
+const ALLOWED_TIERS = ['pro', 'free', 'demo'] as const;
 
 type Role = (typeof ALLOWED_ROLES)[number];
 type Tier = (typeof ALLOWED_TIERS)[number];

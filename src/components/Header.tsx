@@ -32,7 +32,7 @@ interface HeaderProps {
 export default function Header({ historyCount = 0 }: HeaderProps) {
 	const pathname = usePathname();
 	const router = useRouter();
-	const { isAdmin } = useAuthUser();
+	const { isAdmin, isDemo } = useAuthUser();
 	const { mode, toggleColorMode } = useColorMode();
 	const [mounted, setMounted] = useState(false);
 
@@ -236,7 +236,18 @@ export default function Header({ historyCount = 0 }: HeaderProps) {
 								},
 							}}
 						>
-							{isAdmin ? 'Panel Admina' : 'Profil'}
+							{isAdmin ? (
+								'Panel Admina'
+							) : isDemo ? (
+								<>
+									Profil{' '}
+									<Box component="span" sx={{ color: '#f59e0b', fontWeight: 700, ml: 0.5 }}>
+										(demo)
+									</Box>
+								</>
+							) : (
+								'Profil'
+							)}
 						</Button>
 
 						{/* Dedykowany slot autoryzacji zapobiegający przesunięciom CLS */}

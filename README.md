@@ -11,6 +11,15 @@
 
 ---
 
+### 🔑 Konto Demo dla Rekruterów
+
+Jeśli chcesz błyskawicznie przetestować aplikację bez konieczności ręcznej rejestracji, w nagłówku strony dostępny jest dedykowany przycisk **"🔑 Konto Demo"**.
+Po jego naciśnięciu adres e-mail (`tryndamerej@gmail.com`) wpisze się automatycznie w oknie logowania Clerk, a hasło zostanie skopiowane do schowka (Ctrl+V).
+
+- **Uprawnienia & Limity:** Plan DEMO (3 transkrypcje oraz 3 podsumowania AI na dobę)
+
+---
+
 ## 🌟 Kluczowe Funkcje
 
 ### 📺 1. Wyciąganie i Prezentacja Transkrypcji
@@ -33,7 +42,8 @@
   - `[ Tryb Nauki / Q&A ]` – Generowanie pytań sprawdzających i fiszek.
 - **Jednoklikowe kopiowanie kompletnego promptu** wraz ze wklejonym pełnym tekstem wideo.
 - **Symulacja analizy AI**: Podgląd sugerowanej odpowiedzi wewnątrz aplikacji bez użycia API key.
-- **Bezpośrednie generowanie AI**: Integracja z modelami LLM (OpenRouter) dla użytkowników z odpowiednimi uprawnieniami.
+- **Bezpośrednie generowanie AI**: Integracja z darmowym API OpenRouter (używanym w celach edukacyjnych i szkoleniowych).
+- **Dynamiczny wybór modeli LLM**: Pobieranie aktualnej listy darmowych modeli bezpośrednio z API OpenRouter z możliwością wyboru modelu z listy.
 
 ### 🌓 3. Tryb Jasny i Ciemny (Light & Dark Mode)
 
@@ -43,7 +53,11 @@
 ### 👤 4. System Użytkowników & Panel Administratora
 
 - Autoryzacja kont oparta o **Clerk**.
-- Zarządzanie rolami: Użytkownicy Basic, Plan PRO oraz Administrator.
+- Zarządzanie rolami i pakietami: Użytkownicy Basic, Plan DEMO (Rekruter), Plan PRO oraz Administrator.
+- Role i Pakiety (Tiers):
+  - **Basic**: Limit 3 transkrypcji dziennie, generowanie AI z własnym kluczem API lub domyślnym modelem darmowym.
+  - **DEMO (Rekruter)**: Dedykowane konto testowe dla rekruterów z limitem 3 transkrypcji oraz 3 podsumowań AI dziennie.
+  - **PRO**: Nielimitowane pobieranie transkrypcji oraz generowanie AI bez konieczności podawania własnego API key.
 - Panel Admina w profilu umożliwiający zarządzenie pakietami PRO i rolami użytkowników.
 - **Lokalne Archiwum**: Historia przeglądanych materiałów zapisywana w przeglądarce (`localStorage`).
 

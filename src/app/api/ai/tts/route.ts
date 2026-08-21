@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAdminAccess } from '@/lib/auth';
+import { getUserAccess } from '@/lib/auth';
 import { EdgeTTS } from 'node-edge-tts';
 import fs from 'fs';
 import path from 'path';
@@ -19,15 +19,15 @@ function escapeSsmlText(text: string): string {
 
 export async function POST(req: NextRequest) {
 	try {
-		const { isAdmin } = await verifyAdminAccess(req);
+		const access = await getUserAccess(req);
 
-		if (!isAdmin) {
+		if (!access.userId) {
 			return NextResponse.json(
 				{
 					error:
-						'Dostęp ograniczony. Generowanie pliku audio MP3 jest obecnie dostępne tylko dla administratora.',
+						'Dostęp ograniczony. Zaloguj się, aby generować pliki audio MP3.',
 				},
-				{ status: 403 }
+				{ status: 401 }
 			);
 		}
 

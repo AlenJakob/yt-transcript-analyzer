@@ -31,6 +31,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import StarIcon from '@mui/icons-material/Star';
 import { useAuthUser } from '@/hooks/useAuthUser';
+import { useUserUsage } from '@/hooks/useUserUsage';
 import { AdminUser, useAdminUsers } from '@/hooks/useAdminUsers';
 import { useClerk } from '@clerk/nextjs';
 import OpenRouterUsageCard from '@/components/OpenRouterUsageCard';
@@ -41,6 +42,7 @@ interface ProfileViewProps {
 
 export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 	const userAuth = useAuthUser();
+	const { usageInfo } = useUserUsage(userAuth.isSignedIn);
 	const { openSignIn } = useClerk();
 
 	const {
@@ -197,7 +199,9 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 									? 'Dostęp Pełny (Admin)'
 									: userAuth.isPro
 										? 'Plan PRO (Bez limitów)'
-										: 'Plan Basic'
+										: userAuth.isDemo
+											? 'Plan DEMO (Rekruter)'
+											: 'Plan Basic'
 							}
 							sx={{
 								px: 1.5,
@@ -211,7 +215,9 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 											: 'rgba(126, 34, 206, 0.12)'
 										: userAuth.isPro
 											? 'rgba(16, 185, 129, 0.15)'
-											: 'rgba(59, 130, 246, 0.15)',
+											: userAuth.isDemo
+												? 'rgba(245, 158, 11, 0.15)'
+												: 'rgba(59, 130, 246, 0.15)',
 								color: (theme) =>
 									userAuth.isAdmin
 										? theme.palette.mode === 'dark'
@@ -219,17 +225,34 @@ export default function ProfileView({ initialUsers = [] }: ProfileViewProps) {
 											: '#6b21a8'
 										: userAuth.isPro
 											? '#34d399'
-											: '#60a5fa',
+											: userAuth.isDemo
+												? '#fbbf24'
+												: '#60a5fa',
 								border: '1px solid',
 								borderColor: (theme) =>
 									userAuth.isAdmin
 										? theme.palette.mode === 'dark'
 											? 'rgba(168, 85, 247, 0.3)'
 											: 'rgba(126, 34, 206, 0.35)'
-										: 'divider',
+										: userAuth.isDemo
+											? 'rgba(245, 158, 11, 0.3)'
+											: 'divider',
 								borderRadius: 2,
 							}}
 						/>
+						{usageInfo && usageInfo.remaining !== null && (
+							<Typography
+								variant="caption"
+								sx={{
+									display: 'block',
+									color: usageInfo.remaining > 0 ? '#fbbf24' : '#ef4444',
+									fontWeight: 600,
+									mt: 0.8,
+								}}
+							>
+								Pozostało zapytań dziś: {usageInfo.remaining}/{usageInfo.limit}
+							</Typography>
+						)}
 					</Box>
 				</Stack>
 			</Paper>

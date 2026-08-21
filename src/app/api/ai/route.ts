@@ -1,21 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAdminAccess } from '@/lib/auth';
+import { getUserAccess } from '@/lib/auth';
+import { checkAndUpdateDailyLimit } from '@/lib/rateLimit';
 import { getOpenAIClient } from '@/lib/openrouter';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
 	try {
-		const { isAdmin } = await verifyAdminAccess(req);
-
-		if (!isAdmin) {
+		const access = await getUserAccess(req);
+		if (!access.userId) {
 			return NextResponse.json(
-				{
-					error:
-						'Dostęp ograniczony. Generowanie AI z OpenRouter jest obecnie dostępne tylko dla administratora.',
-				},
-				{ status: 403 }
+				{ error: 'Zaloguj się, aby korzystać z generowania analiz AI.' },
+				{ status: 401 }
 			);
+		}
+
+		if (!access.isAdmin && !access.isPro) {
+			const limitCheck = await checkAndUpdateDailyLimit(
+				access.userId,
+				access.publicMetadata
+			);
+			if (!limitCheck.allowed) {
+				return NextResponse.json(
+					{ error: limitCheck.message },
+					{ status: 429 }
+				);
+			}
 		}
 
 		const {

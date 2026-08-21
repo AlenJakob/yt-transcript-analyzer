@@ -11,7 +11,9 @@ export interface AuthUserInfo {
 	imageUrl: string | null;
 	publicMetadata: Record<string, unknown>;
 	isPro: boolean;
+	isDemo: boolean;
 	isAdmin: boolean;
+	tier: string;
 }
 
 export function useAuthUser(): AuthUserInfo {
@@ -25,7 +27,9 @@ export function useAuthUser(): AuthUserInfo {
 	const imageUrl = user?.imageUrl ?? null;
 	const publicMetadata = (user?.publicMetadata as Record<string, unknown>) ?? {};
 
-	const isPro = Boolean(publicMetadata?.tier === 'pro' || publicMetadata?.isPro === true);
+	const tier = (publicMetadata?.tier as string) || 'free';
+	const isPro = Boolean(tier === 'pro' || publicMetadata?.isPro === true);
+	const isDemo = Boolean(tier === 'demo' || publicMetadata?.isDemo === true);
 
 	const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 	const isAdmin = Boolean(
@@ -42,7 +46,9 @@ export function useAuthUser(): AuthUserInfo {
 		fullName,
 		imageUrl,
 		publicMetadata,
+		tier,
 		isPro,
+		isDemo,
 		isAdmin,
 	};
 }
