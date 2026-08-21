@@ -47,9 +47,23 @@ export async function fetchTranscriptWithFallback(
 		const isProd =
 			process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL);
 
+		console.log(`[fetchTranscript] Initiating fetch for video: ${videoId}`);
+		console.log(
+			`[fetchTranscript] Environment: isProd=${isProd} (NODE_ENV=${process.env.NODE_ENV}, VERCEL=${process.env.VERCEL})`
+		);
+
 		// Helper: Pobieranie przez RapidAPI (dla Vercel / Prod)
 		const fetchFromRapidApi = async (): Promise<TranscriptResponse[]> => {
+			console.log(
+				`[RapidAPI] Attempting to fetch transcript for video: ${videoId}`
+			);
+			const hasKey = Boolean(process.env.RAPIDAPI_KEY);
+			console.log(`[RapidAPI] RAPIDAPI_KEY present: ${hasKey}`);
+
 			if (!process.env.RAPIDAPI_KEY) {
+				console.error(
+					'[RapidAPI Error] RAPIDAPI_KEY environment variable is missing!'
+				);
 				throw new Error(
 					'Brak klucza RAPIDAPI_KEY w środowisku Vercel / produkcyjnym.'
 				);
@@ -58,6 +72,10 @@ export async function fetchTranscriptWithFallback(
 			const rapidApiHost =
 				process.env.RAPIDAPI_HOST || 'youtube-transcripts.p.rapidapi.com';
 			const url = `https://${rapidApiHost}/youtube/transcript?videoId=${videoId}`;
+			console.log(
+				`[RapidAPI] Fetching from URL: ${url} (Host: ${rapidApiHost})`
+			);
+
 			const options = {
 				method: 'GET',
 				headers: {
@@ -67,11 +85,18 @@ export async function fetchTranscriptWithFallback(
 			};
 
 			const res = await fetch(url, options);
+			console.log(
+				`[RapidAPI] Response HTTP Status: ${res.status} ${res.statusText}`
+			);
+
 			if (!res.ok) {
+				const errorText = await res.text().catch(() => '');
+				console.error(`[RapidAPI Error] HTTP ${res.status}:`, errorText);
 				throw new Error(`RapidAPI zwróciło błąd HTTP: ${res.status}`);
 			}
 
 			const apiData = await res.json();
+			console.log('[RapidAPI] JSON response received successfully');
 
 			const transcriptData =
 				apiData?.content ||
@@ -81,6 +106,10 @@ export async function fetchTranscriptWithFallback(
 				[];
 
 			if (!Array.isArray(transcriptData) || transcriptData.length === 0) {
+				console.error(
+					'[RapidAPI Error] Parsed transcript data is empty or not an array:',
+					apiData
+				);
 				throw new Error(
 					'RapidAPI nie zwróciło poprawnej tablicy z transkrypcją.'
 				);
@@ -89,6 +118,10 @@ export async function fetchTranscriptWithFallback(
 			if (apiData?.lang) {
 				finalLang = apiData.lang;
 			}
+
+			console.log(
+				`[RapidAPI] Successfully parsed ${transcriptData.length} segments (lang: ${finalLang})`
+			);
 
 			return transcriptData.map((seg: any) => {
 				const rawOffset = parseFloat(seg.start || seg.offset || '0');
@@ -103,7 +136,10 @@ export async function fetchTranscriptWithFallback(
 		};
 
 		// Helper: Pobieranie przez darmową bibliotekę (dla Dev mode)
-		const fetchFromYoutubeTranscript = async (): Promise<TranscriptResponse[]> => {
+		const fetchFromYoutubeTranscript = async (): Promise<
+			TranscriptResponse[]
+		> => {
+			console.log(`[YoutubeTranscript Library] Attempting to fetch for video: ${videoId}`);
 			let raw;
 			try {
 				raw = await YoutubeTranscript.fetchTranscript(videoId, {
@@ -137,19 +173,13 @@ export async function fetchTranscriptWithFallback(
 
 		let mappedTranscript: TranscriptResponse[] = [];
 
-		// W produkcji (Vercel) używamy w pierwszej kolejności RapidAPI.
-		// W trybie dev używamy darmowej biblioteki, a RapidAPI jako fallback.
+		// W produkcji (Vercel) używamy WYŁĄCZNIE RapidAPI.
+		// W trybie dev (lokalnie) używamy paczki npm youtube-transcript, a RapidAPI jako fallback.
 		if (isProd) {
-			try {
-				mappedTranscript = await fetchFromRapidApi();
-			} catch (rapidErr) {
-				console.warn(
-					'RapidAPI w prod nie powiodło się, próba fallback do youtube-transcript:',
-					rapidErr
-				);
-				mappedTranscript = await fetchFromYoutubeTranscript();
-			}
+			console.log('[fetchTranscript] Executing RapidAPI mode (PROD)...');
+			mappedTranscript = await fetchFromRapidApi();
 		} else {
+			console.log('[fetchTranscript] Executing YoutubeTranscript mode (DEV)...');
 			try {
 				mappedTranscript = await fetchFromYoutubeTranscript();
 			} catch (libErr) {
