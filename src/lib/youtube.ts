@@ -123,9 +123,18 @@ export async function fetchTranscriptWithFallback(
 				`[RapidAPI] Successfully parsed ${transcriptData.length} segments (lang: ${finalLang})`
 			);
 
-			return transcriptData.map((seg: any) => {
-				const rawOffset = parseFloat(seg.start || seg.offset || '0');
-				const rawDuration = parseFloat(seg.duration || '0');
+			interface RawRapidApiSegment {
+				start?: string | number;
+				offset?: string | number;
+				duration?: string | number;
+				text?: string;
+				transcript?: string;
+				lang?: string;
+			}
+
+			return transcriptData.map((seg: RawRapidApiSegment) => {
+				const rawOffset = parseFloat(String(seg.start ?? seg.offset ?? '0'));
+				const rawDuration = parseFloat(String(seg.duration ?? '0'));
 				return {
 					text: seg.text || seg.transcript || '',
 					offset: rawOffset > 10000 ? rawOffset / 1000 : rawOffset,
@@ -139,7 +148,9 @@ export async function fetchTranscriptWithFallback(
 		const fetchFromYoutubeTranscript = async (): Promise<
 			TranscriptResponse[]
 		> => {
-			console.log(`[YoutubeTranscript Library] Attempting to fetch for video: ${videoId}`);
+			console.log(
+				`[YoutubeTranscript Library] Attempting to fetch for video: ${videoId}`
+			);
 			let raw;
 			try {
 				raw = await YoutubeTranscript.fetchTranscript(videoId, {
@@ -179,7 +190,9 @@ export async function fetchTranscriptWithFallback(
 			console.log('[fetchTranscript] Executing RapidAPI mode (PROD)...');
 			mappedTranscript = await fetchFromRapidApi();
 		} else {
-			console.log('[fetchTranscript] Executing YoutubeTranscript mode (DEV)...');
+			console.log(
+				'[fetchTranscript] Executing YoutubeTranscript mode (DEV)...'
+			);
 			try {
 				mappedTranscript = await fetchFromYoutubeTranscript();
 			} catch (libErr) {
@@ -274,7 +287,7 @@ export async function fetchVideoMetadata(
 		if (!res.ok) {
 			throw new Error(`OEmbed error: ${res.statusText}`);
 		}
-		const data = (await res.json()) as any;
+		const data = (await res.json()) as { title?: string; author_name?: string };
 		return {
 			videoId,
 			title: data.title || 'Brak tytułu',
