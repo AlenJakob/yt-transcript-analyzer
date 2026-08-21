@@ -36,6 +36,15 @@ export interface FetchTranscriptResult {
 	};
 }
 
+interface RawRapidApiSegment {
+	start?: string | number;
+	offset?: string | number;
+	duration?: string | number;
+	text?: string;
+	transcript?: string;
+	lang?: string;
+}
+
 import { YoutubeTranscript } from 'youtube-transcript';
 
 export async function fetchTranscriptWithFallback(
@@ -122,15 +131,6 @@ export async function fetchTranscriptWithFallback(
 			console.log(
 				`[RapidAPI] Successfully parsed ${transcriptData.length} segments (lang: ${finalLang})`
 			);
-
-			interface RawRapidApiSegment {
-				start?: string | number;
-				offset?: string | number;
-				duration?: string | number;
-				text?: string;
-				transcript?: string;
-				lang?: string;
-			}
 
 			return transcriptData.map((seg: RawRapidApiSegment) => {
 				const rawOffset = parseFloat(String(seg.start ?? seg.offset ?? '0'));
