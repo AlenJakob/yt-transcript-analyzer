@@ -43,79 +43,38 @@ export async function fetchTranscriptWithFallback(
 	preferredLangs: string[] = ['pl', 'en']
 ): Promise<FetchTranscriptResult> {
 	try {
-		let rawTranscript;
 		let finalLang = preferredLangs.length > 0 ? preferredLangs[0] : 'en';
-		let isFallback = false;
+		const isProd =
+			process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL);
 
-		// ETAP 1: Próba pobrania standardowo przez youtube-transcript
-		try {
-			// 1. Próbujemy pobrać w pierwszym preferowanym języku (np. 'pl')
-			try {
-				rawTranscript = await YoutubeTranscript.fetchTranscript(videoId, {
-					lang: preferredLangs[0],
-				});
-				finalLang = preferredLangs[0];
-			} catch (err) {
-				// 2. Jeśli się nie uda, próbujemy drugi język (np. 'en')
-				if (preferredLangs.length > 1) {
-					try {
-						rawTranscript = await YoutubeTranscript.fetchTranscript(videoId, {
-							lang: preferredLangs[1],
-						});
-						finalLang = preferredLangs[1];
-					} catch (err2) {
-						// 3. Jeśli i to się nie uda, pobieramy JAKIKOLWIEK domyślny język, który jest na wideo
-						rawTranscript = await YoutubeTranscript.fetchTranscript(videoId);
-						finalLang = 'domyślny';
-					}
-				} else {
-					// 3. Brak drugiego języka - pobieramy jakikolwiek domyślny
-					rawTranscript = await YoutubeTranscript.fetchTranscript(videoId);
-					finalLang = 'domyślny';
-				}
-			}
-		} catch (primaryErr: unknown) {
-			console.log(
-				'youtube-transcript API zawiodło, przełączam na Fallback RapidAPI...'
-			);
-			isFallback = true;
-		}
-
-		let mappedTranscript: TranscriptResponse[] = [];
-
-		if (!isFallback && rawTranscript && rawTranscript.length > 0) {
-			mappedTranscript = rawTranscript.map((seg) => ({
-				text: seg.text,
-				offset: seg.offset,
-				duration: seg.duration,
-				lang: finalLang,
-			}));
-		} else {
-			// ETAP 2: Pobieranie przez RapidAPI (Fallback)
+		// Helper: Pobieranie przez RapidAPI (dla Vercel / Prod)
+		const fetchFromRapidApi = async (): Promise<TranscriptResponse[]> => {
 			if (!process.env.RAPIDAPI_KEY) {
 				throw new Error(
-					'Brak klucza RAPIDAPI_KEY w środowisku. Vercel blokuje standardowe pobieranie, a fallback jest nieskonfigurowany.'
+					'Brak klucza RAPIDAPI_KEY w środowisku Vercel / produkcyjnym.'
 				);
 			}
 
-			const url = `https://youtube-video-summarizer-gpt-ai.p.rapidapi.com/api/v1/get-transcript-v2?video_id=${videoId}&platform=youtube`;
+			const rapidApiHost =
+				process.env.RAPIDAPI_HOST || 'youtube-transcripts.p.rapidapi.com';
+			const url = `https://${rapidApiHost}/youtube/transcript?videoId=${videoId}`;
 			const options = {
 				method: 'GET',
 				headers: {
 					'x-rapidapi-key': process.env.RAPIDAPI_KEY,
-					'x-rapidapi-host': 'youtube-video-summarizer-gpt-ai.p.rapidapi.com',
+					'x-rapidapi-host': rapidApiHost,
 				},
 			};
 
 			const res = await fetch(url, options);
 			if (!res.ok) {
-				throw new Error(`RapidAPI zwróciło błąd: ${res.status}`);
+				throw new Error(`RapidAPI zwróciło błąd HTTP: ${res.status}`);
 			}
 
 			const apiData = await res.json();
 
-			// Bardzo elastyczne parsowanie (w zależności od dokładnego układu pól w tym API)
 			const transcriptData =
+				apiData?.content ||
 				apiData?.data?.transcript ||
 				apiData?.data?.transcripts ||
 				apiData?.data ||
@@ -127,12 +86,79 @@ export async function fetchTranscriptWithFallback(
 				);
 			}
 
-			mappedTranscript = transcriptData.map((seg: any) => ({
-				text: seg.text || seg.transcript || '',
-				offset: parseFloat(seg.start || seg.offset || '0'),
-				duration: parseFloat(seg.duration || '0'),
+			if (apiData?.lang) {
+				finalLang = apiData.lang;
+			}
+
+			return transcriptData.map((seg: any) => {
+				const rawOffset = parseFloat(seg.start || seg.offset || '0');
+				const rawDuration = parseFloat(seg.duration || '0');
+				return {
+					text: seg.text || seg.transcript || '',
+					offset: rawOffset > 10000 ? rawOffset / 1000 : rawOffset,
+					duration: rawDuration > 10000 ? rawDuration / 1000 : rawDuration,
+					lang: seg.lang || finalLang,
+				};
+			});
+		};
+
+		// Helper: Pobieranie przez darmową bibliotekę (dla Dev mode)
+		const fetchFromYoutubeTranscript = async (): Promise<TranscriptResponse[]> => {
+			let raw;
+			try {
+				raw = await YoutubeTranscript.fetchTranscript(videoId, {
+					lang: preferredLangs[0],
+				});
+				finalLang = preferredLangs[0];
+			} catch {
+				if (preferredLangs.length > 1) {
+					try {
+						raw = await YoutubeTranscript.fetchTranscript(videoId, {
+							lang: preferredLangs[1],
+						});
+						finalLang = preferredLangs[1];
+					} catch {
+						raw = await YoutubeTranscript.fetchTranscript(videoId);
+						finalLang = 'domyślny';
+					}
+				} else {
+					raw = await YoutubeTranscript.fetchTranscript(videoId);
+					finalLang = 'domyślny';
+				}
+			}
+
+			return raw.map((seg) => ({
+				text: seg.text,
+				offset: seg.offset,
+				duration: seg.duration,
 				lang: finalLang,
 			}));
+		};
+
+		let mappedTranscript: TranscriptResponse[] = [];
+
+		// W produkcji (Vercel) używamy w pierwszej kolejności RapidAPI.
+		// W trybie dev używamy darmowej biblioteki, a RapidAPI jako fallback.
+		if (isProd) {
+			try {
+				mappedTranscript = await fetchFromRapidApi();
+			} catch (rapidErr) {
+				console.warn(
+					'RapidAPI w prod nie powiodło się, próba fallback do youtube-transcript:',
+					rapidErr
+				);
+				mappedTranscript = await fetchFromYoutubeTranscript();
+			}
+		} else {
+			try {
+				mappedTranscript = await fetchFromYoutubeTranscript();
+			} catch (libErr) {
+				console.log(
+					'youtube-transcript w dev nie powiodło się, przełączam na RapidAPI:',
+					libErr
+				);
+				mappedTranscript = await fetchFromRapidApi();
+			}
 		}
 
 		if (!mappedTranscript || mappedTranscript.length === 0) {
@@ -145,7 +171,7 @@ export async function fetchTranscriptWithFallback(
 			rapidApiUsage: undefined,
 		};
 	} catch (err: unknown) {
-		console.error('Szczegóły błędu:', err);
+		console.error('Szczegóły błędu fetchTranscriptWithFallback:', err);
 		const errorMessage =
 			err instanceof Error ? err.message : 'Nieoczekiwany błąd';
 		throw new Error(errorMessage);
