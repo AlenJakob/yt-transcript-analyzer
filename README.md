@@ -150,22 +150,30 @@ yt-transcript-analyzer/
 ├── public/                # Zasoby statyczne (obrazy, favicon)
 ├── src/
 │   ├── app/               # Next.js App Router (Strony & API Routes)
-│   │   ├── api/           # API Routes (/transcript, /ai)
-│   │   ├── archive/       # Strona archiwum historii
-│   │   ├── profile/       # Strona profilu i panelu admina
-│   │   ├── layout.tsx     # Główny układ aplikacji
-│   │   └── page.tsx       # Strona główna z analizatorem
+│   │   ├── api/           # Endpunkty API (/transcript, /ai, /admin, /user)
+│   │   │   ├── admin/     # Zarządzanie użytkownikami & zużyciem RapidAPI
+│   │   │   ├── ai/        # Generowanie analiz LLM, lista modeli & TTS
+│   │   │   ├── transcript/# Pobieranie i formatowanie napisów YouTube
+│   │   │   └── user/      # Zarządzanie profilami i uprawnieniami
+│   │   ├── archive/       # Strona archiwum historii transkrypcji
+│   │   ├── profile/       # Strona profilu i panelu administratora
+│   │   ├── layout.tsx     # Główny układ aplikacji i dostawcy kontekstu
+│   │   └── page.tsx       # Strona główna z analizatorem wideo
 │   ├── components/        # Modułowe komponenty React (MUI v9)
-│   │   ├── AiPresets/     # Komponenty szablonów promptów AI
-│   │   ├── ArchiveView/   # Komponenty widoku archiwum
-│   │   ├── TranscriptViewer/ # Komponenty przeglądarki transkrypcji
-│   │   ├── Header.tsx     # Nagłówek z przełącznikiem trybu Jasnego/Ciemnego
+│   │   ├── AiPresets/     # Komponenty i szablony promptów AI
+│   │   ├── ArchiveView/   # Zarządzanie widokiem i usuwaniem archiwum
+│   │   ├── TranscriptViewer/ # Przeglądarka czanków, czasówek i tekstu
+│   │   ├── VideoPlayer/   # Komponent odtwarzacza wideo z podglądem
+│   │   ├── Header.tsx     # Nagłówek z przełącznikiem motywu i nawigacją
+│   │   ├── ProfileView.tsx # Panel profilu oraz zarządzania użytkownikami admina
 │   │   └── ThemeRegistry.tsx # Rejestr motywu MUI
 │   ├── context/           # React Context (ColorModeContext dla trybu jasnego/ciemnego)
-│   ├── hooks/             # Dedykowane hooki (useAuthUser, useTranscriptArchive, etc.)
-│   ├── lib/               # Usługi pomocnicze (youtube transcript parser, auth, storage)
+│   ├── hooks/             # Dedykowane hooki (useAuthUser, useTextToSpeech, useAiSummary, etc.)
+│   ├── lib/               # Usługi pomocnicze (youtube, openrouter, auth, storage, exportUtils)
 │   ├── theme/             # Definicje motywów MUI (darkTheme & lightTheme)
-│   └── types/             # Interfejsy i typy TypeScript
+│   ├── types/             # Interfejsy i typy TypeScript (openRouter)
+│   ├── utils/             # Funkcje pomocnicze i formatujące (helper.ts)
+│   └── proxy.ts           # Middleware autoryzacji Clerk proxy
 ├── README.md              # Dokumentacja projektu
 └── tsconfig.json          # Konfiguracja TypeScript
 ```
